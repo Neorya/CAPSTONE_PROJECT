@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 import os
+from match_settings_api import router as match_settings_router
 
 app = FastAPI()
+
+app.include_router(match_settings_router)
 
 @app.get("/")
 def read_root():
