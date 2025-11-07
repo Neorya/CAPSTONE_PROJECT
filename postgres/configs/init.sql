@@ -16,12 +16,7 @@ GRANT CONNECT ON DATABASE changeme TO api_user;
 
 -- 4. Grant SELECT, INSERT permissions on ALL FUTURE tables created in this schema
 ALTER DEFAULT PRIVILEGES IN SCHEMA capstone_app
-    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO api_user;
-
--- 5. Allow the 'api_user' to utilize sequences (needed for SERIAL/BIGSERIAL data types)
-ALTER DEFAULT PRIVILEGES IN SCHEMA capstone_app
-    GRANT USAGE ON SEQUENCES TO api_user;
-
+    GRANT SELECT, INSERT ON TABLES TO api_user;
 
 -- Creation of Teacher Table :
 
@@ -33,8 +28,6 @@ CREATE TABLE capstone_app.teacher (
     last_name VARCHAR(100) NOT NULL,	
     email VARCHAR(150) UNIQUE NOT NULL
 );
-
-
 
 -- Creation of Match Setting Table & fk match teacher:
 
