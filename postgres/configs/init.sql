@@ -1,12 +1,10 @@
---User story 1, db task : 
+--Create a schema : (User story 1)
 
---Create a schema :
-
--- 1. Create the new schema
 CREATE SCHEMA capstone_app;
 
 
---Create a user for that schema: 
+
+--Create a user for that schema: (User story 1)
 
 -- 2. Create the API user (Replace 'changeme' with a strong password)
 CREATE USER api_user WITH PASSWORD 'changeme';
@@ -18,7 +16,9 @@ GRANT CONNECT ON DATABASE changeme TO api_user;
 ALTER DEFAULT PRIVILEGES IN SCHEMA capstone_app
     GRANT SELECT, INSERT ON TABLES TO api_user;
 
--- Creation of Teacher Table :
+
+
+-- Creation of Teacher Table :  (User story 1)
 
 DROP TABLE IF EXISTS capstone_app.teacher;
 
@@ -29,7 +29,9 @@ CREATE TABLE capstone_app.teacher (
     email VARCHAR(150) UNIQUE NOT NULL
 );
 
--- Creation of Match Setting Table & fk match teacher:
+
+
+-- Creation of Match Setting Table & fk match teacher: (User story 1)
 
 DROP TABLE IF EXISTS capstone_app.match_setting;
 
@@ -42,7 +44,27 @@ CREATE TABLE capstone_app.match_setting (
     creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id)
 );
 
--- Creation of some DB population script for populate the Teacher Table and the Match Settings Table
+
+
+-- Creation of Match Table & fk match teacher and match setting:  (User story 2)
+
+DROP TABLE IF EXISTS capstone_app.match;
+
+CREATE TABLE capstone_app.match (
+    match_id SERIAL PRIMARY KEY,
+    title VARCHAR(150) NOT NULL,
+    match_set_id INTEGER REFERENCES capstone_app.match_setting(match_set_id),
+    creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id),
+    difficulty_level INTEGER NOT NULL,
+    review_number INTEGER NOT NULL,
+    duration_phase1 INTEGER NOT NULL,-- in minutes
+    duration_phase2 INTEGER NOT NULL -- in minutes
+    
+);
+
+
+
+-- Creation of some DB population script for populate the Teacher Table and the Match Settings Table (User story 1)
 
 -- ######################################
 -- INSERT DATA INTO TEACHER TABLE (5 RECORDS)
@@ -67,6 +89,7 @@ VALUES ('Anna', 'Neri', 'a.neri@capstone.it');
 -- Teacher 5
 INSERT INTO capstone_app.teacher (first_name, last_name, email)
 VALUES ('Paolo', 'Gialli', 'p.gialli@capstone.it');
+
 
 
 -- ######################################
@@ -102,3 +125,30 @@ INSERT INTO capstone_app.match_setting (title, description, is_ready, creator_id
 VALUES 
 ('Coding Basics', 'Introduction to Python syntax.', TRUE, 5),
 ('Data Structures Review', 'Review of linked lists and trees.', FALSE, 5);
+
+
+
+-- The Creation of Populate script for the Match table (User story 2)
+
+-- ######################################
+-- INSERT DATA INTO MATCH TABLE (10 RECORDS)
+-- ######################################
+
+INSERT INTO capstone_app.match 
+    (title, match_set_id, creator_id, difficulty_level, review_number, duration_phase1, duration_phase2)
+VALUES
+-- Matches created by Teacher 1 (ID 1)
+('Standard Match - Class 5A', 1, 1, 1, 5, 7, 10),
+('Standard Match - Class 5B', 1, 1, 1, 5, 7, 10),
+-- Matches created by Teacher 2 (ID 2)
+('Functions Lab - Group 1', 4, 2, 4, 3, 10, 5),
+('Functions Lab - Group 2', 4, 2, 4, 3, 10, 5),
+-- Matches created by Teacher 3 (ID 3)
+('Variable Declarations - Section A', 5, 3, 3, 4, 15, 10),
+('Variable Declarations - Section B', 5, 3, 3, 4, 15, 10),
+-- Matches created by Teacher 4 (ID 4)
+('If Statement - Group 1', 8, 4, 5, 3, 10, 5),
+('If Statement - Group 2', 8, 4, 5, 3, 10, 5),
+-- Matches created by Teacher 5 (ID 5)
+('Pointers Basics - Section A', 9, 5, 8, 3, 15, 10),
+('Pointers Basics - Section B', 9, 5, 8, 3, 15, 10);
