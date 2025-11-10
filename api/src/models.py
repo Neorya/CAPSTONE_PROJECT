@@ -28,7 +28,7 @@ class Teacher(Base):
 
     # Relationships: A teacher can create many...
     match_settings = relationship("MatchSetting", back_populates="creator")
-    
+    matches = relationship("Match", back_populates="creator")
 
 class MatchSetting(Base):
     """
@@ -46,3 +46,28 @@ class MatchSetting(Base):
     
     # Relationship: This setting belongs to one teacher
     creator = relationship("Teacher", back_populates="match_settings")
+    matches = relationship("Match", back_populates="match_setting")
+
+
+class Match(Base):
+    """
+    SQLAlchemy model for the 'match' table.
+
+    """
+    __tablename__ = "match"
+    __table_args__ = {'schema': SCHEMA_NAME}
+
+    match_id = Column(Integer, primary_key=True)
+
+    title = Column(String(150), nullable=False) 
+
+    match_set_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.match_setting.match_set_id"))
+    creator_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.teacher.teacher_id"))
+    difficulty_level = Column(Integer, nullable=False)
+    review_number = Column(Integer, nullable=False)
+    duration_phase1 = Column(Integer, nullable=False)
+    duration_phase2 = Column(Integer, nullable=False)
+    
+    # Relationships
+    creator = relationship("Teacher", back_populates="matches")
+    match_setting = relationship("MatchSetting", back_populates="matches")
