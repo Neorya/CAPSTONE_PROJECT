@@ -2,13 +2,17 @@
 Match Settings API Module
 
 Provides endpoints for browsing and filtering match settings.
-Uses in-memory mock data until database integration is ready.
+Connects to the PostgreSQL database via SQLAlchemy.
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
+# Import the database dependency and the ORM model
+from database import get_db
+from models import MatchSetting
 
 # ============================================================================
 # Pydantic Models
@@ -43,7 +47,7 @@ class MatchSettingResponse(BaseModel):
         }
 
 
-# ============================================================================
+""" # ============================================================================
 # Mock Data
 # ============================================================================
 
@@ -69,7 +73,7 @@ MOCK_MATCH_SETTINGS = [
         "is_ready": False,
         "creator_id": 101
     }
-]
+] """
 
 
 # ============================================================================
@@ -135,7 +139,8 @@ async def get_match_settings(
     is_ready: Optional[bool] = Query(
         None,
         description="Filter by readiness status: true=ready, false=draft, omit=all"
-    )
+    ),
+    db: Session = Depends(get_db)
 ) -> List[MatchSettingResponse]:
     """
     Browse all available match settings with optional filtering.
@@ -146,16 +151,16 @@ async def get_match_settings(
     Returns:
         List of match settings matching the filter criteria
     """
-    # Start with all mock data
-    filtered_settings = MOCK_MATCH_SETTINGS
+    # Start by creating a query for the MatchSetting model
+    query = db.query(MatchSetting)
     
     # Apply readiness filter if provided
     if is_ready is not None:
-        filtered_settings = [
-            setting for setting in MOCK_MATCH_SETTINGS
-            if setting["is_ready"] == is_ready
-        ]
+        # This adds a "WHERE is_ready = :is_ready_param" to the SQL query
+        query = query.filter(MatchSetting.is_ready == is_ready)
     
-    # Convert to response models
-    return [MatchSettingResponse(**setting) for setting in filtered_settings]
+    # Execute the query and return all results
+    # FastAPI will automatically convert the list of MatchSetting (ORM objects)
+    # into a JSON response using MatchSettingResponse model.
+    return query.all()
 
