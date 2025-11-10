@@ -3,7 +3,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-public class settingListintPO {
+public class settingListingPO {
     private WebDriver driver;   
     private String IdDraftButton        = "";
     private String IdReadyButton        = "";
