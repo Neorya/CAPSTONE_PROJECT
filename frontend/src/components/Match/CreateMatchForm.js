@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Radio, Select, InputNumber, Button, Alert, Card, Space, Typography } from 'antd';
 import { SaveOutlined, CloseOutlined, ArrowLeftOutlined } from '@ant-design/icons';
-import { mockMatchSettings } from '../../data/mockData';
+import { mockMatchSettings, createMatch } from '../../data/mockData';
 import './CreateMatchForm.css';
 
 const { Title } = Typography;
@@ -52,7 +52,7 @@ const CreateMatchForm = () => {
       };
 
       // Simulate API call
-      await mockCreateMatch(matchData);
+      await createMatch(matchData);
 
       // On success
       showAlert('success', 'The match has been created');
@@ -145,9 +145,9 @@ const CreateMatchForm = () => {
               form={form}
               layout="vertical"
               onFinish={handleSubmit}
-              /*initialValues={{ // Default values removed for semplicity
+              initialValues={{
                 reviewers: 4,
-              }}*/
+              }}
             >
               {/* Difficulty Level */}
               <Form.Item
@@ -269,24 +269,6 @@ const CreateMatchForm = () => {
       </Card>
     </div>
   );
-};
-
-// Mock API function to simulate POST request
-const mockCreateMatch = (matchData) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      console.log('Creating match with data:', matchData);
-      // Simulate successful creation
-      resolve({
-        status: 201,
-        data: {
-          id: Math.floor(Math.random() * 1000),
-          ...matchData,
-          createdAt: new Date().toISOString(),
-        },
-      });
-    }, 500);
-  });
 };
 
 export default CreateMatchForm;
