@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import os
 import models
 import time
@@ -15,6 +16,21 @@ from match_settings_api import router as match_settings_router
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+# todo: CHECK THIS - added to make the call from frontend work
+# Allow the URL(s) where your frontend is actually served to the browser
+ALLOWED_ORIGINS = [
+    "http://localhost:3000"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    allow_credentials=False,
+)
+# todo: CHECK THIS (end)
 
 app.include_router(match_settings_router)
 
