@@ -4,7 +4,7 @@ Matches API Module
 Provides endpoints for creating, browsing matches.
 """
 
-from typing import List, Optional
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -52,10 +52,10 @@ class MatchResponse(BaseModel):
     title: str = Field(..., description="Title of the match")
     match_set_id: int = Field(..., description="ID of the parent Match Setting")
     creator_id: int = Field(..., description="ID of the teacher")
-    difficulty_level: int = Field(None, description="Difficulty level")
-    review_number: int = Field(None, description="Number of reviews")
-    duration_phase1: int = Field(None, description="Duration of phase 1 in minutes")
-    duration_phase2: int = Field(None, description="Duration of phase 2 in minutes")
+    difficulty_level: int = Field(..., description="Difficulty level")
+    review_number: int = Field(..., description="Number of reviews")
+    duration_phase1: int = Field(..., description="Duration of phase 1 in minutes")
+    duration_phase2: int = Field(..., description="Duration of phase 2 in minutes")
 
     class Config:
         from_attributes = True # Enable ORM mode (reads from SQLAlchemy model)
