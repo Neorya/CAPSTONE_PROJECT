@@ -22,13 +22,13 @@ class MatchCreate(BaseModel):
     Request model for creating a new match.
     All fields are now required, matching the schema.
     """
-    title: str = Field(..., description="Title of the match", max_length=150)
+    title: str = Field(..., description="Title of the match", min_length=10, max_length=150)
     match_set_id: int = Field(..., description="ID of the parent Match Setting")
     creator_id: int = Field(..., description="ID of the teacher creating this match")
-    difficulty_level: int = Field(..., description="Difficulty level")
-    review_number: int = Field(..., description="Number of reviews")
-    duration_phase1: int = Field(..., description="Duration of phase 1 in minutes")
-    duration_phase2: int = Field(..., description="Duration of phase 2 in minutes")
+    difficulty_level: int = Field(..., description="Difficulty level", ge=0)
+    review_number: int = Field(..., description="Number of reviews", ge=1)
+    duration_phase1: int = Field(..., description="Duration of phase 1 in minutes", ge=1)
+    duration_phase2: int = Field(..., description="Duration of phase 2 in minutes", ge=1)
 
     class Config:
         json_schema_extra = {
