@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Radio, Select, InputNumber, Button, Alert, Card, Space, Typography, Input, Spin, Tooltip } from 'antd';
 import { SaveOutlined, ReloadOutlined, ArrowLeftOutlined } from '@ant-design/icons';
@@ -19,6 +19,29 @@ const CreateMatchForm = () => {
   const [matchSettings, setMatchSettings] = useState([]);
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const [isFormValid, setIsFormValid] = useState(false);
+
+  const showAlert = (type, message) => {
+    setAlertType(type);
+    setAlertMessage(message);
+    setAlertVisible(true);
+  };
+
+  const handleFormChange = useCallback(() => {
+    const requiredFields = ['title', 'difficulty_level', 'review_number', 'duration_phase1', 'duration_phase2'];
+    
+    // Use getFieldsError and isFieldsTouched to check validation without triggering onFieldsChange
+    const fieldErrors = form.getFieldsError(requiredFields);
+    const hasErrors = fieldErrors.some(field => field.errors.length > 0);
+    
+    // Check if all required fields have values
+    const fieldValues = form.getFieldsValue(requiredFields);
+    const allFieldsFilled = requiredFields.every(field => {
+      const value = fieldValues[field];
+      return value !== undefined && value !== null && value !== '';
+    });
+    
+    setIsFormValid(!hasErrors && allFieldsFilled && selectedMatchSetting !== null);
+  }, [form, selectedMatchSetting]);
 
   useEffect(() => {
     const loadMatchSettings = async () => {
@@ -48,17 +71,11 @@ const CreateMatchForm = () => {
 
   useEffect(() => {
     handleFormChange();
-  }, [selectedMatchSetting]);
+  }, [selectedMatchSetting, handleFormChange]);
 
   const handleMatchSettingChange = (e) => {
     setSelectedMatchSetting(e.target.value);
     handleFormChange();
-  };
-
-  const showAlert = (type, message) => {
-    setAlertType(type);
-    setAlertMessage(message);
-    setAlertVisible(true);
   };
 
   const handleSubmit = async (values) => {
@@ -99,27 +116,6 @@ const CreateMatchForm = () => {
     setSelectedMatchSetting(null);
     setAlertVisible(false);
     setIsFormValid(false);
-  };
-
-  const handleFormChange = () => {
-    setTimeout(() => {
-      const values = form.getFieldsValue();
-      const hasErrors = form.getFieldsError().some(({ errors }) => errors.length);
-      
-      const allFieldsFilled = 
-        values.title && 
-        values.title.length >= 10 &&
-        values.difficulty_level !== undefined && 
-        values.review_number !== undefined && 
-        values.review_number >= 1 &&
-        values.duration_phase1 !== undefined && 
-        values.duration_phase1 >= 1 &&
-        values.duration_phase2 !== undefined &&
-        values.duration_phase2 >= 1 &&
-        selectedMatchSetting !== null;
-      
-      setIsFormValid(!hasErrors && allFieldsFilled);
-    }, 0);
   };
 
   const handleAlertClose = () => {
