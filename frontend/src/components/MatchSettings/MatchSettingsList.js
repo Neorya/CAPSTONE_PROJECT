@@ -12,14 +12,6 @@ const STATUS_COLOR = {
   Draft: "default",
 };
 
-const normalizeStatus = (status) => {
-  if (!status) return status;
-  const s = String(status).toLowerCase();
-  if (s === "ready") return "Ready";
-  if (s === "draft") return "Draft";
-  return status;
-};
-
 const MatchSettingsList = () => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState("All");
@@ -31,7 +23,7 @@ const MatchSettingsList = () => {
         key: it.id ?? idx,
         id: it.id ?? idx,
         name: it.name,
-        status: normalizeStatus(it.status),
+        status: it.status,
       })),
     []
   );
