@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Radio, Select, InputNumber, Button, Alert, Card, Space, Typography } from 'antd';
 import { SaveOutlined, CloseOutlined, ArrowLeftOutlined } from '@ant-design/icons';
-import { mockMatchSettings } from '../../data/mockData';
+import { mockMatchSettings, createMatch } from '../../data/mockData';
 import './CreateMatchForm.css';
 
 const { Title } = Typography;
@@ -52,7 +52,7 @@ const CreateMatchForm = () => {
       };
 
       // Simulate API call
-      await mockCreateMatch(matchData);
+      await createMatch(matchData);
 
       // On success
       showAlert('success', 'The match has been created');
@@ -89,6 +89,7 @@ const CreateMatchForm = () => {
       <Card className="create-match-card">
         <div className="page-header">
           <Button 
+            id="back-to-home-button"
             icon={<ArrowLeftOutlined />} 
             onClick={() => navigate('/')}
             style={{ marginBottom: 16 }}
@@ -100,6 +101,8 @@ const CreateMatchForm = () => {
         
         {alertVisible && (
           <Alert
+            id="match-alert"
+            data-alert-type={alertType}
             message={alertMessage}
             type={alertType}
             closable
@@ -118,6 +121,7 @@ const CreateMatchForm = () => {
             </div>
             <div className="match-settings-scrollable">
               <Radio.Group
+                id="match-settings-radio-group"
                 onChange={handleMatchSettingChange}
                 value={selectedMatchSetting}
                 className="match-settings-radio-group"
@@ -125,12 +129,18 @@ const CreateMatchForm = () => {
                 <Space direction="vertical" style={{ width: '100%' }}>
                   {readyMatchSettings.length > 0 ? (
                     readyMatchSettings.map((setting) => (
-                      <Radio key={setting.id} value={setting.id} className="match-setting-radio">
+                      <Radio 
+                        key={setting.id} 
+                        value={setting.id} 
+                        className="match-setting-radio"
+                        id={`match-setting-${setting.id}`}
+                        data-testid={`match-setting-${setting.id}`}
+                      >
                         <span className="match-setting-name">{setting.name}</span>
                       </Radio>
                     ))
                   ) : (
-                    <div className="no-settings-message">
+                    <div className="no-settings-message" id="no-settings-message">
                       No ready match settings available. Please create a match setting first.
                     </div>
                   )}
@@ -145,9 +155,9 @@ const CreateMatchForm = () => {
               form={form}
               layout="vertical"
               onFinish={handleSubmit}
-              /*initialValues={{ // Default values removed for semplicity
+              initialValues={{
                 reviewers: 4,
-              }}*/
+              }}
             >
               {/* Difficulty Level */}
               <Form.Item
@@ -160,7 +170,11 @@ const CreateMatchForm = () => {
                   },
                 ]}
               >
-                <Select placeholder="Select difficulty level" size="large">
+                <Select 
+                  id="difficulty-select"
+                  placeholder="Select difficulty level" 
+                  size="large"
+                >
                   <Option value="Easy">Easy</Option>
                   <Option value="Medium">Medium</Option>
                   <Option value="Hard">Hard</Option>
@@ -185,6 +199,7 @@ const CreateMatchForm = () => {
                 ]}
               >
                 <InputNumber
+                  id="reviewers-input"
                   min={1}
                   max={10}
                   style={{ width: '100%' }}
@@ -210,6 +225,7 @@ const CreateMatchForm = () => {
                 ]}
               >
                 <InputNumber
+                  id="first-phase-duration-input"
                   min={1}
                   style={{ width: '100%' }}
                   size="large"
@@ -234,6 +250,7 @@ const CreateMatchForm = () => {
                 ]}
               >
                 <InputNumber
+                  id="second-phase-duration-input"
                   min={1}
                   style={{ width: '100%' }}
                   size="large"
@@ -245,6 +262,7 @@ const CreateMatchForm = () => {
               <Form.Item>
                 <Space size="middle">
                   <Button
+                    id="save-match-button"
                     type="primary"
                     htmlType="submit"
                     icon={<SaveOutlined />}
@@ -255,6 +273,7 @@ const CreateMatchForm = () => {
                     Save Match
                   </Button>
                   <Button
+                    id="cancel-button"
                     icon={<CloseOutlined />}
                     onClick={handleCancel}
                     size="large"
@@ -269,24 +288,6 @@ const CreateMatchForm = () => {
       </Card>
     </div>
   );
-};
-
-// Mock API function to simulate POST request
-const mockCreateMatch = (matchData) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      console.log('Creating match with data:', matchData);
-      // Simulate successful creation
-      resolve({
-        status: 201,
-        data: {
-          id: Math.floor(Math.random() * 1000),
-          ...matchData,
-          createdAt: new Date().toISOString(),
-        },
-      });
-    }, 500);
-  });
 };
 
 export default CreateMatchForm;
