@@ -121,7 +121,8 @@ public class MatchAddTest
         matchAddPage.setRevNumber(2);
         matchAddPage.setDurationFirst(15);
         matchAddPage.setDurationSecond(10);
-        matchAddPage.getMatchSetListAtPos(rowMatchsettingToClick).click();
+        //matchAddPage.getMatchSetListAtPos(rowMatchsettingToClick).click();
+        matchAddPage.clickMatchSettingsAtIndex(rowMatchsettingToClick);
         matchAddPage.clickCreateButton();
         assert(matchAddPage.MatchSetListIsPresent()); //??
     }
