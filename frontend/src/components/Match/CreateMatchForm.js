@@ -145,9 +145,9 @@ const CreateMatchForm = () => {
               form={form}
               layout="vertical"
               onFinish={handleSubmit}
-              initialValues={{
+              /*initialValues={{ // Default values removed for semplicity
                 reviewers: 4,
-              }}
+              }}*/
             >
               {/* Difficulty Level */}
               <Form.Item
