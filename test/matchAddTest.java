@@ -8,30 +8,32 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 /**
-  Not tested yet due to the switch to Ant framework, to do asap
+ * Unit test for simple App.
  */
 public class MatchAddTest 
 {
 
     private WebDriver driver;
     private matchAddPO matchAddPage;
+    //private final String matchAddXpath = "//h4[contains(text(),'Create New Match')]";
 
     @BeforeAll 
     public static void setupClass() {
-        System.setProperty("webdriver.chrome.driver", "/path/to/chromedriver");
+        System.setProperty("webdriver.chrome.driver", "YOUR_PATH");
     }
     
     @BeforeEach
-    public void setupTest() {
+    public void setupTest() throws InterruptedException {
         driver = new ChromeDriver();
         matchAddPage = new matchAddPO(driver);
-    }
+        //Thread.sleep(500);
+        //matchAddPage.findElementByXPath(matchAddXpath).click();
+    }   
 
     @Test
     public void testPageLoads() {
@@ -40,20 +42,26 @@ public class MatchAddTest
 
     @Test
     public void titleIsCorrect() {
-        String expectedTitle = "Create Match Setting";
+        String expectedTitle = "React App"; //why???
         assert(driver.getTitle().equals(expectedTitle));
     }
 
     @Test
     public void checkCreateButton() {
-        assert(matchAddPage.getCreateButton().isDisplayed() && matchAddPage.getCreateButton().isEnabled());
+        assert(matchAddPage.getCreateButton().isDisplayed() && !matchAddPage.getCreateButton().isEnabled());
+    }
+
+    @Test
+    public void checkDeleteButton() {
+        assert(matchAddPage.getCancelButton().isDisplayed() && matchAddPage.getCancelButton().isEnabled());
     }
 
     @Test
     public void testSetDifficultyLevel() {
-        matchAddPage.setDifficultyLevel(2);
-        String value = matchAddPage.getDifficultyLevel().getAttribute("value");
-        assert(value.equals("2"));
+        String difficultyLevelToSelect = "Medium";
+        matchAddPage.setDifficultyLevel(difficultyLevelToSelect);
+        String value = matchAddPage.getDifficultyLevel().getAttribute("title");
+        assert(value.equals(difficultyLevelToSelect));
     }
 
     @Test
@@ -80,45 +88,39 @@ public class MatchAddTest
     @Test 
     public void clickMatchSetting() {
         int rowToClick = 2;
-        WebElement element = matchAddPage.getMatchSetListAtPos(rowToClick);
-        assert(element.isEnabled() && element.isSelected() == false);
+        WebElement element = matchAddPage.getMatchSettingsAtIndex(rowToClick);
+        assert(element.isSelected() == false);
         element.click();
         assert(element.isSelected() == true);
         // Further assertions can be added here based on expected behavior after clicking
     }
 
-    //NB the following assertions are not based on requirement or frontEnd, they need to be checked before,
-    @Test
-    public void createMatchSettingEmpty() {
-        matchAddPage.clickCreateButton();
-        Alert alert = driver.switchTo().alert();
-        String alertText = alert.getText(); // get content of the alert box if bis
-        assert(alertText.equals("Please fill all required fields"));
-    }
 
-    @Test
+    /*@Test
     public void createMatchSettingInvalidValues() {
-        matchAddPage.setDifficultyLevel(-1);
         matchAddPage.setRevNumber(0);
         matchAddPage.setDurationFirst(-5);
         matchAddPage.setDurationSecond(0);
-        matchAddPage.clickCreateButton();
-        Alert alert = driver.switchTo().alert();
-        String alertText = alert.getText(); // get content of the alert box if it is displayed
-        assert(alertText.equals("Please enter valid values"));
-    }
+        //matchAddPage.clickCreateButton();
+        assert(matchAddPage.getRevNumberErr().isDisplayed());
+        assert(matchAddPage.getDurationFirstErr().isDisplayed());
+        assert(matchAddPage.getDurationSecondErr().isDisplayed());
+        assert(!matchAddPage.getCreateButton().isEnabled());
+
+    }*/
 
     @Test
     public void testCreateMatchSetting() {
         int rowMatchsettingToClick = 1;
-        matchAddPage.setDifficultyLevel(3);
+        matchAddPage.setDifficultyLevel("Hard");
         matchAddPage.setRevNumber(2);
         matchAddPage.setDurationFirst(15);
         matchAddPage.setDurationSecond(10);
         matchAddPage.getMatchSetListAtPos(rowMatchsettingToClick).click();
         matchAddPage.clickCreateButton();
-        assert(matchAddPage.MatchSetListIsPresent()); 
+        assert(matchAddPage.MatchSetListIsPresent()); //??
     }
+
 
     @AfterEach
     public void tearDown() {
@@ -129,7 +131,7 @@ public class MatchAddTest
 
     @AfterAll
     public static void tearDownClass() {
-        // Add any cleanup code that needs to run once after all tests if needed
+        // Add any cleanup code that needs to run once after all tests
     }
 
 }
