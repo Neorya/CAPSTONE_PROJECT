@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ConfigProvider } from 'antd';
 import HomePage from './components/Home';
 import { CreateMatchForm } from './components/Match';
-import MatchSettingsList from './MatchSettingsList';
+import { MatchSettingsList } from './components/MatchSettings';
 import './App.css';
 
 function App() {
