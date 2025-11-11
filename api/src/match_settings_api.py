@@ -36,6 +36,7 @@ class MatchSettingResponse(BaseModel):
     creator_id: int = Field(..., description="ID of the teacher who created this setting")
 
     class Config:
+        from_attributes = True # Enable ORM mode (reads from SQLAlchemy model)
         json_schema_extra = {
             "example": {
                 "match_set_id": 1,

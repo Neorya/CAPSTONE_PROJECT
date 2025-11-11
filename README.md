@@ -2,6 +2,11 @@
 For launching the containers use:
 docker compose up --build
 
+Rebuild:
+docker compose down
+docker compose build --no-cache
+docker compose up -d
+
 ## BRANCH NAMING CONVENTIONS
 
 ### Format 
