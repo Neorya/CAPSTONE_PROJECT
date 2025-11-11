@@ -19,7 +19,7 @@ public class MatchAddTest
 {
 
     private WebDriver driver;
-    private matchAddPO matchAddPage;
+    private MatchAddPO matchAddPage;
     //private final String matchAddXpath = "//h4[contains(text(),'Create New Match')]";
 
     @BeforeAll 
@@ -35,7 +35,7 @@ public class MatchAddTest
         options.addArguments("--no-sandbox"); 
         options.addArguments("--disable-dev-shm-usage"); 
         driver = new ChromeDriver();
-        matchAddPage = new matchAddPO(driver);
+        matchAddPage = new MatchAddPO(driver);
         //Thread.sleep(500);
         //matchAddPage.findElementByXPath(matchAddXpath).click();
     }   
