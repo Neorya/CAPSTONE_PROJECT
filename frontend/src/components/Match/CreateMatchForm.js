@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Form, Radio, Select, InputNumber, Button, Alert, Card, Space, Typography } from 'antd';
-import { SaveOutlined, CloseOutlined, ArrowLeftOutlined } from '@ant-design/icons';
-import { mockMatchSettings, createMatch } from '../../data/mockData';
+import { Form, Radio, Select, InputNumber, Button, Alert, Card, Space, Typography, Input, Spin, Tooltip } from 'antd';
+import { SaveOutlined, ReloadOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { fetchMatchSettings, createMatch } from '../../services/matchService';
 import './CreateMatchForm.css';
 
 const { Title } = Typography;
@@ -16,14 +16,43 @@ const CreateMatchForm = () => {
   const [alertType, setAlertType] = useState('success');
   const [alertMessage, setAlertMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [matchSettings, setMatchSettings] = useState([]);
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
+  const [isFormValid, setIsFormValid] = useState(false);
 
-  // Filter only Ready match settings
-  const readyMatchSettings = mockMatchSettings.filter(
-    setting => setting.status === 'Ready'
-  );
+  useEffect(() => {
+    const loadMatchSettings = async () => {
+      try {
+        setIsLoadingSettings(true);
+        const settings = await fetchMatchSettings(true);
+        setMatchSettings(settings);
+        
+        if (settings.length === 0) {
+          showAlert('info', 'No ready match settings available. Please create and mark a match setting as ready first.');
+        }
+      } catch (error) {
+        console.error('Error loading match settings:', error);
+        
+        const errorMessage = error.message.includes('fetch')
+          ? 'Cannot connect to the server. Please make sure the backend is running (docker-compose up).'
+          : `Failed to load match settings: ${error.message}`;
+        
+        showAlert('error', errorMessage);
+      } finally {
+        setIsLoadingSettings(false);
+      }
+    };
+
+    loadMatchSettings();
+  }, []);
+
+  useEffect(() => {
+    handleFormChange();
+  }, [selectedMatchSetting]);
 
   const handleMatchSettingChange = (e) => {
     setSelectedMatchSetting(e.target.value);
+    handleFormChange();
   };
 
   const showAlert = (type, message) => {
@@ -33,7 +62,6 @@ const CreateMatchForm = () => {
   };
 
   const handleSubmit = async (values) => {
-    // Check if match setting is selected
     if (!selectedMatchSetting) {
       showAlert('error', 'You should select a match setting to create a match');
       return;
@@ -42,42 +70,56 @@ const CreateMatchForm = () => {
     setIsSubmitting(true);
 
     try {
-      // Mock POST API call
       const matchData = {
-        matchSettingId: selectedMatchSetting,
-        difficultyLevel: values.difficulty,
-        reviewNumber: values.reviewers,
-        durationFirstPhase: values.firstPhaseDuration,
-        durationSecondPhase: values.secondPhaseDuration,
+        title: values.title,
+        match_set_id: selectedMatchSetting,
+        creator_id: values.creator_id || 1,
+        difficulty_level: values.difficulty_level,
+        review_number: values.review_number,
+        duration_phase1: values.duration_phase1,
+        duration_phase2: values.duration_phase2,
       };
 
-      // Simulate API call
-      await createMatch(matchData);
-
-      // On success
-      showAlert('success', 'The match has been created');
+      const createdMatch = await createMatch(matchData);
+      showAlert('success', `Match "${createdMatch.title}" has been created successfully!`);
       
-      // Reset form after success
       form.resetFields();
       setSelectedMatchSetting(null);
-
-      // Navigate back to home after 2 seconds
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
+      setIsFormValid(false);
       
     } catch (error) {
-      showAlert('error', 'Failed to create match. Please try again.');
+      showAlert('error', error.message || 'Failed to create match. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleCancel = () => {
+  const handleReset = () => {
     form.resetFields();
     setSelectedMatchSetting(null);
     setAlertVisible(false);
-    navigate('/');
+    setIsFormValid(false);
+  };
+
+  const handleFormChange = () => {
+    setTimeout(() => {
+      const values = form.getFieldsValue();
+      const hasErrors = form.getFieldsError().some(({ errors }) => errors.length);
+      
+      const allFieldsFilled = 
+        values.title && 
+        values.title.length >= 10 &&
+        values.difficulty_level !== undefined && 
+        values.review_number !== undefined && 
+        values.review_number >= 1 &&
+        values.duration_phase1 !== undefined && 
+        values.duration_phase1 >= 1 &&
+        values.duration_phase2 !== undefined &&
+        values.duration_phase2 >= 1 &&
+        selectedMatchSetting !== null;
+      
+      setIsFormValid(!hasErrors && allFieldsFilled);
+    }, 0);
   };
 
   const handleAlertClose = () => {
@@ -113,56 +155,92 @@ const CreateMatchForm = () => {
         )}
 
         <div className="form-layout">
-          {/* Left Column - Match Settings List */}
           <div className="match-settings-column">
             <div className="match-settings-header">
               <Title level={4}>Match Settings</Title>
               <p className="match-settings-subtitle">Select one match setting from the ready list</p>
             </div>
             <div className="match-settings-scrollable">
-              <Radio.Group
-                id="match-settings-radio-group"
-                onChange={handleMatchSettingChange}
-                value={selectedMatchSetting}
-                className="match-settings-radio-group"
-              >
-                <Space direction="vertical" style={{ width: '100%' }}>
-                  {readyMatchSettings.length > 0 ? (
-                    readyMatchSettings.map((setting) => (
-                      <Radio 
-                        key={setting.id} 
-                        value={setting.id} 
-                        className="match-setting-radio"
-                        id={`match-setting-${setting.id}`}
-                        data-testid={`match-setting-${setting.id}`}
-                      >
-                        <span className="match-setting-name">{setting.name}</span>
-                      </Radio>
-                    ))
-                  ) : (
-                    <div className="no-settings-message" id="no-settings-message">
-                      No ready match settings available. Please create a match setting first.
-                    </div>
-                  )}
-                </Space>
-              </Radio.Group>
+              {isLoadingSettings ? (
+                <div style={{ textAlign: 'center', padding: '40px' }}>
+                  <Spin size="large" tip="Loading match settings..." />
+                </div>
+              ) : (
+                <Radio.Group
+                  id="match-settings-radio-group"
+                  onChange={handleMatchSettingChange}
+                  value={selectedMatchSetting}
+                  className="match-settings-radio-group"
+                >
+                  <Space direction="vertical" style={{ width: '100%' }}>
+                    {matchSettings.length > 0 ? (
+                      matchSettings.map((setting) => (
+                        <Radio 
+                          key={setting.id} 
+                          value={setting.id} 
+                          className="match-setting-radio"
+                          id={`match-setting-${setting.id}`}
+                          data-testid={`match-setting-${setting.id}`}
+                        >
+                          <span className="match-setting-name">{setting.name}</span>
+                        </Radio>
+                      ))
+                    ) : (
+                      <div className="no-settings-message" id="no-settings-message">
+                        No ready match settings available. Please create a match setting first.
+                      </div>
+                    )}
+                  </Space>
+                </Radio.Group>
+              )}
             </div>
           </div>
 
-          {/* Right Column - Other Form Fields */}
           <div className="form-fields-column">
             <Form
               form={form}
               layout="vertical"
               onFinish={handleSubmit}
+              onFieldsChange={handleFormChange}
               initialValues={{
-                reviewers: 4,
+                review_number: 4,
+                creator_id: 1,
               }}
             >
-              {/* Difficulty Level */}
+              <Form.Item
+                label="Match Title"
+                name="title"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please enter a match title',
+                  },
+                  {
+                    min: 10,
+                    message: 'Title must be at least 10 characters',
+                  },
+                  {
+                    max: 150,
+                    message: 'Title must not exceed 150 characters',
+                  },
+                ]}
+              >
+                <Input
+                  id="title-input"
+                  placeholder="Enter a descriptive title for this match"
+                  size="large"
+                  showCount
+                  maxLength={150}
+                />
+              </Form.Item>
+
+              <Form.Item name="creator_id" hidden>
+                <InputNumber />
+              </Form.Item>
+
               <Form.Item
                 label="Difficulty Level"
-                name="difficulty"
+                name="difficulty_level"
                 rules={[
                   {
                     required: true,
@@ -175,16 +253,15 @@ const CreateMatchForm = () => {
                   placeholder="Select difficulty level" 
                   size="large"
                 >
-                  <Option value="Easy">Easy</Option>
-                  <Option value="Medium">Medium</Option>
-                  <Option value="Hard">Hard</Option>
+                  <Option value={1}>Easy</Option>
+                  <Option value={2}>Medium</Option>
+                  <Option value={3}>Hard</Option>
                 </Select>
               </Form.Item>
 
-              {/* Review Number */}
               <Form.Item
                 label="Review Number"
-                name="reviewers"
+                name="review_number"
                 rules={[
                   {
                     required: true,
@@ -208,10 +285,9 @@ const CreateMatchForm = () => {
                 />
               </Form.Item>
 
-              {/* Duration First Phase */}
               <Form.Item
-                label="Duration First Phase (minutes)"
-                name="firstPhaseDuration"
+                label="Duration Phase 1 (minutes)"
+                name="duration_phase1"
                 rules={[
                   {
                     required: true,
@@ -233,10 +309,9 @@ const CreateMatchForm = () => {
                 />
               </Form.Item>
 
-              {/* Duration Second Phase */}
               <Form.Item
-                label="Duration Second Phase (minutes)"
-                name="secondPhaseDuration"
+                label="Duration Phase 2 (minutes)"
+                name="duration_phase2"
                 rules={[
                   {
                     required: true,
@@ -258,7 +333,6 @@ const CreateMatchForm = () => {
                 />
               </Form.Item>
 
-              {/* Form Actions */}
               <Form.Item>
                 <Space size="middle">
                   <Button
@@ -268,18 +342,22 @@ const CreateMatchForm = () => {
                     icon={<SaveOutlined />}
                     loading={isSubmitting}
                     size="large"
-                    disabled={!selectedMatchSetting}
+                    disabled={!isFormValid || isSubmitting}
                   >
                     Save Match
                   </Button>
-                  <Button
-                    id="cancel-button"
-                    icon={<CloseOutlined />}
-                    onClick={handleCancel}
-                    size="large"
-                  >
-                    Cancel
-                  </Button>
+                  <Tooltip title="Clear all form fields and start over">
+                    <Button
+                      id="reset-button"
+                      danger
+                      icon={<ReloadOutlined />}
+                      onClick={handleReset}
+                      size="large"
+                      disabled={isSubmitting}
+                    >
+                      Reset
+                    </Button>
+                  </Tooltip>
                 </Space>
               </Form.Item>
             </Form>
