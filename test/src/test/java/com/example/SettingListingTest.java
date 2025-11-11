@@ -22,7 +22,19 @@ public class SettingListingTest {
     public static void setUp() {
         // Setup ChromeDriver options
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--start-maximized");
+        
+        // Check if running in CI/headless environment
+        String headless = System.getProperty("headless", "false");
+        if ("true".equals(headless) || System.getenv("CI") != null) {
+            options.addArguments("--headless=new");
+            options.addArguments("--no-sandbox");
+            options.addArguments("--disable-dev-shm-usage");
+            options.addArguments("--disable-gpu");
+            options.addArguments("--window-size=1920,1080");
+        } else {
+            options.addArguments("--start-maximized");
+        }
+        
         options.addArguments("--disable-blink-features=AutomationControlled");
         
         // Initialize WebDriver
