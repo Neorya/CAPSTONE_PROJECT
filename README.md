@@ -25,5 +25,5 @@ sp1_st1_db1
 
 ### Few example:
 
-CAP-49 Frontend Task of the third user story <Francesco Matano>
+CAP-49 Frontend Task of the third user story < Francesco Matano \>
 
