@@ -1,0 +1,135 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+
+  # Selenium Tests
+  selenium-test:
+    name: Selenium (E2E) Tests
+    runs-on: ubuntu-latest    #In future, evaluate others OSes
+    
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: changeme
+          POSTGRES_PASSWORD: changeme
+          POSTGRES_DB: changeme
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Initialize database
+        run: |
+          PGPASSWORD=changeme psql -h localhost -U changeme -d changeme -f ./postgres/configs/init.sql
+      
+      - name: Install API dependencies
+        working-directory: ./api
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Start API server
+        working-directory: ./api/src
+        run: |
+          uvicorn main:app --host 0.0.0.0 --port 8000 &
+          sleep 10
+        env:
+          DATABASE_URL: postgresql://changeme:changeme@localhost:5432/changeme
+      
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+      
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+      
+      - name: Serve frontend
+        working-directory: ./frontend
+        run: |
+          npx serve -s build -l 3000 &
+          sleep 5
+      
+      - name: Run Selenium tests
+        working-directory: ./test
+        run: mvn clean test
+      
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-test-reports
+          path: test/target/surefire-reports/
+
+  # Docker Build
+  docker-build:
+    name: Docker Build Verification
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build API Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./api
+          push: false
+          tags: capstone-api:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Build Frontend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: false
+          tags: capstone-frontend:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Test Docker Compose
+        run: |
+          docker compose up -d
+          sleep 20
+          docker compose ps
+          docker compose logs
+          # Test API health
+          curl -f http://localhost:8000 || exit 1
+          # Test Frontend
+          curl -f http://localhost:3000 || exit 1
+          docker compose down -v
