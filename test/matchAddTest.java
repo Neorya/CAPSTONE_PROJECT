@@ -29,6 +29,11 @@ public class MatchAddTest
     
     @BeforeEach
     public void setupTest() throws InterruptedException {
+        
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless");
+        options.addArguments("--no-sandbox"); 
+        options.addArguments("--disable-dev-shm-usage"); 
         driver = new ChromeDriver();
         matchAddPage = new matchAddPO(driver);
         //Thread.sleep(500);
