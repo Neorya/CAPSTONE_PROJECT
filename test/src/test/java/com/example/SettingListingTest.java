@@ -313,7 +313,7 @@ public class SettingListingTest {
     @DisplayName("Verify pagination previous button state")
     public void testPaginationPreviousButton() {
         // On first page, previous button should be disabled
-        assertFalse(settingListingPage.isPreviousPageButtonEnabled(), 
+        assertFalse(settingListingPage.ispreviousPageButtonParentEnabled(), 
             "Previous page button should be disabled on first page");
     }
     

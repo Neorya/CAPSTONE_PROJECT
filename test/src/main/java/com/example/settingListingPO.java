@@ -40,7 +40,7 @@ public class settingListingPO {
     private By statusTags = By.xpath("//tbody[@class='ant-table-tbody']//td[2]//span[contains(@class, 'ant-tag')]");
     
     // Locators for Pagination
-    private By previousPageButton = By.xpath("//li[contains(@class, 'ant-pagination-prev')]//button");
+    private By previousPageButtonParent = By.xpath("//li[contains(@class, 'ant-pagination-prev')]");
     private By nextPageButton = By.xpath("//li[contains(@class, 'ant-pagination-next')]//button");
     private By currentPageNumber = By.xpath("//li[contains(@class, 'ant-pagination-item-active')]");
     
@@ -184,7 +184,7 @@ public class settingListingPO {
     
     // Pagination Methods
     public void clickPreviousPage() {
-        WebElement prevButton = driver.findElement(previousPageButton);
+        WebElement prevButton = driver.findElement(previousPageButtonParent);
         if (prevButton.isEnabled()) {
             prevButton.click();
         }
@@ -197,8 +197,8 @@ public class settingListingPO {
         }
     }
     
-    public boolean isPreviousPageButtonEnabled() {
-        WebElement prevButton = driver.findElement(previousPageButton);
+    public boolean ispreviousPageButtonParentEnabled() {
+        WebElement prevButton = driver.findElement(previousPageButtonParent);
         return !prevButton.getAttribute("class").contains("ant-pagination-disabled");
     }
     
