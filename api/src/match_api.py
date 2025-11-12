@@ -34,25 +34,45 @@ class MatchCreate(BaseModel):
     @classmethod
     def sanitize_title(cls, tit: str) -> str:
         """
-        Sanitize the title to prevent XSS attacks.
-        - Remove HTML tags
-        - Escape HTML entities
-        - Remove potentially dangerous characters
+        Validate and sanitize the title to prevent XSS attacks.
+        
+        Security approach:
+        1. Input Validation: Reject malicious patterns (HTML tags, scripts)
+        2. Sanitization: Clean control characters
+        3. Output Encoding: HTML escape as final defense layer
+        
+        This layered approach ensures:
+        - Malicious input is rejected with clear error messages
+        - Database contains clean, semantic data
+        - Output is safe even if display layer fails to escape
         """
         
         # Strip leading/trailing whitespace
         tit = tit.strip()
-
-        # Remove null bytes and control characters
-        tit = re.sub(r'[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]', '', tit)
         
-        # Escape HTML entities to prevent XSS
-        tit = html.escape(tit)
-
+        # Length validation
         if len(tit) < 10:
             raise ValueError('Title must be at least 10 characters')
         if len(tit) > 150:
             raise ValueError('Title must be at most 150 characters')
+
+        # Check for HTML tags
+        if re.search(r'<[^>]*>', tit):
+            raise ValueError('Title cannot contain HTML tags')
+        
+        # Check for javascript patterns
+        if re.search(r'javascript:|on\w+\s*=|<script', tit, re.IGNORECASE):
+            raise ValueError('Title contains forbidden script patterns')
+        
+        #Remove null bytes and control characters
+        tit = re.sub(r'[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]', '', tit)
+        
+        #Escape HTML entities as final protection layer
+        tit = html.escape(tit)
+        
+        # Final length check (after escaping, as entities expand length)
+        if len(tit) > 150:
+            raise ValueError('Title exceeds maximum length')
         
         return tit
 
