@@ -1,8 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Card, Radio, Space, Table, Tag, Typography } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
-import { mockMatchSettings } from "../../data/mockData";
+import { getMatchSettings } from "./getMatchSettings.ts";
 import "./MatchSettingsList.css";
 
 const { Title, Text } = Typography;
@@ -12,35 +12,32 @@ const STATUS_COLOR = {
   Draft: "default",
 };
 
-const normalizeStatus = (status) => {
-  if (!status) return status;
-  const s = String(status).toLowerCase();
-  if (s === "ready") return "Ready";
-  if (s === "draft") return "Draft";
-  return status;
-};
-
 const MatchSettingsList = () => {
-  const navigate = useNavigate();
-  const [filter, setFilter] = useState("All");
+  const navigate = useNavigate();                     // navigation hook
+  const [filter, setFilter] = useState("All");        // filter state (all, ready, draft)
+  const [items, setItems] = useState([]);             // match settings items
+  const [loading, setLoading] = useState(false);      // loading
 
-  // useMemo to avoid recalculating items on every render
-  const items = useMemo(
-    () =>
-      (mockMatchSettings || []).map((it, idx) => ({
-        key: it.id ?? idx,
-        id: it.id ?? idx,
-        name: it.name,
-        status: normalizeStatus(it.status),
-      })),
-    []
-  );
-
-  // Filtered items based on selected filter
-  const filteredItems = useMemo(() => {
-    if (filter === "All") return items;
-    return items.filter((it) => it.status === filter);
-  }, [items, filter]);
+  
+  useEffect(() => {                         // useEffect runs on component mount and filter change
+    const fetchItems = async () => {        // fetch match settings based on filter
+      try {
+        setLoading(true);
+        const data = await getMatchSettings(filter);
+        const formatted = data.map((item) => ({   // format data for table
+          id: item.match_set_id,
+          name: item.title,
+          status: item.is_ready ? "Ready" : "Draft",
+        }));
+        setItems(formatted);
+      } catch (err) {
+        console.error("Error fetching match settings:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchItems();
+  }, [filter]);
 
   // Table columns definition
   const columns = [
@@ -65,7 +62,6 @@ const MatchSettingsList = () => {
   return (
     <div className="match-settings-list-container">
       <Card className="match-settings-card">
-        {/* Header */}
         <div className="page-header">
           <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/")}>
             Back to Home
@@ -73,17 +69,15 @@ const MatchSettingsList = () => {
           <Title level={2} className="page-title">
             Match Settings
           </Title>
-          <span /> {/* spacer to keep title centered */}
+          <span />
         </div>
 
-        {/* Optional helper text */}
         <div className="subheader">
           <Text type="secondary">
             Browse existing match settings. Use the filter to narrow results.
           </Text>
         </div>
 
-        {/* Filter bar */}
         <div className="filter-bar">
           <Space size="middle" align="center" wrap>
             <Text strong>Filter:</Text>
@@ -101,10 +95,10 @@ const MatchSettingsList = () => {
           </Space>
         </div>
 
-        {/* Table */}
         <Table
-          dataSource={filteredItems}
+          dataSource={items}
           columns={columns}
+          loading={loading} 
           pagination={{ pageSize: 8, showSizeChanger: false }}
           rowKey="id"
           className="match-settings-table"
