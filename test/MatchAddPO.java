@@ -3,7 +3,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-public class matchAddPO {
+public class MatchAddPO {
     private WebDriver driver;   
 
     private String CreateButtonXPathR    = "//button[@type='submit']";
@@ -24,7 +24,7 @@ public class matchAddPO {
     
 
 
-    public matchAddPO(WebDriver driver) {
+    public MatchAddPO(WebDriver driver) {
         this.driver = driver;
         driver.get(MatchCreateURL);
     }
