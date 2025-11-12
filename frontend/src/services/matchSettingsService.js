@@ -8,6 +8,6 @@ export async function fetchMatchSettings(filter) {
   const url = new URL("/api/match-settings", API_BASE_URL);
   if (isReady !== undefined) url.searchParams.set("is_ready", String(isReady));
   const res = await fetch(url.toString(), { method: "GET" });
-  if (!res.ok) throw new Error(`API error ${res.status}`);
+  if (!res.ok) throw new Error(`Failed to fetch match settings: ${res.statusText}`);
   return res.json();
 }
