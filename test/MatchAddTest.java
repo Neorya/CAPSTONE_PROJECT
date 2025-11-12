@@ -25,17 +25,28 @@ public class MatchAddTest
 
     @BeforeAll 
     public static void setupClass() {
-        System.setProperty("webdriver.chrome.driver", "YOUR_PATH");
+        // ChromeDriver path is automatically detected when installed via setup-chromedriver action
+        // or WebDriver Manager. No need to set manually.
     }
     
     @BeforeEach
     public void setupTest() throws InterruptedException {
         
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless");
+        
+        // Check if running in CI/headless environment
+        String headless = System.getProperty("headless", "false");
+        if ("true".equals(headless) || System.getenv("CI") != null) {
+            options.addArguments("--headless=new");
+        } else {
+            options.addArguments("--headless");
+        }
         options.addArguments("--no-sandbox"); 
         options.addArguments("--disable-dev-shm-usage"); 
-        driver = new ChromeDriver();
+        options.addArguments("--disable-gpu");
+        options.addArguments("--window-size=1920,1080");
+        
+        driver = new ChromeDriver(options);
         matchAddPage = new MatchAddPO(driver);
         //Thread.sleep(500);
         //matchAddPage.findElementByXPath(matchAddXpath).click();

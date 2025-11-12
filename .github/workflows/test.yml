@@ -63,6 +63,8 @@ jobs:
         run: |
           google-chrome --version
           chromedriver --version
+          which chromedriver
+          echo "CHROMEDRIVER_PATH=$(which chromedriver)"
 
       - name: Install Python dependencies
         run: |
