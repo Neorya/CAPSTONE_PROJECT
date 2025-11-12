@@ -1,7 +1,7 @@
 import { API_BASE_URL } from "./config";
 
 export async function fetchMatchSettings(filter) {
-  // prepare value for the is_ready parameter of getMatchSettings
+  // prepare value for the is_ready parameter of fetchMatchSettings
   let isReady;
   if (filter === "Ready") isReady = true;
   else if (filter === "Draft") isReady = false;
