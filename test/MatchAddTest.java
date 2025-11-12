@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 
 /**
  * Unit test for simple App.
@@ -19,7 +20,7 @@ public class MatchAddTest
 {
 
     private WebDriver driver;
-    private matchAddPO matchAddPage;
+    private MatchAddPO matchAddPage;
     //private final String matchAddXpath = "//h4[contains(text(),'Create New Match')]";
 
     @BeforeAll 
@@ -35,7 +36,7 @@ public class MatchAddTest
         options.addArguments("--no-sandbox"); 
         options.addArguments("--disable-dev-shm-usage"); 
         driver = new ChromeDriver();
-        matchAddPage = new matchAddPO(driver);
+        matchAddPage = new MatchAddPO(driver);
         //Thread.sleep(500);
         //matchAddPage.findElementByXPath(matchAddXpath).click();
     }   
@@ -121,7 +122,8 @@ public class MatchAddTest
         matchAddPage.setRevNumber(2);
         matchAddPage.setDurationFirst(15);
         matchAddPage.setDurationSecond(10);
-        matchAddPage.getMatchSetListAtPos(rowMatchsettingToClick).click();
+        //matchAddPage.getMatchSetListAtPos(rowMatchsettingToClick).click();
+        matchAddPage.clickMatchSettingsAtIndex(rowMatchsettingToClick);
         matchAddPage.clickCreateButton();
         assert(matchAddPage.MatchSetListIsPresent()); //??
     }
