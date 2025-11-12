@@ -1,8 +1,8 @@
-package com.example.tests;
+package com.example;
 
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.WebElement;
-import com.example.pages.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -164,6 +164,13 @@ public class MatchAddTest extends BaseTest {
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
         
+        // Wait a moment for validation
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
         // Verify error is displayed
         assertTrue(matchAddPage.isRevNumberErrorDisplayed(), 
             "Error message should be displayed for review number below minimum");
@@ -181,7 +188,14 @@ public class MatchAddTest extends BaseTest {
         
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
-
+        
+        // Wait a moment for validation
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
         // Verify error is displayed
         assertTrue(matchAddPage.isRevNumberErrorDisplayed(), 
             "Error message should be displayed for review number above maximum");
@@ -201,6 +215,13 @@ public class MatchAddTest extends BaseTest {
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
         
+        // Wait a moment for validation
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
         // Verify create button remains disabled
         assertFalse(matchAddPage.isCreateButtonEnabled(), 
             "Create button should remain disabled with negative review number");
@@ -214,7 +235,14 @@ public class MatchAddTest extends BaseTest {
         
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
-
+        
+        // Wait a moment for validation
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
         // Verify error is displayed
         assertTrue(matchAddPage.isDurationFirstErrorDisplayed(), 
             "Error message should be displayed for zero duration in phase 1");
@@ -234,6 +262,13 @@ public class MatchAddTest extends BaseTest {
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
         
+        // Wait a moment for validation
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
         // Verify create button remains disabled
         assertFalse(matchAddPage.isCreateButtonEnabled(), 
             "Create button should remain disabled with negative phase 1 duration");
@@ -247,6 +282,13 @@ public class MatchAddTest extends BaseTest {
         
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
+        
+        // Wait a moment for validation
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         
         // Verify error is displayed
         assertTrue(matchAddPage.isDurationSecondErrorDisplayed(), 
@@ -266,7 +308,14 @@ public class MatchAddTest extends BaseTest {
         
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
-
+        
+        // Wait a moment for validation
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
         // Verify create button remains disabled
         assertFalse(matchAddPage.isCreateButtonEnabled(), 
             "Create button should remain disabled with negative phase 2 duration");
@@ -282,7 +331,6 @@ public class MatchAddTest extends BaseTest {
         matchAddPage.setDurationFirst(10);
         matchAddPage.setDurationSecond(5);
         matchAddPage.clickMatchSettingAtIndex(1);
-
         // Verify create button remains disabled
         assertFalse(matchAddPage.isCreateButtonEnabled(), 
             "Create button should remain disabled when title is empty");
@@ -298,6 +346,13 @@ public class MatchAddTest extends BaseTest {
         matchAddPage.setDurationSecond(5);
         matchAddPage.clickMatchSettingAtIndex(1);
         
+        // Wait a moment for validation
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
         // Verify create button remains disabled
         assertFalse(matchAddPage.isCreateButtonEnabled(), 
             "Create button should remain disabled when difficulty level is not selected");
@@ -312,7 +367,14 @@ public class MatchAddTest extends BaseTest {
         matchAddPage.setRevNumber(3);
         matchAddPage.setDurationFirst(10);
         matchAddPage.setDurationSecond(5);
-
+        
+        // Wait a moment for validation
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
         // Verify create button remains disabled
         assertFalse(matchAddPage.isCreateButtonEnabled(), 
             "Create button should remain disabled when match setting is not selected");
@@ -330,6 +392,13 @@ public class MatchAddTest extends BaseTest {
         // Click somewhere else to trigger validation
         matchAddPage.getBackToHomeButton().click();
         driver.navigate().back();
+        
+        // Wait a moment for validation
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         
         // Verify error messages are displayed
         assertTrue(matchAddPage.isRevNumberErrorDisplayed() || 
@@ -351,6 +420,13 @@ public class MatchAddTest extends BaseTest {
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
         
+        // Wait a moment for validation
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
         if (matchAddPage.isRevNumberErrorDisplayed()) {
             String errorText = matchAddPage.getRevNumberErrorText();
             assertFalse(errorText.isEmpty(), 
@@ -366,7 +442,14 @@ public class MatchAddTest extends BaseTest {
         matchAddPage.setRevNumber(0);
         matchAddPage.setDurationFirst(0);
         matchAddPage.setDurationSecond(0);
-
+        
+        // Wait a moment for validation
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
         // Verify create button is disabled and cannot be clicked
         assertFalse(matchAddPage.isCreateButtonEnabled(), 
             "Create button should be disabled with all invalid inputs");

@@ -1,9 +1,9 @@
-package com.example;
+package com.example.tests;
 
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.WebElement;
 import java.util.List;
-
+import com.example.pages.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -112,13 +112,6 @@ public class SettingListingTest extends BaseTest {
     public void testSelectReadyFilter() {
         settingListingPage.selectReadyFilter();
         
-        // Wait a moment for filter to apply
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        
         assertTrue(settingListingPage.isReadyFilterSelected(), 
             "Ready filter should be selected after clicking");
     }
@@ -128,13 +121,6 @@ public class SettingListingTest extends BaseTest {
     @DisplayName("Test selecting Draft filter")
     public void testSelectDraftFilter() {
         settingListingPage.selectDraftFilter();
-        
-        // Wait a moment for filter to apply
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         
         assertTrue(settingListingPage.isDraftFilterSelected(), 
             "Draft filter should be selected after clicking");
@@ -149,14 +135,7 @@ public class SettingListingTest extends BaseTest {
         
         // Then select All filter
         settingListingPage.selectAllFilter();
-        
-        // Wait a moment for filter to apply
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        
+
         assertTrue(settingListingPage.isAllFilterSelected(), 
             "All filter should be selected after clicking");
     }
@@ -260,14 +239,7 @@ public class SettingListingTest extends BaseTest {
     @DisplayName("Verify Ready filter shows only Ready settings")
     public void testReadyFilterShowsOnlyReadySettings() {
         settingListingPage.selectReadyFilter();
-        
-        // Wait for filter to apply
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        
+
         List<WebElement> statusTags = settingListingPage.getStatusTags();
         
         for (WebElement status : statusTags) {
@@ -281,14 +253,7 @@ public class SettingListingTest extends BaseTest {
     @DisplayName("Verify Draft filter shows only Draft settings")
     public void testDraftFilterShowsOnlyDraftSettings() {
         settingListingPage.selectDraftFilter();
-        
-        // Wait for filter to apply
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        
+
         List<WebElement> statusTags = settingListingPage.getStatusTags();
         
         for (WebElement status : statusTags) {
