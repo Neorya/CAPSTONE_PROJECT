@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Form, Radio, Select, InputNumber, Button, Alert, Card, Space, Typography, Input, Spin, Tooltip } from 'antd';
 import { SaveOutlined, ReloadOutlined, ArrowLeftOutlined } from '@ant-design/icons';
-import { fetchMatchSettings, createMatch } from '../../services/matchService';
+import { createMatch } from '../../services/matchService';
+import { fetchMatchSettings } from '../../services/matchSettingsService';
 import './CreateMatchForm.css';
 
 const { Title } = Typography;

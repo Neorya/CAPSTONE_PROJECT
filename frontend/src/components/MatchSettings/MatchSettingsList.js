@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Card, Radio, Space, Table, Tag, Typography } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
-import { getMatchSettings } from "./getMatchSettings.ts";
+import { fetchMatchSettings } from "../../services/matchSettingsService.js";
 import "./MatchSettingsList.css";
 
 const { Title, Text } = Typography;
@@ -23,7 +23,7 @@ const MatchSettingsList = () => {
     const fetchItems = async () => {        // fetch match settings based on filter
       try {
         setLoading(true);
-        const data = await getMatchSettings(filter);
+        const data = await fetchMatchSettings(filter);
         const formatted = data.map((item) => ({   // format data for table
           id: item.match_set_id,
           name: item.title,
