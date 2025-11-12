@@ -1,5 +1,10 @@
 import { API_BASE_URL } from "./config";
 
+/**
+ * Fetch match settings with optional filtering
+ * @param {string} filter - Filter value ('Ready', 'Draft', or 'All')
+ * @returns {Promise<Array>} Array of match settings
+ */
 export async function fetchMatchSettings(filter) {
   // prepare value for the is_ready parameter of fetchMatchSettings
   let isReady;
