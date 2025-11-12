@@ -5,6 +5,7 @@ import { SaveOutlined, ReloadOutlined, ArrowLeftOutlined } from '@ant-design/ico
 import { createMatch } from '../../services/matchService';
 import { fetchMatchSettings } from '../../services/matchSettingsService';
 import './CreateMatchForm.css';
+import { log } from 'async';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -52,7 +53,8 @@ const CreateMatchForm = () => {
     const loadMatchSettings = async () => {
       try {
         setIsLoadingSettings(true);
-        const settings = await fetchMatchSettings(true);
+        const settings = await fetchMatchSettings('Ready');
+        console.log(settings);
         setMatchSettings(settings);
         
         if (settings.length === 0) {
@@ -175,13 +177,13 @@ const CreateMatchForm = () => {
                     {matchSettings.length > 0 ? (
                       matchSettings.map((setting) => (
                         <Radio 
-                          key={setting.id} 
-                          value={setting.id} 
+                          key={setting.match_set_id} 
+                          value={setting.match_set_id} 
                           className="match-setting-radio"
-                          id={`match-setting-${setting.id}`}
-                          data-testid={`match-setting-${setting.id}`}
+                          id={`match-setting-${setting.match_set_id}`}
+                          data-testid={`match-setting-${setting.match_set_id}`}
                         >
-                          <span className="match-setting-name">{setting.name}</span>
+                          <span className="match-setting-name">{setting.title}</span>
                         </Radio>
                       ))
                     ) : (
