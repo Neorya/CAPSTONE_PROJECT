@@ -16,10 +16,21 @@
 
 .page-header {
   margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
 }
 
 .page-header .ant-typography {
   margin-bottom: 0;
+}
+
+.page-header #back-to-home-button {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 /* Two-column layout */
@@ -123,6 +134,7 @@
 .form-fields-column {
   flex: 1;
   min-width: 0;
+  padding-top: 48px;
 }
 
 /* Form styling */
