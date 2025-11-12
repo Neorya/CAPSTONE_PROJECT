@@ -17,10 +17,8 @@ public class SettingListingTest extends BaseTest {
     
     @BeforeAll
     public static void setUpTest() {
-        // Call parent setUp to initialize WebDriver
-        BaseTest.setUp();
-        
-        // Initialize Page Object
+        // BaseTest.setUp() is automatically called by JUnit due to @BeforeAll in parent class
+        // Just initialize Page Object here
         settingListingPage = new settingListingPO(driver);
     }
     
@@ -369,7 +367,7 @@ public class SettingListingTest extends BaseTest {
     
     @AfterAll
     public static void tearDownTest() {
-        // Call parent tearDown to clean up WebDriver
-        BaseTest.tearDown();
+        // BaseTest.tearDown() is automatically called by JUnit due to @AfterAll in parent class
+        // No need to call it explicitly here
     }
 }
