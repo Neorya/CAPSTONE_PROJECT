@@ -51,7 +51,7 @@ DROP TABLE IF EXISTS capstone_app.game_session;
 
 CREATE TABLE capstone_app.game_session (
     game_id SERIAL PRIMARY KEY,
-    teacher_id INTEGER REFERENCES capstone_app.teacher(teacher_id) NOT NULL
+    creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id) NOT NULL
 );
 
 
@@ -178,4 +178,5 @@ VALUES
 -- Matches created by Teacher 5 (ID 5)
 ('Pointers Basics - Section A', 9, 5, 8, 3, 15, 10),
 ('Pointers Basics - Section B', 9, 5, 8, 3, 15, 10);
+
 
