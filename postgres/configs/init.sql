@@ -2,22 +2,6 @@
 
 CREATE SCHEMA capstone_app;
 
-
-
---Create a user for that schema: (User story 1)
-
--- 2. Create the API user (Replace 'changeme' with a strong password)
-CREATE USER api_user WITH PASSWORD 'changeme';
-
--- 3. Grant connection rights to the database
-GRANT CONNECT ON DATABASE changeme TO api_user;
-
--- 4. Grant SELECT, INSERT permissions on ALL FUTURE tables created in this schema
-ALTER DEFAULT PRIVILEGES IN SCHEMA capstone_app
-    GRANT SELECT, INSERT ON TABLES TO api_user;
-
-
-
 -- Creation of Teacher Table :  (User story 1)
 
 DROP TABLE IF EXISTS capstone_app.teacher;
@@ -61,6 +45,47 @@ CREATE TABLE capstone_app.match (
     duration_phase2 INTEGER NOT NULL -- in minutes
     
 );
+
+
+DROP TABLE IF EXISTS capstone_app.game_session;
+
+CREATE TABLE capstone_app.game_session (
+    game_id SERIAL PRIMARY KEY
+);
+
+
+DROP TABLE IF EXISTS capstone_app.matches_for_game;
+
+CREATE TABLE capstone_app.matches_for_game (
+    match_set_id SERIAL PRIMARY KEY,
+
+    match_id INTEGER REFERENCES capstone_app.match(match_id) NOT NULL,
+    game_id  INTEGER REFERENCES capstone_app.game_session(game_id) NOT NULL,
+    CONSTRAINT uc_matches_for_game UNIQUE (match_id, game_id)
+);
+
+
+
+
+
+--Create a user for that schema: (User story 1)
+
+-- 2. Create the API user (Replace 'changeme' with a strong password)
+CREATE USER api_user WITH PASSWORD 'changeme';
+
+-- 3. Grant connection rights to the database
+GRANT CONNECT ON DATABASE changeme TO api_user;
+GRANT USAGE ON SCHEMA capstone_app TO api_user;
+
+
+-- 4. Grant SELECT, INSERT permissions on ALL FUTURE tables created in this schema
+GRANT SELECT, INSERT ON TABLE  
+capstone_app.teacher,
+capstone_app.match_setting,
+capstone_app.match,
+capstone_app.game_session, 
+capstone_app.matches_for_game
+TO api_user;
 
 
 
