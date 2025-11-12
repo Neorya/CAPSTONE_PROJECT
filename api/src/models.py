@@ -1,6 +1,5 @@
 """
-This file defines Python classes that map to your database tables.
-This is the "Object-Relational Mapping" (ORM) layer.
+This file defines Python classes (ORM) that map to database tables.
 """
 
 from sqlalchemy import Boolean, Column, Integer, String, Text, ForeignKey
@@ -14,7 +13,6 @@ class Teacher(Base):
     """
     SQLAlchemy model for the 'teacher' table.
     
-    *** CORRECTED TO MATCH YOUR SQL SCHEMA ***
     """
     __tablename__ = "teacher"
     __table_args__ = {'schema': SCHEMA_NAME}

@@ -1,34 +1,60 @@
 """
 Matches API Module
 
-Provides endpoints for creating, browsing matches.
+Provides endpoints for creating, browsing matches previously created.
 """
+import re
+import html
+import logging
 
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.orm import Session
 
-# Import the database dependency and ORM models
 from database import get_db
 from models import Match, Teacher, MatchSetting
 
-# ============================================================================
+
 # Pydantic Models
-# ============================================================================
 
 class MatchCreate(BaseModel):
     """
     Request model for creating a new match.
-    All fields are now required, matching the schema.
     """
-    title: str = Field(..., description="Title of the match", min_length=10, max_length=150)
+    title: str = Field(..., description="Title of the match")
     match_set_id: int = Field(..., description="ID of the parent Match Setting")
     creator_id: int = Field(..., description="ID of the teacher creating this match")
-    difficulty_level: int = Field(..., description="Difficulty level", ge=0)
-    review_number: int = Field(..., description="Number of reviews", ge=1)
-    duration_phase1: int = Field(..., description="Duration of phase 1 in minutes", ge=1)
-    duration_phase2: int = Field(..., description="Duration of phase 2 in minutes", ge=1)
+    difficulty_level: int = Field(..., description="Difficulty level", ge=0, le=10)
+    review_number: int = Field(..., description="Number of reviews", ge=1, le=100)
+    duration_phase1: int = Field(..., description="Duration of phase 1 in minutes", ge=1, le=120)
+    duration_phase2: int = Field(..., description="Duration of phase 2 in minutes", ge=1, le=120)
+
+    @field_validator('title')
+    @classmethod
+    def sanitize_title(cls, tit: str) -> str:
+        """
+        Sanitize the title to prevent XSS attacks.
+        - Remove HTML tags
+        - Escape HTML entities
+        - Remove potentially dangerous characters
+        """
+        
+        # Strip leading/trailing whitespace
+        tit = tit.strip()
+
+        # Remove null bytes and control characters
+        tit = re.sub(r'[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]', '', tit)
+        
+        # Escape HTML entities to prevent XSS
+        tit = html.escape(tit)
+
+        if len(tit) < 10:
+            raise ValueError('Title must be at least 10 characters')
+        if len(tit) > 150:
+            raise ValueError('Title must be at most 150 characters')
+        
+        return tit
 
     class Config:
         json_schema_extra = {
@@ -46,7 +72,7 @@ class MatchCreate(BaseModel):
 
 class MatchResponse(BaseModel):
     """
-    Response model for a single match, includes all fields.
+    Response model for a single match
     """
     match_id: int = Field(..., description="Unique identifier for the match")
     title: str = Field(..., description="Title of the match")
@@ -58,7 +84,9 @@ class MatchResponse(BaseModel):
     duration_phase2: int = Field(..., description="Duration of phase 2 in minutes")
 
     class Config:
-        from_attributes = True # Enable ORM mode (reads from SQLAlchemy model)
+        #from_attributes = True because in the create_match function we work on an ORM object,
+        # and we need to convert it into a dictionary to return a MatchResponse 
+        from_attributes = True
         json_schema_extra = {
             "example": {
                 "match_id": 5,
@@ -72,18 +100,15 @@ class MatchResponse(BaseModel):
             }
         }
 
-# ============================================================================
 # Router
-# ============================================================================
+
 
 router = APIRouter(
     prefix="/api",
     tags=["matches"]
 )
 
-# ============================================================================
 # Endpoints
-# ============================================================================
 
 @router.post(
     "/matches",
@@ -107,31 +132,23 @@ async def create_match(
         The newly created match object.
         
     Raises:
-        HTTPException (404): If the 'creator_id' or 'match_set_id' does not exist.
+        HTTPException (400): If the 'creator_id' or 'match_set_id' does not exist.
         HTTPException (500): On database operation failure.
     """
     
-    # --- Validation ---
     # Check if the creator (teacher) exists     
     teacher = db.query(Teacher).filter(Teacher.teacher_id == match.creator_id).first()
-    if not teacher:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Teacher with id {match.creator_id} not found."
-        )
-        
     # Check if the match setting exists
     setting = db.query(MatchSetting).filter(MatchSetting.match_set_id == match.match_set_id).first()
-    if not setting:
+    
+    if not teacher or not setting:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Match Setting with id {match.match_set_id} not found."
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid creator_id or match_set_id."
         )
 
-    # --- Create Operation ---
     try:
-        # Create a new ORM object from the Pydantic model
-        # **match.model_dump() unpacks the request body fields
+        # Create a new ORM object
         new_match = Match(**match.model_dump())
         
         # Add to the session and commit
@@ -145,9 +162,12 @@ async def create_match(
         
     except Exception as e:
         db.rollback()
+
+        logging.error(f"Failed to create match: {str(e)}")
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create match: {str(e)}"
+            detail="An internal error occurred while creating the match."
         )
 
 @router.get(
