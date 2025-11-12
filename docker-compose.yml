@@ -33,7 +33,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://changeme:changeme@db/changeme
     depends_on:
-      db:
+      db: 
         condition: service_healthy
     networks:
       - backend
