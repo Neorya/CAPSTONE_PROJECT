@@ -2,7 +2,7 @@ name: Run Selenium Tests
 
 on:
   push:
-    branches: [ main, develop, sp1_st2_sec_task ]
+    branches: [ main, develop, test_git_actions ]
   pull_request:
     branches: [ main, develop ]
   workflow_dispatch: # Allow manual trigger
