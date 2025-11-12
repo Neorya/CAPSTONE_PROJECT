@@ -1,44 +1,4 @@
-/**
- * Match Service
- * Handles all match-related API communications
- */
-
 import {API_BASE_URL, API_ENDPOINTS} from './config';
-
-/**
- * Fetch match settings from the backend
- * @param {boolean} isReady - Filter by ready status (default: true)
- * @returns {Promise<Array>} Array of match settings
- */
-export const fetchMatchSettings = async (isReady = true) => {
-  try {
-    const url = `${API_BASE_URL}${API_ENDPOINTS.MATCH_SETTINGS}?is_ready=${isReady}`;
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch match settings: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    
-    // Map backend format to frontend format
-    return data.map(setting => ({
-      id: setting.match_set_id,
-      name: setting.title,
-      description: setting.description,
-      status: setting.is_ready ? 'Ready' : 'Draft',
-      creator_id: setting.creator_id,
-    }));
-  } catch (error) {
-    console.error('Error fetching match settings:', error);
-    throw error;
-  }
-};
 
 /**
  * Create a new match
