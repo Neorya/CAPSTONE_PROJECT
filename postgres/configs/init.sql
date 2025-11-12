@@ -50,7 +50,8 @@ CREATE TABLE capstone_app.match (
 DROP TABLE IF EXISTS capstone_app.game_session;
 
 CREATE TABLE capstone_app.game_session (
-    game_id SERIAL PRIMARY KEY
+    game_id SERIAL PRIMARY KEY,
+    teacher_id INTEGER REFERENCES capstone_app.teacher(teacher_id) NOT NULL
 );
 
 
