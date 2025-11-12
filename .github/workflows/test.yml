@@ -2,7 +2,7 @@ name: Run Selenium Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, sp1_st2_sec_task ]
   pull_request:
     branches: [ main, develop ]
   workflow_dispatch: # Allow manual trigger
@@ -63,6 +63,8 @@ jobs:
         run: |
           google-chrome --version
           chromedriver --version
+          which chromedriver
+          echo "CHROMEDRIVER_PATH=$(which chromedriver)"
 
       - name: Install Python dependencies
         run: |

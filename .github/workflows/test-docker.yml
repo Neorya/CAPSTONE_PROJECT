@@ -2,7 +2,7 @@ name: Run Selenium Tests with Docker
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, test_git_actions ]
   pull_request:
     branches: [ main, develop ]
   workflow_dispatch:
@@ -32,7 +32,7 @@ jobs:
 
       - name: Start services with Docker Compose
         run: |
-          docker-compose up -d
+          docker compose up -d
           sleep 30
 
       - name: Wait for services to be healthy
@@ -42,7 +42,7 @@ jobs:
 
       - name: Show service logs
         if: always()
-        run: docker-compose logs
+        run: docker compose logs
 
       - name: Run Selenium tests
         run: |
@@ -61,4 +61,4 @@ jobs:
 
       - name: Stop services
         if: always()
-        run: docker-compose down
+        run: docker compose down
