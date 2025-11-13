@@ -2,9 +2,6 @@ package com.example.tests;
 
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import java.time.Duration;
 import com.example.pages.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -160,85 +157,93 @@ public class MatchAddTest extends BaseTest {
     
     @Test
     @Order(13)
-    @DisplayName("Verify review number below minimum (0) is corrected to 1")
+    @DisplayName("Verify review number below minimum (0) shows error message")
     public void testReviewNumberBelowMinimum() {
         matchAddPage.setRevNumber(0);
         
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
        
-        // Verify the value is automatically corrected to 1
-        String correctedValue = matchAddPage.getRevNumber().getAttribute("value");
-        assertEquals("1", correctedValue, 
-            "Review number should be automatically corrected to 1 when set to 0");
+        // Verify error message is displayed
+        assertTrue(matchAddPage.isRevNumberErrorDisplayed(), 
+            "Error message should be displayed when review number is set to 0");
+        
+        String errorText = matchAddPage.getRevNumberErrorText();
+        assertTrue(errorText.contains("Reviewers must be between 1 and 10"), 
+            "Error message should indicate reviewers must be between 1 and 10");
     }
     
     @Test
     @Order(14)
-    @DisplayName("Verify review number above maximum (11) is corrected to 10")
+    @DisplayName("Verify review number above maximum (11) shows error message")
     public void testReviewNumberAboveMaximum() {
         matchAddPage.setRevNumber(11);
         
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
 
-        // Wait for the value to be automatically corrected to 10
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(2));
-        wait.until(ExpectedConditions.attributeToBe(matchAddPage.getRevNumber(), "value", "10"));
+        // Verify error message is displayed
+        assertTrue(matchAddPage.isRevNumberErrorDisplayed(), 
+            "Error message should be displayed when review number is set above maximum");
         
-        // Verify the value is automatically corrected to 10
-        String correctedValue = matchAddPage.getRevNumber().getAttribute("value");
-        assertEquals("10", correctedValue, 
-            "Review number should be automatically corrected to 10 when set above maximum");
+        String errorText = matchAddPage.getRevNumberErrorText();
+        assertTrue(errorText.contains("Reviewers must be between 1 and 10"), 
+            "Error message should indicate reviewers must be between 1 and 10");
     }
     
     @Test
     @Order(15)
-    @DisplayName("Verify negative review number is corrected to 1")
+    @DisplayName("Verify negative review number shows error message")
     public void testNegativeReviewNumber() {
         matchAddPage.setRevNumber(-5);
         
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
         
-        // Wait for the value to be automatically corrected to 1
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(2));
-        wait.until(ExpectedConditions.attributeToBe(matchAddPage.getRevNumber(), "value", "1"));
+        // Verify error message is displayed
+        assertTrue(matchAddPage.isRevNumberErrorDisplayed(), 
+            "Error message should be displayed when review number is set to a negative value");
         
-        // Verify the value is automatically corrected to 1
-        String correctedValue = matchAddPage.getRevNumber().getAttribute("value");
-        assertEquals("1", correctedValue, 
-            "Review number should be automatically corrected to 1 when set to a negative value");
+        String errorText = matchAddPage.getRevNumberErrorText();
+        assertTrue(errorText.contains("Reviewers must be between 1 and 10"), 
+            "Error message should indicate reviewers must be between 1 and 10");
     }
     
     @Test
     @Order(16)
-    @DisplayName("Verify zero duration for phase 1 is corrected to 1")
+    @DisplayName("Verify zero duration for phase 1 shows error message")
     public void testDurationFirstZero() {
         matchAddPage.setDurationFirst(0);
         
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
 
-        // Wait for the value to be automatically corrected to 1
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(2));
-        wait.until(ExpectedConditions.attributeToBe(matchAddPage.getDurationFirst(), "value", "1"));
+        // Verify error message is displayed
+        assertTrue(matchAddPage.isDurationFirstErrorDisplayed(), 
+            "Error message should be displayed when phase 1 duration is set to 0");
         
-        // Verify the value is automatically corrected to 1
-        String correctedValue = matchAddPage.getDurationFirst().getAttribute("value");
-        assertEquals("1", correctedValue, 
-            "Phase 1 duration should be automatically corrected to 1 when set to 0");
+        String errorText = matchAddPage.getDurationFirstErrorText();
+        assertTrue(errorText.contains("Duration must be at least 1 minute"), 
+            "Error message should indicate duration must be at least 1 minute");
     }
     
     @Test
     @Order(17)
-    @DisplayName("Verify negative duration for phase 1 shows error")
+    @DisplayName("Verify negative duration for phase 1 shows error message")
     public void testDurationFirstNegative() {
         matchAddPage.getDurationFirst().clear();
         matchAddPage.getDurationFirst().sendKeys("-10");
         
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
+        
+        // Verify error message is displayed
+        assertTrue(matchAddPage.isDurationFirstErrorDisplayed(), 
+            "Error message should be displayed when phase 1 duration is negative");
+        
+        String errorText = matchAddPage.getDurationFirstErrorText();
+        assertTrue(errorText.contains("Duration must be at least 1 minute"), 
+            "Error message should indicate duration must be at least 1 minute");
         
         // Verify create button remains disabled
         assertFalse(matchAddPage.isCreateButtonEnabled(), 
@@ -247,26 +252,25 @@ public class MatchAddTest extends BaseTest {
     
     @Test
     @Order(18)
-    @DisplayName("Verify zero duration for phase 2 is corrected to 1")
+    @DisplayName("Verify zero duration for phase 2 shows error message")
     public void testDurationSecondZero() {
         matchAddPage.setDurationSecond(0);
         
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
         
-        // Wait for the value to be automatically corrected to 1
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(2));
-        wait.until(ExpectedConditions.attributeToBe(matchAddPage.getDurationSecond(), "value", "1"));
+        // Verify error message is displayed
+        assertTrue(matchAddPage.isDurationSecondErrorDisplayed(), 
+            "Error message should be displayed when phase 2 duration is set to 0");
         
-        // Verify the value is automatically corrected to 1
-        String correctedValue = matchAddPage.getDurationSecond().getAttribute("value");
-        assertEquals("1", correctedValue, 
-            "Phase 2 duration should be automatically corrected to 1 when set to 0");
+        String errorText = matchAddPage.getDurationSecondErrorText();
+        assertTrue(errorText.contains("Duration must be at least 1 minute"), 
+            "Error message should indicate duration must be at least 1 minute");
     }
     
     @Test
     @Order(19)
-    @DisplayName("Verify negative duration for phase 2 shows error")
+    @DisplayName("Verify negative duration for phase 2 shows error message")
     public void testDurationSecondNegative() {
         matchAddPage.getDurationSecond().clear();
         matchAddPage.getDurationSecond().sendKeys("-15");
@@ -274,6 +278,14 @@ public class MatchAddTest extends BaseTest {
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
 
+        // Verify error message is displayed
+        assertTrue(matchAddPage.isDurationSecondErrorDisplayed(), 
+            "Error message should be displayed when phase 2 duration is negative");
+        
+        String errorText = matchAddPage.getDurationSecondErrorText();
+        assertTrue(errorText.contains("Duration must be at least 1 minute"), 
+            "Error message should indicate duration must be at least 1 minute");
+        
         // Verify create button remains disabled
         assertFalse(matchAddPage.isCreateButtonEnabled(), 
             "Create button should remain disabled with negative phase 2 duration");
@@ -281,6 +293,33 @@ public class MatchAddTest extends BaseTest {
     
     @Test
     @Order(20)
+    @DisplayName("Verify short title shows error message")
+    public void testShortTitle() {
+        matchAddPage.setMatchTitle("55");
+        matchAddPage.setDifficultyLevel("Easy");
+        matchAddPage.setRevNumber(3);
+        matchAddPage.setDurationFirst(10);
+        matchAddPage.setDurationSecond(5);
+        matchAddPage.clickMatchSettingAtIndex(1);
+
+        // Click somewhere else to trigger validation
+        matchAddPage.getDurationFirst().click();
+
+        // Verify error message is displayed
+        assertTrue(matchAddPage.isTitleErrorDisplayed(), 
+            "Error message should be displayed when title is too short");
+        
+        String errorText = matchAddPage.getTitleErrorText();
+        assertTrue(errorText.contains("Title must be at least 10 characters"), 
+            "Error message should indicate title must be at least 10 characters");
+        
+        // Verify create button remains disabled
+        assertFalse(matchAddPage.isCreateButtonEnabled(), 
+            "Create button should remain disabled when title is too short");
+    }
+    
+    @Test
+    @Order(21)
     @DisplayName("Verify empty title prevents form submission")
     public void testEmptyTitle() {
         matchAddPage.getTitleInput().clear();
@@ -296,7 +335,7 @@ public class MatchAddTest extends BaseTest {
     }
     
     @Test
-    @Order(21)
+    @Order(22)
     @DisplayName("Verify missing difficulty level prevents form submission")
     public void testMissingDifficultyLevel() {
         matchAddPage.setMatchTitle("Test Match");
@@ -311,7 +350,7 @@ public class MatchAddTest extends BaseTest {
     }
     
     @Test
-    @Order(22)
+    @Order(23)
     @DisplayName("Verify missing match setting prevents form submission")
     public void testMissingMatchSetting() {
         matchAddPage.setMatchTitle("Test Match");
@@ -326,7 +365,7 @@ public class MatchAddTest extends BaseTest {
     }
     
     @Test
-    @Order(23)
+    @Order(24)
     @DisplayName("Verify at least one empty required field shows error and prevents submission")
     public void testMultipleInvalidFields() {
         // Leave title empty (required field)
@@ -348,7 +387,7 @@ public class MatchAddTest extends BaseTest {
     }
     
     @Test
-    @Order(24)
+    @Order(25)
     @DisplayName("Verify error messages have meaningful content")
     public void testErrorMessageContent() {
         matchAddPage.setRevNumber(11);
@@ -364,7 +403,7 @@ public class MatchAddTest extends BaseTest {
     }
     
     @Test
-    @Order(25)
+    @Order(26)
     @DisplayName("Verify form cannot be submitted with all invalid inputs")
     public void testFormSubmissionWithAllInvalidInputs() {
         matchAddPage.getTitleInput().clear();

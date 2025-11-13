@@ -25,6 +25,7 @@ public class MatchAddPO {
     private static final String RESET_BUTTON_ID = "reset-button";
     private static final String MATCH_SETTINGS_RADIO_GROUP_ID = "match-settings-radio-group";
     private static final String MATCH_SETTINGS_LIST_XPATH = "//div[@class='ant-space css-dev-only-do-not-override-hofb1t ant-space-vertical ant-space-gap-row-small ant-space-gap-col-small']";
+    private static final String TITLE_ERROR_XPATH = "//div[@id='title_help']";
     private static final String REV_NUMBER_ERROR_XPATH = "//div[@id='review_number_help']";
     private static final String DURATION_FIRST_ERROR_XPATH = "//div[@id='duration_phase1_help']";
     private static final String DURATION_SECOND_ERROR_XPATH = "//div[@id='duration_phase2_help']";
@@ -133,6 +134,10 @@ public class MatchAddPO {
     }
     
     // Error message getters
+    public WebElement getTitleError() {
+        return driver.findElement(By.xpath(TITLE_ERROR_XPATH));
+    }
+    
     public WebElement getRevNumberError() {
         return driver.findElement(By.xpath(REV_NUMBER_ERROR_XPATH));
     }
@@ -183,6 +188,14 @@ public class MatchAddPO {
         return getBackToHomeButton().isDisplayed();
     }
     
+    public boolean isTitleErrorDisplayed() {
+        try {
+            return getTitleError().isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
     public boolean isRevNumberErrorDisplayed() {
         try {
             return getRevNumberError().isDisplayed();
@@ -204,6 +217,14 @@ public class MatchAddPO {
             return getDurationSecondError().isDisplayed();
         } catch (Exception e) {
             return false;
+        }
+    }
+    
+    public String getTitleErrorText() {
+        try {
+            return getTitleError().getText();
+        } catch (Exception e) {
+            return "";
         }
     }
     
