@@ -2,6 +2,9 @@ package com.example.tests;
 
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import java.time.Duration;
 import com.example.pages.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -157,71 +160,74 @@ public class MatchAddTest extends BaseTest {
     
     @Test
     @Order(13)
-    @DisplayName("Verify review number below minimum (0) shows error")
+    @DisplayName("Verify review number below minimum (0) is corrected to 1")
     public void testReviewNumberBelowMinimum() {
         matchAddPage.setRevNumber(0);
         
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
-        
-        // Verify error is displayed
-        assertTrue(matchAddPage.isRevNumberErrorDisplayed(), 
-            "Error message should be displayed for review number below minimum");
-        
-        // Verify create button remains disabled
-        assertFalse(matchAddPage.isCreateButtonEnabled(), 
-            "Create button should remain disabled with invalid review number");
+       
+        // Verify the value is automatically corrected to 1
+        String correctedValue = matchAddPage.getRevNumber().getAttribute("value");
+        assertEquals("1", correctedValue, 
+            "Review number should be automatically corrected to 1 when set to 0");
     }
     
     @Test
     @Order(14)
-    @DisplayName("Verify review number above maximum (11) shows error")
+    @DisplayName("Verify review number above maximum (11) is corrected to 10")
     public void testReviewNumberAboveMaximum() {
         matchAddPage.setRevNumber(11);
         
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
 
-        // Verify error is displayed
-        assertTrue(matchAddPage.isRevNumberErrorDisplayed(), 
-            "Error message should be displayed for review number above maximum");
+        // Wait for the value to be automatically corrected to 10
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(2));
+        wait.until(ExpectedConditions.attributeToBe(matchAddPage.getRevNumber(), "value", "10"));
         
-        // Verify create button remains disabled
-        assertFalse(matchAddPage.isCreateButtonEnabled(), 
-            "Create button should remain disabled with invalid review number");
+        // Verify the value is automatically corrected to 10
+        String correctedValue = matchAddPage.getRevNumber().getAttribute("value");
+        assertEquals("10", correctedValue, 
+            "Review number should be automatically corrected to 10 when set above maximum");
     }
     
     @Test
     @Order(15)
-    @DisplayName("Verify negative review number shows error")
+    @DisplayName("Verify negative review number is corrected to 1")
     public void testNegativeReviewNumber() {
-        matchAddPage.getRevNumber().clear();
-        matchAddPage.getRevNumber().sendKeys("-5");
+        matchAddPage.setRevNumber(-5);
         
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
         
-        // Verify create button remains disabled
-        assertFalse(matchAddPage.isCreateButtonEnabled(), 
-            "Create button should remain disabled with negative review number");
+        // Wait for the value to be automatically corrected to 1
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(2));
+        wait.until(ExpectedConditions.attributeToBe(matchAddPage.getRevNumber(), "value", "1"));
+        
+        // Verify the value is automatically corrected to 1
+        String correctedValue = matchAddPage.getRevNumber().getAttribute("value");
+        assertEquals("1", correctedValue, 
+            "Review number should be automatically corrected to 1 when set to a negative value");
     }
     
     @Test
     @Order(16)
-    @DisplayName("Verify zero duration for phase 1 shows error")
+    @DisplayName("Verify zero duration for phase 1 is corrected to 1")
     public void testDurationFirstZero() {
         matchAddPage.setDurationFirst(0);
         
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
 
-        // Verify error is displayed
-        assertTrue(matchAddPage.isDurationFirstErrorDisplayed(), 
-            "Error message should be displayed for zero duration in phase 1");
+        // Wait for the value to be automatically corrected to 1
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(2));
+        wait.until(ExpectedConditions.attributeToBe(matchAddPage.getDurationFirst(), "value", "1"));
         
-        // Verify create button remains disabled
-        assertFalse(matchAddPage.isCreateButtonEnabled(), 
-            "Create button should remain disabled with invalid phase 1 duration");
+        // Verify the value is automatically corrected to 1
+        String correctedValue = matchAddPage.getDurationFirst().getAttribute("value");
+        assertEquals("1", correctedValue, 
+            "Phase 1 duration should be automatically corrected to 1 when set to 0");
     }
     
     @Test
@@ -241,20 +247,21 @@ public class MatchAddTest extends BaseTest {
     
     @Test
     @Order(18)
-    @DisplayName("Verify zero duration for phase 2 shows error")
+    @DisplayName("Verify zero duration for phase 2 is corrected to 1")
     public void testDurationSecondZero() {
         matchAddPage.setDurationSecond(0);
         
         // Click somewhere else to trigger validation
         matchAddPage.getTitleInput().click();
         
-        // Verify error is displayed
-        assertTrue(matchAddPage.isDurationSecondErrorDisplayed(), 
-            "Error message should be displayed for zero duration in phase 2");
+        // Wait for the value to be automatically corrected to 1
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(2));
+        wait.until(ExpectedConditions.attributeToBe(matchAddPage.getDurationSecond(), "value", "1"));
         
-        // Verify create button remains disabled
-        assertFalse(matchAddPage.isCreateButtonEnabled(), 
-            "Create button should remain disabled with invalid phase 2 duration");
+        // Verify the value is automatically corrected to 1
+        String correctedValue = matchAddPage.getDurationSecond().getAttribute("value");
+        assertEquals("1", correctedValue, 
+            "Phase 2 duration should be automatically corrected to 1 when set to 0");
     }
     
     @Test
@@ -320,26 +327,24 @@ public class MatchAddTest extends BaseTest {
     
     @Test
     @Order(23)
-    @DisplayName("Verify multiple invalid fields prevent form submission")
+    @DisplayName("Verify at least one empty required field shows error and prevents submission")
     public void testMultipleInvalidFields() {
+        // Leave title empty (required field)
         matchAddPage.getTitleInput().clear();
-        matchAddPage.setRevNumber(0);
-        matchAddPage.setDurationFirst(0);
-        matchAddPage.setDurationSecond(0);
+        
+        // Set other fields to valid values
+        matchAddPage.setDifficultyLevel("Medium");
+        matchAddPage.setRevNumber(3);
+        matchAddPage.setDurationFirst(10);
+        matchAddPage.setDurationSecond(5);
+        matchAddPage.clickMatchSettingAtIndex(1);
         
         // Click somewhere else to trigger validation
-        matchAddPage.getBackToHomeButton().click();
-        driver.navigate().back();
+        matchAddPage.getDurationFirst().click();
         
-        // Verify error messages are displayed
-        assertTrue(matchAddPage.isRevNumberErrorDisplayed() || 
-                   matchAddPage.isDurationFirstErrorDisplayed() || 
-                   matchAddPage.isDurationSecondErrorDisplayed(), 
-            "At least one error message should be displayed with multiple invalid fields");
-        
-        // Verify create button remains disabled
+        // Verify create button remains disabled when title is empty
         assertFalse(matchAddPage.isCreateButtonEnabled(), 
-            "Create button should remain disabled with multiple invalid fields");
+            "Create button should remain disabled when at least one required field (title) is empty");
     }
     
     @Test

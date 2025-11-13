@@ -1,6 +1,7 @@
 package com.example.pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -60,8 +61,10 @@ public class MatchAddPO {
     }
     
     public void setRevNumber(int revNumber) {
-        getRevNumber().clear();
-        getRevNumber().sendKeys(String.valueOf(revNumber));
+        WebElement revNumberInput = getRevNumber();
+        revNumberInput.click();
+        revNumberInput.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+        revNumberInput.sendKeys(String.valueOf(revNumber));
     }
     
     public void setDurationFirst(int duration) {
