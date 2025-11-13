@@ -2,6 +2,8 @@
 
 CREATE SCHEMA capstone_app;
 
+
+
 -- Creation of Teacher Table :  (User story 1)
 
 DROP TABLE IF EXISTS capstone_app.teacher;
@@ -47,13 +49,21 @@ CREATE TABLE capstone_app.match (
 );
 
 
+
+-- Creation of the game session table: (User story 3)
+
 DROP TABLE IF EXISTS capstone_app.game_session;
+CREATE TYPE capstone_app.game_status AS ENUM ('active', 'inactive');
 
 CREATE TABLE capstone_app.game_session (
     game_id SERIAL PRIMARY KEY,
+    status capstone_app.game_status NOT NULL DEFAULT 'inactive',
     creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id) NOT NULL
 );
 
+
+
+-- The creation of relationship between match and game session (User story 3)
 
 DROP TABLE IF EXISTS capstone_app.matches_for_game;
 
@@ -67,8 +77,6 @@ CREATE TABLE capstone_app.matches_for_game (
 
 
 
-
-
 --Create a user for that schema: (User story 1)
 
 -- 2. Create the API user (Replace 'changeme' with a strong password)
@@ -77,7 +85,6 @@ CREATE USER api_user WITH PASSWORD 'changeme';
 -- 3. Grant connection rights to the database
 GRANT CONNECT ON DATABASE changeme TO api_user;
 GRANT USAGE ON SCHEMA capstone_app TO api_user;
-
 
 -- 4. Grant SELECT, INSERT permissions on ALL FUTURE tables created in this schema
 GRANT SELECT, INSERT ON TABLE  
@@ -179,4 +186,47 @@ VALUES
 ('Pointers Basics - Section A', 9, 5, 8, 3, 15, 10),
 ('Pointers Basics - Section B', 9, 5, 8, 3, 15, 10);
 
+
+
+-- Populate script (user story 3)
+
+-- ######################################
+-- INSERT DATA INTO GAME_SESSION TABLE (5 RECORDS)
+-- ######################################
+
+INSERT INTO capstone_app.game_session (status, creator_id)
+VALUES 
+('active', 1),
+('inactive', 2),
+('active', 3),
+('inactive', 4),
+('active', 5);
+
+
+
+-- ######################################
+-- INSERT DATA INTO MATCHES_FOR_GAME TABLE (10 RECORDS)
+-- ######################################
+
+INSERT INTO capstone_app.matches_for_game (match_id, game_id)
+VALUES
+-- Game Session 1 (active) - Teacher 1
+(1, 1),
+(2, 1),
+
+-- Game Session 2 (inactive) - Teacher 2
+(3, 2),
+(4, 2),
+
+-- Game Session 3 (active) - Teacher 3
+(5, 3),
+(6, 3),
+
+-- Game Session 4 (inactive) - Teacher 4
+(7, 4),
+(8, 4),
+
+-- Game Session 5 (active) - Teacher 5
+(9, 5),
+(10, 5);
 
