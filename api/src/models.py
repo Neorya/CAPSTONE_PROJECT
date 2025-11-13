@@ -3,6 +3,7 @@ This file defines Python classes that map to your database tables.
 This is the "Object-Relational Mapping" (ORM) layer.
 """
 
+import enum
 from sqlalchemy import Boolean, Column, Integer, String, Text, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from database import Base
