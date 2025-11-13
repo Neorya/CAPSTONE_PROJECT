@@ -59,16 +59,16 @@ async def create_game_session(
     teacher = db.query(Teacher).filter(Teacher.teacher_id == game_session_data.creator_id).first()
     if not teacher:
         raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Teacher with id {game_session_data.creator_id} not found."
+                status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Request error"
         )
     
     matches = db.query(Match).filter(Match.match_id.in_(game_session_data.match_id)).all()
     
     if len(matches) != len(game_session_data.match_id):
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="One or more Match IDs not found."
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Request error"
         )
         
     new_game_session = GameSession(creator_id=game_session_data.creator_id) 
@@ -90,7 +90,7 @@ async def create_game_session(
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create game session: {str(e)}"
+            detail=f"Server error"
         )
 
     return new_game_session
