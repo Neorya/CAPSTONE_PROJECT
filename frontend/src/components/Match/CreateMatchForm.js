@@ -278,8 +278,6 @@ const CreateMatchForm = () => {
               >
                 <InputNumber
                   id="reviewers-input"
-                  min={1}
-                  max={10}
                   style={{ width: '100%' }}
                   size="large"
                   placeholder="Enter number of reviewers (default: 4)"
@@ -303,7 +301,6 @@ const CreateMatchForm = () => {
               >
                 <InputNumber
                   id="first-phase-duration-input"
-                  min={1}
                   style={{ width: '100%' }}
                   size="large"
                   placeholder="Enter duration in minutes"
@@ -327,7 +324,6 @@ const CreateMatchForm = () => {
               >
                 <InputNumber
                   id="second-phase-duration-input"
-                  min={1}
                   style={{ width: '100%' }}
                   size="large"
                   placeholder="Enter duration in minutes"
