@@ -1,0 +1,16 @@
+-------------------------------------------------------------------------------
+Test set: com.example.SettingListingTest
+-------------------------------------------------------------------------------
+Tests run: 26, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 22.38 s <<< FAILURE! -- in com.example.SettingListingTest
+com.example.SettingListingTest.testPaginationPreviousButton -- Time elapsed: 0.516 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Previous page button should be disabled on first page ==> expected: <false> but was: <true>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertFalse.failNotFalse(AssertFalse.java:63)
+	at org.junit.jupiter.api.AssertFalse.assertFalse(AssertFalse.java:36)
+	at org.junit.jupiter.api.Assertions.assertFalse(Assertions.java:235)
+	at com.example.SettingListingTest.testPaginationPreviousButton(SettingListingTest.java:316)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
