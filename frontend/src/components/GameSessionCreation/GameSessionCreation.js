@@ -66,6 +66,7 @@ const GameSessionCreation = () => {
 
                 {/* Table */}
                 <Table
+                    id="game-session-creation-table"
                     dataSource={dataSource}
                     columns={columns}
                     pagination={{ pageSize: 8, showSizeChanger: false }}
@@ -73,7 +74,7 @@ const GameSessionCreation = () => {
                     className="match-settings-table"
                     locale={{ emptyText: "No match settings found." }}
                 />
-                <div className="confirm-button">
+                <div className="confirm-button" id="create-game-session-button">
                     <Button onClick={() => navigate("/")}>
                         Create Game Session
                     </Button>
