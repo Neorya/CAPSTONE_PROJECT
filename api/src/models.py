@@ -2,7 +2,8 @@
 This file defines Python classes (ORM) that map to database tables.
 """
 
-from sqlalchemy import Boolean, Column, Integer, String, Text, ForeignKey
+import enum
+from sqlalchemy import Boolean, Column, Integer, String, Text, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -27,6 +28,7 @@ class Teacher(Base):
     # Relationships: A teacher can create many...
     match_settings = relationship("MatchSetting", back_populates="creator")
     matches = relationship("Match", back_populates="creator")
+    game_sessions = relationship("GameSession", back_populates="creator")
 
 class MatchSetting(Base):
     """
@@ -69,3 +71,25 @@ class Match(Base):
     # Relationships
     creator = relationship("Teacher", back_populates="matches")
     match_setting = relationship("MatchSetting", back_populates="matches")
+
+
+class MatchesForGame(Base):
+    __tablename__ = "matches_for_game"
+    __table_args__ = {'schema': SCHEMA_NAME}
+
+    match_for_game_id = Column(Integer, primary_key=True)
+    match_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.match.match_id"))
+    game_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.game_session.game_id"))
+
+class GameStatusEnum(enum.Enum):
+    active = "active"
+    inactive = "inactive"
+
+class GameSession(Base):
+    __tablename__ = "game_session"
+    __table_args__ = {'schema': SCHEMA_NAME}
+
+    game_id = Column(Integer, primary_key=True)
+    status = Column(Enum(GameStatusEnum, name='game_status', schema='capstone_app'), nullable=False, default=GameStatusEnum.inactive)
+    creator_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.teacher.teacher_id"))
+    creator = relationship("Teacher", back_populates="game_sessions")

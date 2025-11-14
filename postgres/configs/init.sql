@@ -2,8 +2,6 @@
 
 CREATE SCHEMA capstone_app;
 
-
-
 -- Creation of Teacher Table :  (User story 1)
 
 DROP TABLE IF EXISTS capstone_app.teacher;
@@ -229,4 +227,3 @@ VALUES
 -- Game Session 5 (active) - Teacher 5
 (9, 5),
 (10, 5);
-
