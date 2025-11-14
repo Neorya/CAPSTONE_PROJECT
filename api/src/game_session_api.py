@@ -56,6 +56,13 @@ async def create_game_session(
     db: Session = Depends(get_db)
     ) -> GameSessionResponse:
 
+    if len(game_session_data.match_id) <= 0:
+         raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Request error, at least one match is required"
+        )
+
+
     teacher = db.query(Teacher).filter(Teacher.teacher_id == game_session_data.creator_id).first()
     if not teacher:
         raise HTTPException(
