@@ -18,7 +18,6 @@ const MatchSettingsList = () => {
   const [items, setItems] = useState([]);             // match settings items
   const [loading, setLoading] = useState(false);      // loading
 
-  
   useEffect(() => {                         // useEffect runs on component mount and filter change
     const fetchItems = async () => {        // fetch match settings based on filter
       try {

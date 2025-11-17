@@ -4,30 +4,32 @@ import { ConfigProvider } from 'antd';
 import HomePage from './components/Home';
 import { CreateMatchForm } from './components/Match';
 import { MatchSettingsList } from './components/MatchSettings';
+import { GameSessionCreation } from './components/GameSessionCreation';
 import './App.css';
 
 function App() {
-  return (
-    <ConfigProvider
-      theme={{
-        token: {
-          colorPrimary: '#1890ff',
-          borderRadius: 6,
-        },
-      }}
-    >
-      <Router>
-        <div className="App">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/create-match" element={<CreateMatchForm />} />
-            <Route path="/match-settings" element={<MatchSettingsList />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </div>
-      </Router>
-    </ConfigProvider>
-  );
+    return (
+        <ConfigProvider
+            theme={{
+                token: {
+                    colorPrimary: '#1890ff',
+                    borderRadius: 6,
+                },
+            }}
+        >
+            <Router>
+                <div className="App">
+                    <Routes>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/create-match" element={<CreateMatchForm />} />
+                        <Route path="/match-settings" element={<MatchSettingsList />} />
+                        <Route path="/create-game-session" element={<GameSessionCreation />} />
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                </div>
+            </Router>
+        </ConfigProvider>
+    );
 }
 
 export default App;
