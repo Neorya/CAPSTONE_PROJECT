@@ -11,6 +11,14 @@ const GameSessionCreation = () => {
     const navigate = useNavigate();
 
     const [selectedRows, setSelectedRows] = useState([]);
+const handleCreateSession = () => {
+    if (selectedRows.length === 0){
+      alert("You should select at least a match to create a game session");
+      return;
+    }
+  alert("The game session has been created");
+  navigate("/");
+};
     const dataSource = [
         {
             key: '1',
@@ -72,7 +80,7 @@ const GameSessionCreation = () => {
                     locale={{ emptyText: "No match settings found." }}
                 />
                 <div className="confirm-button" id="create-game-session-button">
-                    <Button onClick={(alert("The game session has been created")) => navigate("/")}>
+                    <Button onClick={handleCreateSession}>
                         Create Game Session
                     </Button>
                 </div>
