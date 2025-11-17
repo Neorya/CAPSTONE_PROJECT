@@ -20,7 +20,7 @@ const GameSessionCreation = () => {
 
     const handleCreateSession = () => {
         if (selectedRows.length === 0) {
-            alert("You must select at least one match to create a game session");
+            alert("You should select at least one match to create a game session");
             return;
         }
         alert("The game session has been created");
@@ -91,5 +91,4 @@ const GameSessionCreation = () => {
         </div>
     );
 };
-
 export default GameSessionCreation;
