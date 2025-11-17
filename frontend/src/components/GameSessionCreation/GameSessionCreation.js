@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Typography, Table, message, Checkbox } from "antd";
+import { Button, Card, Typography, Table, message, Checkbox, Tooltip } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import "./GameSessionCreation.css";
 
-// todo change this to matchService
-import { getMatches } from "../../services/temp-getMatchesGameSession.js";
+import { getMatches } from "../../services/matchService.js";
+import { createGameSession } from "../../services/gameSessionService.js";
 
 const { Title, Text } = Typography;
 
@@ -14,6 +14,7 @@ const GameSessionCreation = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [creating, setCreating] = useState(false);      // state for creation of game session
 
   // fetch matches 
   useEffect(() => {
@@ -39,19 +40,24 @@ const GameSessionCreation = () => {
     }
   };
 
-  const handleCreateSession = () => {
+  const handleCreateSession = async () => {
     if (selectedRows.length === 0) {
       alert("You should select at least a match to create a game session");
       return;
     }
-    alert("The game session has been created");
-    navigate("/");
+    try {
+        setCreating(true);
+        const creatorId = 1;         // TODO: replace with actual user ID when authentication is implemented
+        await createGameSession(selectedRows, creatorId);
+        message.success("The game session has been created");
+        navigate("/");
+      } catch (error) {
+        console.error("Failed to create game session:", error);
+        message.error("Failed to create game session");
+      } finally {
+        setCreating(false);
+      }
   };
-
-  // const dataSource = [
-  //     { key: '1', name: 'Test 1' },
-  //     { key: '2', name: 'Test 2' },
-  // ];
 
   const columns = [
     {
@@ -78,9 +84,15 @@ const GameSessionCreation = () => {
     <div className="match-settings-list-container">
       <Card className="match-settings-card">
         <div className="page-header">
-          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/")}>
-            Back to Home
-          </Button>
+          <Tooltip title="Back to Home">
+            <Button 
+              id="back-to-home-button"
+              icon={<ArrowLeftOutlined />} 
+              onClick={() => navigate('/')}
+              shape="circle"
+              size="large"
+            />
+          </Tooltip>
           <Title level={2} id="page_title" className="page-title">
             Create Game Session
           </Title>
@@ -105,7 +117,7 @@ const GameSessionCreation = () => {
         />
 
         <div className="confirm-button" id="create-game-session-button">
-          <Button type="primary" onClick={handleCreateSession}>
+          <Button type="primary" onClick={handleCreateSession} loading={creating}>
             Create Game Session
           </Button>
         </div>
