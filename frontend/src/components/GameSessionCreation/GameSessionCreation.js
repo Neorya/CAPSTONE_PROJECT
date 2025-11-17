@@ -11,6 +11,14 @@ const GameSessionCreation = () => {
     const navigate = useNavigate();
 
     const [selectedRows, setSelectedRows] = useState([]);
+const handleCreateSession = () => {
+    if (selectedRows.length === 0){
+      alert("You should select at least a match to create a game session");
+      return;
+    }
+  alert("The game session has been created");
+  navigate("/");
+};
     const dataSource = [
         {
             key: '1',
@@ -45,18 +53,16 @@ const GameSessionCreation = () => {
     return (
         <div className="match-settings-list-container">
             <Card className="match-settings-card">
-                {/* Header */}
                 <div className="page-header">
                     <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/")}>
                         Back to Home
                     </Button>
-                    <Title level={2} className="page-title">
+                    <Title level={2} id="page_title" className="page-title">
                         Create Game Session
                     </Title>
-                    <span /> {/* spacer to keep title centered */}
+                    <span />
                 </div>
 
-                {/* Optional helper text */}
                 <div className="subheader">
                     <Text type="secondary">
                         Create a new Game Session selecting you desidered matches
@@ -64,7 +70,6 @@ const GameSessionCreation = () => {
                 </div>
 
 
-                {/* Table */}
                 <Table
                     id="game-session-creation-table"
                     dataSource={dataSource}
@@ -75,7 +80,7 @@ const GameSessionCreation = () => {
                     locale={{ emptyText: "No match settings found." }}
                 />
                 <div className="confirm-button" id="create-game-session-button">
-                    <Button onClick={() => navigate("/")}>
+                    <Button onClick={handleCreateSession}>
                         Create Game Session
                     </Button>
                 </div>
