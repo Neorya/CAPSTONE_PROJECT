@@ -23,9 +23,7 @@ function App() {
                         <Route path="/" element={<HomePage />} />
                         <Route path="/create-match" element={<CreateMatchForm />} />
                         <Route path="/match-settings" element={<MatchSettingsList />} />
-
                         <Route path="/create-game-session" element={<GameSessionCreation />} />
-
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </div>
