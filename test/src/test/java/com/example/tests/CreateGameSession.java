@@ -36,9 +36,9 @@ public class CreateGameSession extends BaseTest  {
     @Test
     @Order(1)
     @DisplayName("Verify page loads successfully")
-    public void testPageLoads() {
-        assertTrue(createGameSessionPage.isPageLoaded(), 
-            "Create Game Session page should load successfully");
+    public void testCorrectPageLoads() {
+        assertTrue((createGameSessionPage.isPageLoaded() && createGameSessionPage.getPageTitle().getText().equals("Create Game Session") )
+        , "Create Game Session page should load successfully");
     }
 
 
