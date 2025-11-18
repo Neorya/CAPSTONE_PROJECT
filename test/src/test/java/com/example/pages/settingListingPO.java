@@ -14,36 +14,36 @@ public class settingListingPO {
     private WebDriverWait wait;
     
     // Locators for Page Header
-    private By backToHomeButton = By.xpath("//button[contains(@class, 'ant-btn')]//span[text()='Back to Home']");
-    private By pageTitle = By.xpath("//h2[contains(@class, 'page-title') and text()='Match Settings']");
+    private By backToHomeButton = By.id("back-to-home-button");
+    private By pageTitle = By.cssSelector("h2.page-title");
     
     // Locators for Subheader
-    private By subheaderText = By.xpath("//span[contains(@class, 'ant-typography-secondary') and contains(text(), 'Browse existing match settings')]");
+    private By subheaderText = By.cssSelector("span.ant-typography-secondary");
     
     // Locators for Filter Bar
-    private By filterLabel = By.xpath("//span[contains(@class, 'ant-typography')]//strong[text()='Filter:']");
-    private By filterAllRadio = By.xpath("//input[@type='radio' and @value='All']");
-    private By filterReadyRadio = By.xpath("//input[@type='radio' and @value='Ready']");
-    private By filterDraftRadio = By.xpath("//input[@type='radio' and @value='Draft']");
-    private By allRadioLabel = By.xpath("//label[contains(@class, 'ant-radio-button-wrapper')]//span[text()='All']");
-    private By readyRadioLabel = By.xpath("//label[contains(@class, 'ant-radio-button-wrapper')]//span[text()='Ready']");
-    private By draftRadioLabel = By.xpath("//label[contains(@class, 'ant-radio-button-wrapper')]//span[text()='Draft']");
+    private By filterLabel = By.cssSelector(".filter-bar strong");
+    private By filterAllRadio = By.cssSelector("input[type='radio'][value='All']");
+    private By filterReadyRadio = By.cssSelector("input[type='radio'][value='Ready']");
+    private By filterDraftRadio = By.cssSelector("input[type='radio'][value='Draft']");
+    private By allRadioLabel = By.cssSelector("label.ant-radio-button-wrapper:has(input[value='All'])");
+    private By readyRadioLabel = By.cssSelector("label.ant-radio-button-wrapper:has(input[value='Ready'])");
+    private By draftRadioLabel = By.cssSelector("label.ant-radio-button-wrapper:has(input[value='Draft'])");
     
     // Locators for Table
-    private By matchSettingsTable = By.xpath("//div[contains(@class, 'match-settings-table')]");
-    private By tableHeaders = By.xpath("//thead[@class='ant-table-thead']//th");
-    private By nameColumnHeader = By.xpath("//th[text()='Name']");
-    private By statusColumnHeader = By.xpath("//th[text()='Status']");
-    private By tableRows = By.xpath("//tbody[@class='ant-table-tbody']//tr");
+    private By matchSettingsTable = By.className("match-settings-table");
+    private By tableHeaders = By.cssSelector("thead.ant-table-thead th");
+    private By nameColumnHeader = By.cssSelector("thead.ant-table-thead th:nth-child(1)");
+    private By statusColumnHeader = By.cssSelector("thead.ant-table-thead th:nth-child(2)");
+    private By tableRows = By.cssSelector("tbody.ant-table-tbody tr");
     
     // Locators for Table Cells
-    private By settingNames = By.xpath("//tbody[@class='ant-table-tbody']//td[1]//strong");
-    private By statusTags = By.xpath("//tbody[@class='ant-table-tbody']//td[2]//span[contains(@class, 'ant-tag')]");
+    private By settingNames = By.cssSelector("tbody.ant-table-tbody td:first-child strong");
+    private By statusTags = By.cssSelector("tbody.ant-table-tbody td:nth-child(2) span.ant-tag");
     
     // Locators for Pagination
-    private By previousPageButtonParent = By.xpath("//li[contains(@class, 'ant-pagination-prev')]");
-    private By nextPageButton = By.xpath("//li[contains(@class, 'ant-pagination-next')]//button");
-    private By currentPageNumber = By.xpath("//li[contains(@class, 'ant-pagination-item-active')]");
+    private By previousPageButtonParent = By.cssSelector("li.ant-pagination-prev");
+    private By nextPageButton = By.cssSelector("li.ant-pagination-next button");
+    private By currentPageNumber = By.cssSelector("li.ant-pagination-item-active");
     
     // Constructor
     public settingListingPO(WebDriver driver) {
@@ -160,11 +160,13 @@ public class settingListingPO {
     }
     
     public WebElement getRowBySettingName(String settingName) {
+        // XPath needed here for text matching within nested elements
         By rowLocator = By.xpath("//tbody[@class='ant-table-tbody']//tr[.//strong[text()='" + settingName + "']]");
         return wait.until(ExpectedConditions.presenceOfElementLocated(rowLocator));
     }
     
     public String getStatusBySettingName(String settingName) {
+        // XPath needed here for text matching
         By statusLocator = By.xpath("//tbody[@class='ant-table-tbody']//tr[.//strong[text()='" + settingName + "']]//td[2]//span[contains(@class, 'ant-tag')]");
         return driver.findElement(statusLocator).getText();
     }
@@ -179,6 +181,7 @@ public class settingListingPO {
     }
     
     public int countSettingsByStatus(String status) {
+        // XPath needed here for text matching within span elements
         By statusLocator = By.xpath("//tbody[@class='ant-table-tbody']//span[contains(@class, 'ant-tag') and text()='" + status + "']");
         return driver.findElements(statusLocator).size();
     }

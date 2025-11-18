@@ -13,22 +13,21 @@ public class MatchAddPO {
     private WebDriver driver;
     
     // Locators
-    private static final String PAGE_TITLE_XPATH = "//h2[contains(text(),'Create New Match')]";
+    private static final String PAGE_TITLE_CSS = "h2";
     private static final String BACK_TO_HOME_BUTTON_ID = "back-to-home-button";
     private static final String TITLE_INPUT_ID = "title-input";
     private static final String DIFFICULTY_SELECT_ID = "difficulty-select";
-    private static final String DIFFICULTY_LEVEL_SELECTED_XPATH = "//span[@class='ant-select-selection-item']";
     private static final String REV_NUMBER_INPUT_ID = "reviewers-input";
     private static final String DURATION_FIRST_INPUT_ID = "first-phase-duration-input";
     private static final String DURATION_SECOND_INPUT_ID = "second-phase-duration-input";
     private static final String SAVE_MATCH_BUTTON_ID = "save-match-button";
     private static final String RESET_BUTTON_ID = "reset-button";
     private static final String MATCH_SETTINGS_RADIO_GROUP_ID = "match-settings-radio-group";
-    private static final String MATCH_SETTINGS_LIST_XPATH = "//div[@class='ant-space css-dev-only-do-not-override-hofb1t ant-space-vertical ant-space-gap-row-small ant-space-gap-col-small']";
-    private static final String TITLE_ERROR_XPATH = "//div[@id='title_help']";
-    private static final String REV_NUMBER_ERROR_XPATH = "//div[@id='review_number_help']";
-    private static final String DURATION_FIRST_ERROR_XPATH = "//div[@id='duration_phase1_help']";
-    private static final String DURATION_SECOND_ERROR_XPATH = "//div[@id='duration_phase2_help']";
+    private static final String MATCH_SETTINGS_LIST_CSS = ".match-settings-scrollable .ant-space-vertical";
+    private static final String TITLE_ERROR_ID = "title_help";
+    private static final String REV_NUMBER_ERROR_ID = "review_number_help";
+    private static final String DURATION_FIRST_ERROR_ID = "duration_phase1_help";
+    private static final String DURATION_SECOND_ERROR_ID = "duration_phase2_help";
     
     public MatchAddPO(WebDriver driver) {
         this.driver = driver;
@@ -80,7 +79,7 @@ public class MatchAddPO {
     
     // Element getters
     public WebElement getPageTitle() {
-        return driver.findElement(By.xpath(PAGE_TITLE_XPATH));
+        return driver.findElement(By.cssSelector(PAGE_TITLE_CSS));
     }
     
     public WebElement getBackToHomeButton() {
@@ -104,10 +103,11 @@ public class MatchAddPO {
     }
     
     public WebElement getSelectedDifficultyLevel() {
-        return driver.findElement(By.xpath(DIFFICULTY_LEVEL_SELECTED_XPATH));
+        return driver.findElement(By.cssSelector("span.ant-select-selection-item"));
     }
     
     private WebElement getDifficultyDropdownOption(String level) {
+        // XPath needed here for text matching within dropdown options
         String xpath = "//div[@class='ant-select-item-option-content' and text()='" + level + "']";
         return driver.findElement(By.xpath(xpath));
     }
@@ -135,19 +135,19 @@ public class MatchAddPO {
     
     // Error message getters
     public WebElement getTitleError() {
-        return driver.findElement(By.xpath(TITLE_ERROR_XPATH));
+        return driver.findElement(By.id(TITLE_ERROR_ID));
     }
     
     public WebElement getRevNumberError() {
-        return driver.findElement(By.xpath(REV_NUMBER_ERROR_XPATH));
+        return driver.findElement(By.id(REV_NUMBER_ERROR_ID));
     }
     
     public WebElement getDurationFirstError() {
-        return driver.findElement(By.xpath(DURATION_FIRST_ERROR_XPATH));
+        return driver.findElement(By.id(DURATION_FIRST_ERROR_ID));
     }
     
     public WebElement getDurationSecondError() {
-        return driver.findElement(By.xpath(DURATION_SECOND_ERROR_XPATH));
+        return driver.findElement(By.id(DURATION_SECOND_ERROR_ID));
     }
     
     // Verification methods
@@ -162,7 +162,7 @@ public class MatchAddPO {
     
     public boolean isMatchSettingsListDisplayed() {
         try {
-            return driver.findElement(By.xpath(MATCH_SETTINGS_LIST_XPATH)).isDisplayed();
+            return driver.findElement(By.cssSelector(MATCH_SETTINGS_LIST_CSS)).isDisplayed();
         } catch (Exception e) {
             return false;
         }
