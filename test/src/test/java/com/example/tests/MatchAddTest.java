@@ -25,6 +25,18 @@ public class MatchAddTest extends BaseTest {
     public void navigateToPage() {
         // Navigate to the create match page before each test
         navigateTo("/create-match");
+        
+        // Give extra time for page to load in CI environments
+        if (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        
+        // Wait for page to be fully loaded
+        matchAddPage.isPageLoaded();
     }
     
     @Test

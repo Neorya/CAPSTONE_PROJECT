@@ -49,7 +49,7 @@ public class settingListingPO {
     public settingListingPO(WebDriver driver) {
         this.driver = driver;
         // Use longer timeout in CI environments
-        int waitTimeout = (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) ? 20 : 10;
+        int waitTimeout = (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) ? 30 : 10;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(waitTimeout));
     }
     
@@ -235,8 +235,12 @@ public class settingListingPO {
         try {
             wait.until(ExpectedConditions.visibilityOfElementLocated(pageTitle));
             wait.until(ExpectedConditions.visibilityOfElementLocated(matchSettingsTable));
+            wait.until(ExpectedConditions.visibilityOfElementLocated(backToHomeButton));
+            // Additional check to ensure elements are interactive
+            wait.until(ExpectedConditions.elementToBeClickable(backToHomeButton));
             return true;
         } catch (Exception e) {
+            System.err.println("Page load failed: " + e.getMessage());
             return false;
         }
     }
