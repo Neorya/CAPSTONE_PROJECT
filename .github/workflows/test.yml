@@ -79,6 +79,12 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/matchdb
 
+      - name: Wait for API to be ready
+        run: |
+          echo "Waiting for API server..."
+          timeout 30 bash -c 'until curl -f http://localhost:8000 > /dev/null 2>&1; do echo "Waiting for API..."; sleep 2; done' || true
+          echo "API is ready"
+
       - name: Initialize database
         run: |
           PGPASSWORD=postgres psql -h localhost -U postgres -d matchdb -f postgres/configs/init.sql
@@ -96,8 +102,11 @@ jobs:
 
       - name: Wait for application to be ready
         run: |
-          timeout 60 bash -c 'until curl -f http://localhost:3000 > /dev/null 2>&1; do sleep 2; done' || true
-          echo "Frontend is ready"
+          echo "Waiting for frontend..."
+          timeout 90 bash -c 'until curl -f http://localhost:3000 > /dev/null 2>&1; do echo "Waiting..."; sleep 3; done'
+          echo "Frontend is responding"
+          sleep 5
+          echo "Additional settling time complete"
 
       - name: Run Selenium tests
         run: |
