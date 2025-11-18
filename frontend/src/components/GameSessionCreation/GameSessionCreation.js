@@ -42,7 +42,7 @@ const GameSessionCreation = () => {
 
   const handleCreateSession = async () => {
     if (selectedRows.length === 0) {
-      alert("You should select at least a match to create a game session");
+      message.warning("You should select at least a match to create a game session");
       return;
     }
     try {

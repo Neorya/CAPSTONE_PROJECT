@@ -1,4 +1,4 @@
-import {API_BASE_URL, API_ENDPOINTS} from './config';
+import { API_BASE_URL, API_ENDPOINTS } from "./config";
 
 /**
  * Create a new match
@@ -16,20 +16,20 @@ export const createMatch = async (matchData) => {
   try {
     const url = `${API_BASE_URL}${API_ENDPOINTS.MATCHES}`;
     const response = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(matchData),
     });
 
     if (!response.ok) {
       let errorMessage = `Failed to create match: ${response.statusText}`;
-      
+
       // Try to parse JSON error response, fallback to text if parsing fails
-      const contentType = response.headers.get('content-type');
+      const contentType = response.headers.get("content-type");
       try {
-        if (contentType && contentType.includes('application/json')) {
+        if (contentType && contentType.includes("application/json")) {
           const errorData = await response.json();
           errorMessage = errorData.detail || errorData.message || errorMessage;
         } else {
@@ -41,33 +41,37 @@ export const createMatch = async (matchData) => {
         }
       } catch (parseError) {
         // If parsing fails, keep the default error message
-        console.warn('Failed to parse error response:', parseError);
+        console.warn("Failed to parse error response:", parseError);
       }
-      
+
       throw new Error(errorMessage);
     }
 
     return await response.json();
   } catch (error) {
-    console.error('Error creating match:', error);
+    console.error("Error creating match:", error);
     throw error;
   }
 };
 
+/**
+ * Fetch the list of matches
+ * @returns {Promise<Array<Object>>} List of match objects
+ */
 export const getMatches = async () => {
   try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.MATCHES}`, {
-          method: 'GET',
-      });
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.MATCHES}`, {
+      method: "GET",
+    });
 
-      if (!response.ok) {
-          throw new Error(`Error fetching matches: ${response.statusText}`);
-      }
+    if (!response.ok) {
+      throw new Error(`Error fetching matches: ${response.statusText}`);
+    }
 
-      const data = await response.json();
-      return data; // Return the list of matches
+    const data = await response.json();
+    return data; // Return the list of matches
   } catch (error) {
-      console.error('Failed to fetch matches:', error);
-      throw error;
+    console.error("Failed to fetch matches:", error);
+    throw error;
   }
-}
+};
