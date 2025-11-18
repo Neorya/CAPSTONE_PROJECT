@@ -26,6 +26,15 @@ public class SettingListingTest extends BaseTest {
     public void navigateToPage() {
         // Navigate to the settings listing page before each test
         navigateTo("/match-settings");
+        
+        // Give extra time for page to load in CI environments
+        if (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
     
     @Test

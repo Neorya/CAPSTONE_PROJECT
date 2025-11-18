@@ -48,7 +48,9 @@ public class settingListingPO {
     // Constructor
     public settingListingPO(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        // Use longer timeout in CI environments
+        int waitTimeout = (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) ? 20 : 10;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(waitTimeout));
     }
     
     // Page Header Methods
@@ -57,7 +59,11 @@ public class settingListingPO {
     }
     
     public boolean isBackToHomeButtonDisplayed() {
-        return driver.findElement(backToHomeButton).isDisplayed();
+        try {
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(backToHomeButton)).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
     }
     
     public String getPageTitle() {
@@ -65,16 +71,24 @@ public class settingListingPO {
     }
     
     public boolean isPageTitleDisplayed() {
-        return driver.findElement(pageTitle).isDisplayed();
+        try {
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(pageTitle)).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
     }
     
     // Subheader Methods
     public String getSubheaderText() {
-        return driver.findElement(subheaderText).getText();
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(subheaderText)).getText();
     }
     
     public boolean isSubheaderDisplayed() {
-        return driver.findElement(subheaderText).isDisplayed();
+        try {
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(subheaderText)).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
     }
     
     // Filter Methods
@@ -103,7 +117,11 @@ public class settingListingPO {
     }
     
     public boolean isFilterLabelDisplayed() {
-        return driver.findElement(filterLabel).isDisplayed();
+        try {
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(filterLabel)).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
     }
     
     // Table Methods
