@@ -233,14 +233,22 @@ public class settingListingPO {
     // Verification Methods
     public boolean isPageLoaded() {
         try {
+            // Wait for the page title first
             wait.until(ExpectedConditions.visibilityOfElementLocated(pageTitle));
-            wait.until(ExpectedConditions.visibilityOfElementLocated(matchSettingsTable));
+            
+            // Wait for back button to be visible
             wait.until(ExpectedConditions.visibilityOfElementLocated(backToHomeButton));
-            // Additional check to ensure elements are interactive
+            
+            // Wait for the table container (even if empty)
+            wait.until(ExpectedConditions.presenceOfElementLocated(matchSettingsTable));
+            
+            // Additional check to ensure back button is interactive
             wait.until(ExpectedConditions.elementToBeClickable(backToHomeButton));
+            
             return true;
         } catch (Exception e) {
             System.err.println("Page load failed: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
