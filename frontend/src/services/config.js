@@ -11,5 +11,6 @@ export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8
 export const API_ENDPOINTS = {
   MATCH_SETTINGS: '/api/match-settings',
   MATCHES: '/api/matches',
+  GAME_SESSIONS: '/api/game_session',
 };
 

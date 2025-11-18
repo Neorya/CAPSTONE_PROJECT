@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Radio, Space, Table, Tag, Typography } from "antd";
+import { Button, Card, Radio, Space, Table, Tag, Typography, Tooltip } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { fetchMatchSettings } from "../../services/matchSettingsService.js";
 import "./MatchSettingsList.css";
@@ -62,9 +62,15 @@ const MatchSettingsList = () => {
     <div className="match-settings-list-container">
       <Card className="match-settings-card">
         <div className="page-header">
-          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/")}>
-            Back to Home
-          </Button>
+          <Tooltip title="Back to Home">
+            <Button 
+              id="back-to-home-button"
+              icon={<ArrowLeftOutlined />} 
+              onClick={() => navigate('/')}
+              shape="circle"
+              size="large"
+            />
+          </Tooltip>
           <Title level={2} className="page-title">
             Match Settings
           </Title>
