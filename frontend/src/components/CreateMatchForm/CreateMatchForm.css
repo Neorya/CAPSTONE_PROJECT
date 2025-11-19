@@ -138,7 +138,7 @@
 }
 
 /* Form styling */
-.ant-form-item-label > label {
+.ant-form-item-label>label {
   font-weight: 500;
   font-size: 14px;
 }
@@ -182,4 +182,3 @@
     gap: 8px;
   }
 }
-
