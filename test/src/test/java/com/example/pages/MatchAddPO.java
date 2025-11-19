@@ -64,7 +64,11 @@ public class MatchAddPO {
     
     public void setDifficultyLevel(String level) {
         getDifficultyLevelBox().click();
-        getDifficultyDropdownOption(level).click();
+        // Wait for dropdown to open and option to be clickable
+        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(
+            By.xpath("//div[@class='ant-select-item-option-content' and text()='" + level + "']")
+        ));
+        option.click();
     }
     
     public void setRevNumber(int revNumber) {
@@ -111,12 +115,6 @@ public class MatchAddPO {
     
     public WebElement getSelectedDifficultyLevel() {
         return driver.findElement(By.cssSelector("span.ant-select-selection-item"));
-    }
-    
-    private WebElement getDifficultyDropdownOption(String level) {
-        // XPath needed here for text matching within dropdown options
-        String xpath = "//div[@class='ant-select-item-option-content' and text()='" + level + "']";
-        return driver.findElement(By.xpath(xpath));
     }
     
     public WebElement getRevNumber() {
