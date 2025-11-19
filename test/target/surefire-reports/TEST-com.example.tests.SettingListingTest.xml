@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.tests.MatchAddTest" time="117.269" tests="25" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.tests.SettingListingTest" time="150.746" tests="26" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -13,7 +13,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="/usr/lib/jvm/java-21-openjdk-amd64/lib"/>
-    <property name="sun.java.command" value="/home/sahar/Desktop/CP/CAPSTONE_PROJECT/test/target/surefire/surefirebooter-20251119183217703_3.jar /home/sahar/Desktop/CP/CAPSTONE_PROJECT/test/target/surefire 2025-11-19T18-32-17_534-jvmRun1 surefire-20251119183217703_1tmp surefire_0-20251119183217703_2tmp"/>
+    <property name="sun.java.command" value="/home/sahar/Desktop/CP/CAPSTONE_PROJECT/test/target/surefire/surefirebooter-20251119181507476_3.jar /home/sahar/Desktop/CP/CAPSTONE_PROJECT/test/target/surefire 2025-11-19T18-15-07_315-jvmRun1 surefire-20251119181507476_1tmp surefire_0-20251119181507476_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="/home/sahar/Desktop/CP/CAPSTONE_PROJECT/test/target/test-classes:/home/sahar/Desktop/CP/CAPSTONE_PROJECT/test/target/classes:/home/sahar/.m2/repository/org/junit/jupiter/junit-jupiter/5.10.0/junit-jupiter-5.10.0.jar:/home/sahar/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.10.0/junit-jupiter-api-5.10.0.jar:/home/sahar/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/sahar/.m2/repository/org/junit/platform/junit-platform-commons/1.10.0/junit-platform-commons-1.10.0.jar:/home/sahar/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/sahar/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.10.0/junit-jupiter-params-5.10.0.jar:/home/sahar/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.10.0/junit-jupiter-engine-5.10.0.jar:/home/sahar/.m2/repository/org/junit/platform/junit-platform-engine/1.10.0/junit-platform-engine-1.10.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-java/4.25.0/selenium-java-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-api/4.25.0/selenium-api-4.25.0.jar:/home/sahar/.m2/repository/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-chrome-driver/4.25.0/selenium-chrome-driver-4.25.0.jar:/home/sahar/.m2/repository/com/google/auto/service/auto-service-annotations/1.1.1/auto-service-annotations-1.1.1.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-chromium-driver/4.25.0/selenium-chromium-driver-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-json/4.25.0/selenium-json-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-manager/4.25.0/selenium-manager-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-devtools-v127/4.25.0/selenium-devtools-v127-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-devtools-v128/4.25.0/selenium-devtools-v128-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-devtools-v129/4.25.0/selenium-devtools-v129-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-devtools-v85/4.25.0/selenium-devtools-v85-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-edge-driver/4.25.0/selenium-edge-driver-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-firefox-driver/4.25.0/selenium-firefox-driver-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-http/4.25.0/selenium-http-4.25.0.jar:/home/sahar/.m2/repository/dev/failsafe/failsafe/3.3.2/failsafe-3.3.2.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-ie-driver/4.25.0/selenium-ie-driver-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-remote-driver/4.25.0/selenium-remote-driver-4.25.0.jar:/home/sahar/.m2/repository/com/google/guava/guava/33.3.0-jre/guava-33.3.0-jre.jar:/home/sahar/.m2/repository/com/google/guava/failureaccess/1.0.2/failureaccess-1.0.2.jar:/home/sahar/.m2/repository/com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar:/home/sahar/.m2/repository/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar:/home/sahar/.m2/repository/org/checkerframework/checker-qual/3.43.0/checker-qual-3.43.0.jar:/home/sahar/.m2/repository/com/google/errorprone/error_prone_annotations/2.28.0/error_prone_annotations-2.28.0.jar:/home/sahar/.m2/repository/com/google/j2objc/j2objc-annotations/3.0.0/j2objc-annotations-3.0.0.jar:/home/sahar/.m2/repository/io/opentelemetry/semconv/opentelemetry-semconv/1.25.0-alpha/opentelemetry-semconv-1.25.0-alpha.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-api/1.42.1/opentelemetry-api-1.42.1.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-context/1.42.1/opentelemetry-context-1.42.1.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-exporter-logging/1.42.1/opentelemetry-exporter-logging-1.42.1.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-sdk-common/1.42.1/opentelemetry-sdk-common-1.42.1.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-sdk-extension-autoconfigure-spi/1.42.1/opentelemetry-sdk-extension-autoconfigure-spi-1.42.1.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-sdk-extension-autoconfigure/1.42.1/opentelemetry-sdk-extension-autoconfigure-1.42.1.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-api-incubator/1.42.1-alpha/opentelemetry-api-incubator-1.42.1-alpha.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-sdk-trace/1.42.1/opentelemetry-sdk-trace-1.42.1.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-sdk/1.42.1/opentelemetry-sdk-1.42.1.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-sdk-metrics/1.42.1/opentelemetry-sdk-metrics-1.42.1.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-sdk-logs/1.42.1/opentelemetry-sdk-logs-1.42.1.jar:/home/sahar/.m2/repository/net/bytebuddy/byte-buddy/1.15.1/byte-buddy-1.15.1.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-os/4.25.0/selenium-os-4.25.0.jar:/home/sahar/.m2/repository/org/apache/commons/commons-exec/1.4.0/commons-exec-1.4.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-safari-driver/4.25.0/selenium-safari-driver-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-support/4.25.0/selenium-support-4.25.0.jar:"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -28,7 +28,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
-    <property name="surefire.real.class.path" value="/home/sahar/Desktop/CP/CAPSTONE_PROJECT/test/target/surefire/surefirebooter-20251119183217703_3.jar"/>
+    <property name="surefire.real.class.path" value="/home/sahar/Desktop/CP/CAPSTONE_PROJECT/test/target/surefire/surefirebooter-20251119181507476_3.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="21.0.8+9-Ubuntu-0ubuntu124.04.1"/>
     <property name="user.name" value="sahar"/>
@@ -55,35 +55,36 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="testPageLoads" classname="com.example.tests.MatchAddTest" time="5.133">
-    <system-err><![CDATA[Nov 19, 2025 6:32:20 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+  <testcase name="testPageLoads" classname="com.example.tests.SettingListingTest" time="6.853">
+    <system-err><![CDATA[Nov 19, 2025 6:17:07 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
 WARNING: Unable to find CDP implementation matching 141
-Nov 19, 2025 6:32:20 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+Nov 19, 2025 6:17:07 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
 WARNING: Unable to find version of CDP to use for 141.0.7390.107. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.25.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="testCreateButtonState" classname="com.example.tests.MatchAddTest" time="4.063"/>
-  <testcase name="testCancelButton" classname="com.example.tests.MatchAddTest" time="3.793"/>
-  <testcase name="testSetDifficultyLevel" classname="com.example.tests.MatchAddTest" time="4.319"/>
-  <testcase name="testSetDurationFirst" classname="com.example.tests.MatchAddTest" time="4.21"/>
-  <testcase name="testSetDurationSecond" classname="com.example.tests.MatchAddTest" time="3.835"/>
-  <testcase name="testSelectMatchSetting" classname="com.example.tests.MatchAddTest" time="3.836"/>
-  <testcase name="testBackToHomeButton" classname="com.example.tests.MatchAddTest" time="3.727"/>
-  <testcase name="testPageTitle" classname="com.example.tests.MatchAddTest" time="3.675"/>
-  <testcase name="testSetMatchTitle" classname="com.example.tests.MatchAddTest" time="4.413"/>
-  <testcase name="testCreateMatch" classname="com.example.tests.MatchAddTest" time="7.436"/>
-  <testcase name="testReviewNumberBelowMinimum" classname="com.example.tests.MatchAddTest" time="4.236"/>
-  <testcase name="testReviewNumberAboveMaximum" classname="com.example.tests.MatchAddTest" time="4.145"/>
-  <testcase name="testNegativeReviewNumber" classname="com.example.tests.MatchAddTest" time="4.169"/>
-  <testcase name="testDurationFirstZero" classname="com.example.tests.MatchAddTest" time="4.236"/>
-  <testcase name="testDurationFirstNegative" classname="com.example.tests.MatchAddTest" time="4.179"/>
-  <testcase name="testDurationSecondZero" classname="com.example.tests.MatchAddTest" time="4.083"/>
-  <testcase name="testDurationSecondNegative" classname="com.example.tests.MatchAddTest" time="4.013"/>
-  <testcase name="testShortTitle" classname="com.example.tests.MatchAddTest" time="6.496"/>
-  <testcase name="testEmptyTitle" classname="com.example.tests.MatchAddTest" time="5.259"/>
-  <testcase name="testMissingDifficultyLevel" classname="com.example.tests.MatchAddTest" time="5.245"/>
-  <testcase name="testMissingMatchSetting" classname="com.example.tests.MatchAddTest" time="6.203"/>
-  <testcase name="testMultipleInvalidFields" classname="com.example.tests.MatchAddTest" time="5.759"/>
-  <testcase name="testErrorMessageContent" classname="com.example.tests.MatchAddTest" time="4.188"/>
-  <testcase name="testFormSubmissionWithAllInvalidInputs" classname="com.example.tests.MatchAddTest" time="4.653"/>
+  <testcase name="testAllPageElementsDisplayed" classname="com.example.tests.SettingListingTest" time="5.878"/>
+  <testcase name="testPageTitle" classname="com.example.tests.SettingListingTest" time="5.562"/>
+  <testcase name="testSubheaderText" classname="com.example.tests.SettingListingTest" time="5.641"/>
+  <testcase name="testBackToHomeButton" classname="com.example.tests.SettingListingTest" time="5.576"/>
+  <testcase name="testTableDisplayed" classname="com.example.tests.SettingListingTest" time="5.567"/>
+  <testcase name="testTableHeaders" classname="com.example.tests.SettingListingTest" time="5.643"/>
+  <testcase name="testTableHasRows" classname="com.example.tests.SettingListingTest" time="5.562"/>
+  <testcase name="testDefaultFilterSelection" classname="com.example.tests.SettingListingTest" time="5.526"/>
+  <testcase name="testSelectReadyFilter" classname="com.example.tests.SettingListingTest" time="5.966"/>
+  <testcase name="testSelectDraftFilter" classname="com.example.tests.SettingListingTest" time="5.944"/>
+  <testcase name="testSelectAllFilter" classname="com.example.tests.SettingListingTest" time="6.463"/>
+  <testcase name="testSettingNamesDisplayed" classname="com.example.tests.SettingListingTest" time="5.679"/>
+  <testcase name="testStatusTagsDisplayed" classname="com.example.tests.SettingListingTest" time="5.61"/>
+  <testcase name="testGetSettingNameByIndex" classname="com.example.tests.SettingListingTest" time="5.463"/>
+  <testcase name="testGetStatusByIndex" classname="com.example.tests.SettingListingTest" time="5.532"/>
+  <testcase name="testRowCount" classname="com.example.tests.SettingListingTest" time="5.479"/>
+  <testcase name="testFindSettingByName" classname="com.example.tests.SettingListingTest" time="5.491"/>
+  <testcase name="testCountSettingsByStatus" classname="com.example.tests.SettingListingTest" time="5.568"/>
+  <testcase name="testReadyFilterShowsOnlyReadySettings" classname="com.example.tests.SettingListingTest" time="5.877"/>
+  <testcase name="testDraftFilterShowsOnlyDraftSettings" classname="com.example.tests.SettingListingTest" time="5.789"/>
+  <testcase name="testPaginationPreviousButton" classname="com.example.tests.SettingListingTest" time="5.509"/>
+  <testcase name="testCurrentPageNumber" classname="com.example.tests.SettingListingTest" time="5.544"/>
+  <testcase name="testFilterLabelDisplayed" classname="com.example.tests.SettingListingTest" time="5.536"/>
+  <testcase name="testFilterNavigationMaintainsState" classname="com.example.tests.SettingListingTest" time="6.59"/>
+  <testcase name="testTableDataIntegrity" classname="com.example.tests.SettingListingTest" time="5.822"/>
 </testsuite>
