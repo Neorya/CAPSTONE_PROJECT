@@ -65,7 +65,10 @@ public class MatchAddPO {
     
     public void setDifficultyLevel(String level) {
         getDifficultyLevelBox().click();
-        getDifficultyDropdownOption(level).click();
+        // Wait for dropdown to appear and option to be clickable
+        String xpath = "//div[@class='ant-select-item-option-content' and text()='" + level + "']";
+        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath)));
+        option.click();
     }
     
     public void setRevNumber(int revNumber) {
@@ -83,25 +86,6 @@ public class MatchAddPO {
     public void setDurationSecond(int duration) {
         getDurationSecond().clear();
         getDurationSecond().sendKeys(String.valueOf(duration));
-    }
-    
-    /**
-     * Wait for match settings to finish loading from the API.
-     * This ensures either match setting radio buttons appear or a "no settings" message appears.
-     */
-    private void waitForMatchSettingsToLoad() {
-        // Wait for either match settings to appear OR the "no settings" message to appear
-        wait.until(ExpectedConditions.or(
-            ExpectedConditions.presenceOfElementLocated(By.className("match-setting-radio")),
-            ExpectedConditions.presenceOfElementLocated(By.id("no-settings-message"))
-        ));
-        
-        // Small additional wait for rendering to complete
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
     
     // Element getters
@@ -131,11 +115,6 @@ public class MatchAddPO {
     
     public WebElement getSelectedDifficultyLevel() {
         return driver.findElement(By.xpath(DIFFICULTY_LEVEL_SELECTED_XPATH));
-    }
-    
-    private WebElement getDifficultyDropdownOption(String level) {
-        String xpath = "//div[@class='ant-select-item-option-content' and text()='" + level + "']";
-        return driver.findElement(By.xpath(xpath));
     }
     
     public WebElement getRevNumber() {
