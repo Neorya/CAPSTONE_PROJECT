@@ -30,9 +30,9 @@ public class MatchAddPO {
     private static final String MATCH_SETTINGS_RADIO_GROUP_ID = "match-settings-radio-group";
     private static final String MATCH_SETTINGS_LIST_XPATH = "//div[@class='ant-space css-dev-only-do-not-override-hofb1t ant-space-vertical ant-space-gap-row-small ant-space-gap-col-small']";
     private static final String TITLE_ERROR_XPATH = "//div[@id='title_help']";
-    private static final String REV_NUMBER_ERROR_XPATH = "//div[@id='review_number_help']";
-    private static final String DURATION_FIRST_ERROR_XPATH = "//div[@id='duration_phase1_help']";
-    private static final String DURATION_SECOND_ERROR_XPATH = "//div[@id='duration_phase2_help']";
+    private static final String REV_NUMBER_ERROR_XPATH = "//div[@id='review_number_help']//div[contains(@class,'ant-form-item-explain-error')]";
+    private static final String DURATION_FIRST_ERROR_XPATH = "//div[@id='duration_phase1_help']//div[contains(@class,'ant-form-item-explain-error')]";
+    private static final String DURATION_SECOND_ERROR_XPATH = "//div[@id='duration_phase2_help']//div[contains(@class,'ant-form-item-explain-error')]";
     
     public MatchAddPO(WebDriver driver) {
         this.driver = driver;

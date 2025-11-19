@@ -14,7 +14,7 @@ public class settingListingPO {
     private WebDriverWait wait;
     
     // Locators for Page Header
-    private By backToHomeButton = By.xpath("//button[contains(@class, 'ant-btn')]//span[text()='Back to Home']");
+    private By backToHomeButton = By.id("back-to-home-button");
     private By pageTitle = By.xpath("//h2[contains(@class, 'page-title') and text()='Match Settings']");
     
     // Locators for Subheader
