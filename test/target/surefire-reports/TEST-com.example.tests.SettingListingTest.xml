@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.tests.MatchAddTest" time="118.384" tests="25" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.tests.SettingListingTest" time="150.746" tests="26" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -55,35 +55,36 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="testPageLoads" classname="com.example.tests.MatchAddTest" time="5.11">
-    <system-err><![CDATA[Nov 19, 2025 6:15:10 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+  <testcase name="testPageLoads" classname="com.example.tests.SettingListingTest" time="6.853">
+    <system-err><![CDATA[Nov 19, 2025 6:17:07 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
 WARNING: Unable to find CDP implementation matching 141
-Nov 19, 2025 6:15:10 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+Nov 19, 2025 6:17:07 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
 WARNING: Unable to find version of CDP to use for 141.0.7390.107. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.25.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="testCreateButtonState" classname="com.example.tests.MatchAddTest" time="3.918"/>
-  <testcase name="testCancelButton" classname="com.example.tests.MatchAddTest" time="3.82"/>
-  <testcase name="testSetDifficultyLevel" classname="com.example.tests.MatchAddTest" time="4.247"/>
-  <testcase name="testSetDurationFirst" classname="com.example.tests.MatchAddTest" time="4.053"/>
-  <testcase name="testSetDurationSecond" classname="com.example.tests.MatchAddTest" time="3.977"/>
-  <testcase name="testSelectMatchSetting" classname="com.example.tests.MatchAddTest" time="4.038"/>
-  <testcase name="testBackToHomeButton" classname="com.example.tests.MatchAddTest" time="3.737"/>
-  <testcase name="testPageTitle" classname="com.example.tests.MatchAddTest" time="3.715"/>
-  <testcase name="testSetMatchTitle" classname="com.example.tests.MatchAddTest" time="4.482"/>
-  <testcase name="testCreateMatch" classname="com.example.tests.MatchAddTest" time="7.203"/>
-  <testcase name="testReviewNumberBelowMinimum" classname="com.example.tests.MatchAddTest" time="4.379"/>
-  <testcase name="testReviewNumberAboveMaximum" classname="com.example.tests.MatchAddTest" time="4.254"/>
-  <testcase name="testNegativeReviewNumber" classname="com.example.tests.MatchAddTest" time="4.167"/>
-  <testcase name="testDurationFirstZero" classname="com.example.tests.MatchAddTest" time="4.221"/>
-  <testcase name="testDurationFirstNegative" classname="com.example.tests.MatchAddTest" time="4.29"/>
-  <testcase name="testDurationSecondZero" classname="com.example.tests.MatchAddTest" time="4.271"/>
-  <testcase name="testDurationSecondNegative" classname="com.example.tests.MatchAddTest" time="4.203"/>
-  <testcase name="testShortTitle" classname="com.example.tests.MatchAddTest" time="6.184"/>
-  <testcase name="testEmptyTitle" classname="com.example.tests.MatchAddTest" time="5.476"/>
-  <testcase name="testMissingDifficultyLevel" classname="com.example.tests.MatchAddTest" time="5.439"/>
-  <testcase name="testMissingMatchSetting" classname="com.example.tests.MatchAddTest" time="5.626"/>
-  <testcase name="testMultipleInvalidFields" classname="com.example.tests.MatchAddTest" time="6.076"/>
-  <testcase name="testErrorMessageContent" classname="com.example.tests.MatchAddTest" time="4.362"/>
-  <testcase name="testFormSubmissionWithAllInvalidInputs" classname="com.example.tests.MatchAddTest" time="4.963"/>
+  <testcase name="testAllPageElementsDisplayed" classname="com.example.tests.SettingListingTest" time="5.878"/>
+  <testcase name="testPageTitle" classname="com.example.tests.SettingListingTest" time="5.562"/>
+  <testcase name="testSubheaderText" classname="com.example.tests.SettingListingTest" time="5.641"/>
+  <testcase name="testBackToHomeButton" classname="com.example.tests.SettingListingTest" time="5.576"/>
+  <testcase name="testTableDisplayed" classname="com.example.tests.SettingListingTest" time="5.567"/>
+  <testcase name="testTableHeaders" classname="com.example.tests.SettingListingTest" time="5.643"/>
+  <testcase name="testTableHasRows" classname="com.example.tests.SettingListingTest" time="5.562"/>
+  <testcase name="testDefaultFilterSelection" classname="com.example.tests.SettingListingTest" time="5.526"/>
+  <testcase name="testSelectReadyFilter" classname="com.example.tests.SettingListingTest" time="5.966"/>
+  <testcase name="testSelectDraftFilter" classname="com.example.tests.SettingListingTest" time="5.944"/>
+  <testcase name="testSelectAllFilter" classname="com.example.tests.SettingListingTest" time="6.463"/>
+  <testcase name="testSettingNamesDisplayed" classname="com.example.tests.SettingListingTest" time="5.679"/>
+  <testcase name="testStatusTagsDisplayed" classname="com.example.tests.SettingListingTest" time="5.61"/>
+  <testcase name="testGetSettingNameByIndex" classname="com.example.tests.SettingListingTest" time="5.463"/>
+  <testcase name="testGetStatusByIndex" classname="com.example.tests.SettingListingTest" time="5.532"/>
+  <testcase name="testRowCount" classname="com.example.tests.SettingListingTest" time="5.479"/>
+  <testcase name="testFindSettingByName" classname="com.example.tests.SettingListingTest" time="5.491"/>
+  <testcase name="testCountSettingsByStatus" classname="com.example.tests.SettingListingTest" time="5.568"/>
+  <testcase name="testReadyFilterShowsOnlyReadySettings" classname="com.example.tests.SettingListingTest" time="5.877"/>
+  <testcase name="testDraftFilterShowsOnlyDraftSettings" classname="com.example.tests.SettingListingTest" time="5.789"/>
+  <testcase name="testPaginationPreviousButton" classname="com.example.tests.SettingListingTest" time="5.509"/>
+  <testcase name="testCurrentPageNumber" classname="com.example.tests.SettingListingTest" time="5.544"/>
+  <testcase name="testFilterLabelDisplayed" classname="com.example.tests.SettingListingTest" time="5.536"/>
+  <testcase name="testFilterNavigationMaintainsState" classname="com.example.tests.SettingListingTest" time="6.59"/>
+  <testcase name="testTableDataIntegrity" classname="com.example.tests.SettingListingTest" time="5.822"/>
 </testsuite>

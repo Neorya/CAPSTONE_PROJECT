@@ -85,6 +85,25 @@ public class MatchAddPO {
         getDurationSecond().sendKeys(String.valueOf(duration));
     }
     
+    /**
+     * Wait for match settings to finish loading from the API.
+     * This ensures either match setting radio buttons appear or a "no settings" message appears.
+     */
+    private void waitForMatchSettingsToLoad() {
+        // Wait for either match settings to appear OR the "no settings" message to appear
+        wait.until(ExpectedConditions.or(
+            ExpectedConditions.presenceOfElementLocated(By.className("match-setting-radio")),
+            ExpectedConditions.presenceOfElementLocated(By.id("no-settings-message"))
+        ));
+        
+        // Small additional wait for rendering to complete
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+    
     // Element getters
     public WebElement getPageTitle() {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(PAGE_TITLE_XPATH)));
