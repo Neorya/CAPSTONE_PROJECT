@@ -40,11 +40,9 @@ public abstract class BaseTest {
         
         // Set longer timeouts for CI environments
         if ("true".equals(headless) || System.getenv("CI") != null) {
-            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(15));
             driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
             driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(30));
         } else {
-            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
             driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(20));
         }
     }
