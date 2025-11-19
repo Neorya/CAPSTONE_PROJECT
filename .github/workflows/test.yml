@@ -66,6 +66,10 @@ jobs:
           which chromedriver
           echo "CHROMEDRIVER_PATH=$(which chromedriver)"
 
+      - name: Initialize database
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -d matchdb -f postgres/configs/init.sql
+
       - name: Install Python dependencies
         run: |
           cd api
@@ -75,19 +79,14 @@ jobs:
         run: |
           cd api/src
           python main.py &
-          sleep 10
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/matchdb
 
       - name: Wait for API to be ready
         run: |
           echo "Waiting for API server..."
-          timeout 15 bash -c 'until curl -f http://localhost:8000 > /dev/null 2>&1; do echo "Waiting for API..."; sleep 2; done' || true
+          timeout 30 bash -c 'until curl -f http://localhost:8000/docs > /dev/null 2>&1; do echo "Waiting for API..."; sleep 2; done'
           echo "API is ready"
-
-      - name: Initialize database
-        run: |
-          PGPASSWORD=postgres psql -h localhost -U postgres -d matchdb -f postgres/configs/init.sql
 
       - name: Install frontend dependencies
         run: |
@@ -98,17 +97,14 @@ jobs:
         run: |
           cd frontend
           npm start &
-          sleep 30
 
       - name: Wait for application to be ready
         run: |
           echo "Waiting for frontend..."
-          timeout 120 bash -c 'until curl -f http://localhost:3000 > /dev/null 2>&1; do echo "Waiting..."; sleep 3; done'
+          timeout 60 bash -c 'until curl -f http://localhost:3000 > /dev/null 2>&1; do echo "Waiting..."; sleep 2; done'
           echo "Frontend is responding"
-          sleep 10
-          echo "Additional settling time complete"
-          # Verify the page is actually rendering
-          curl -s http://localhost:3000 | grep -q "<!DOCTYPE html>" || echo "Warning: HTML may not be fully rendered"
+          sleep 5
+          echo "Services ready"
 
       - name: Run Selenium tests
         run: |
