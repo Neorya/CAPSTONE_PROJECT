@@ -30,8 +30,14 @@ jobs:
       - name: Install ChromeDriver
         uses: nanasess/setup-chromedriver@v2
 
+      - name: Clean up any existing containers
+        run: |
+          docker compose down -v || true
+          docker system prune -f || true
+
       - name: Start services with Docker Compose
         run: |
+          docker compose build --no-cache
           docker compose up -d
 
       - name: Wait for services to be healthy
@@ -64,7 +70,7 @@ jobs:
         with:
           name: test-reports
           path: test/target/surefire-reports/
-          retention-days: 30
+          retention-days: 7
 
       - name: Stop services
         if: always()
