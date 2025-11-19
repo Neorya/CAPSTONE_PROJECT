@@ -33,18 +33,19 @@ jobs:
       - name: Start services with Docker Compose
         run: |
           docker compose up -d
-          sleep 30
 
       - name: Wait for services to be healthy
         run: |
+          echo "Waiting for API..."
+          timeout 60 bash -c 'until curl -f http://localhost:8000/docs > /dev/null 2>&1; do sleep 2; done'
+          echo "API is ready"
+          
           echo "Waiting for frontend..."
-          timeout 15 bash -c 'until curl -f http://localhost:3000 > /dev/null 2>&1; do echo "Waiting..."; sleep 3; done'
+          timeout 60 bash -c 'until curl -f http://localhost:3000 > /dev/null 2>&1; do sleep 2; done'
           echo "Frontend is responding"
+          
           sleep 5
-          echo "Additional settling time complete"
-          # Verify the page is actually rendering
-          curl -s http://localhost:3000 | grep -q "<!DOCTYPE html>" || echo "Warning: HTML may not be fully rendered"
-          timeout 60 bash -c 'until curl -f http://localhost:8000/docs > /dev/null 2>&1; do sleep 5; done'
+          echo "Services ready"
 
       - name: Show service logs
         if: always()
