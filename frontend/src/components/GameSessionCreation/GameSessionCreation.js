@@ -46,17 +46,17 @@ const GameSessionCreation = () => {
       return;
     }
     try {
-        setCreating(true);
-        const creatorId = 1;         // TODO: replace with actual user ID when authentication is implemented
-        await createGameSession(selectedRows, creatorId);
-        message.success("The game session has been created");
-        navigate("/");
-      } catch (error) {
-        console.error("Failed to create game session:", error);
-        message.error("Failed to create game session");
-      } finally {
-        setCreating(false);
-      }
+      setCreating(true);
+      const creatorId = 1;         // TODO: replace with actual user ID when authentication is implemented
+      await createGameSession(selectedRows, creatorId);
+      message.success("The game session has been created");
+      navigate("/");
+    } catch (error) {
+      console.error("Failed to create game session:", error);
+      message.error("Failed to create game session");
+    } finally {
+      setCreating(false);
+    }
   };
 
   const columns = [
@@ -85,9 +85,9 @@ const GameSessionCreation = () => {
       <Card className="match-settings-card">
         <div className="page-header">
           <Tooltip title="Back to Home">
-            <Button 
+            <Button
               id="back-to-home-button"
-              icon={<ArrowLeftOutlined />} 
+              icon={<ArrowLeftOutlined />}
               onClick={() => navigate('/')}
               shape="circle"
               size="large"
@@ -109,7 +109,7 @@ const GameSessionCreation = () => {
           id="game-session-creation-table"
           dataSource={items}
           columns={columns}
-          loading={loading} 
+          loading={loading}
           pagination={{ pageSize: 8, showSizeChanger: false }}
           rowKey="match_id"
           className="match-settings-table"

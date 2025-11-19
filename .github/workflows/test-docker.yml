@@ -2,13 +2,13 @@ name: Run Selenium Tests with Docker
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, sp1_test_github_actions ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, sp1_test_github_actions ]
   workflow_dispatch:
 
 jobs:
-  test:
+  test-docker:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,12 +33,19 @@ jobs:
       - name: Start services with Docker Compose
         run: |
           docker compose up -d
-          sleep 30
 
       - name: Wait for services to be healthy
         run: |
-          timeout 120 bash -c 'until curl -f http://localhost:3000 > /dev/null 2>&1; do sleep 5; done'
-          timeout 60 bash -c 'until curl -f http://localhost:8000/docs > /dev/null 2>&1; do sleep 5; done'
+          echo "Waiting for API..."
+          timeout 60 bash -c 'until curl -f http://localhost:8000/docs > /dev/null 2>&1; do sleep 2; done'
+          echo "API is ready"
+          
+          echo "Waiting for frontend..."
+          timeout 60 bash -c 'until curl -f http://localhost:3000 > /dev/null 2>&1; do sleep 2; done'
+          echo "Frontend is responding"
+          
+          sleep 5
+          echo "Services ready"
 
       - name: Show service logs
         if: always()

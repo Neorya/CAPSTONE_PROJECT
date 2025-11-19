@@ -4,6 +4,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import java.time.Duration;
 
 /**
  * Page Object for the Create Match page.
@@ -11,6 +14,7 @@ import org.openqa.selenium.WebElement;
  */
 public class MatchAddPO {
     private WebDriver driver;
+    private WebDriverWait wait;
     
     // Locators
     private static final String PAGE_TITLE_CSS = "h2";
@@ -31,6 +35,9 @@ public class MatchAddPO {
     
     public MatchAddPO(WebDriver driver) {
         this.driver = driver;
+        // Use longer timeout in CI environments
+        int waitTimeout = (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) ? 30 : 10;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(waitTimeout));
     }
     
     // Actions
@@ -79,23 +86,23 @@ public class MatchAddPO {
     
     // Element getters
     public WebElement getPageTitle() {
-        return driver.findElement(By.cssSelector(PAGE_TITLE_CSS));
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(PAGE_TITLE_CSS)));
     }
     
     public WebElement getBackToHomeButton() {
-        return driver.findElement(By.id(BACK_TO_HOME_BUTTON_ID));
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(BACK_TO_HOME_BUTTON_ID)));
     }
     
     public WebElement getTitleInput() {
-        return driver.findElement(By.id(TITLE_INPUT_ID));
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(TITLE_INPUT_ID)));
     }
     
     public WebElement getCreateButton() {
-        return driver.findElement(By.id(SAVE_MATCH_BUTTON_ID));
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(SAVE_MATCH_BUTTON_ID)));
     }
     
     public WebElement getCancelButton() {
-        return driver.findElement(By.id(RESET_BUTTON_ID));
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(RESET_BUTTON_ID)));
     }
     
     public WebElement getDifficultyLevelBox() {
