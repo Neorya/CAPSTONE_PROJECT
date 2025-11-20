@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Button, Card, Radio, Space, Table, Tag, Typography, Tooltip } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { fetchMatchSettings } from "../../services/matchSettingsService.js";
+import { useMatchSettingDetails } from "./hooks/useMatchSettingDetails";
+import MatchSettingDetailsPopup from "./components/MatchSettingDetailsPopup";
 import "./MatchSettingsList.css";
 
 const { Title, Text } = Typography;
@@ -18,6 +20,13 @@ const MatchSettingsList = () => {
   const [items, setItems] = useState([]);             // match settings items
   const [loading, setLoading] = useState(false);      // loading
 
+  const {
+    selectedMatchSetting,
+    isPopupVisible,
+    openPopup,
+    closePopup
+  } = useMatchSettingDetails();
+
   useEffect(() => {                         // useEffect runs on component mount and filter change
     const fetchItems = async () => {        // fetch match settings based on filter
       try {
@@ -26,6 +35,7 @@ const MatchSettingsList = () => {
         const formatted = data.map((item) => ({   // format data for table
           id: item.match_set_id,
           name: item.title,
+          description: item.description,
           status: item.is_ready ? "Ready" : "Draft",
         }));
         setItems(formatted);
@@ -108,8 +118,18 @@ const MatchSettingsList = () => {
           rowKey="id"
           className="match-settings-table"
           locale={{ emptyText: "No match settings found." }}
+          onRow={(record) => ({
+            onClick: () => openPopup(record),
+            style: { cursor: 'pointer' }
+          })}
         />
       </Card>
+
+      <MatchSettingDetailsPopup
+        visible={isPopupVisible}
+        onClose={closePopup}
+        matchSetting={selectedMatchSetting}
+      />
     </div>
   );
 };
