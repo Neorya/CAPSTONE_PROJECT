@@ -14,8 +14,6 @@ const MatchSettingDetailsPopup = ({ visible, onClose, matchSetting }) => {
     if (match) {
       return { input: match[1], output: match[2] };
     }
-    // Fallback if format doesn't match
-    return { input: testString, output: '-' };
   };
 
   const publicTest = parseTestString(matchSetting.public_test);

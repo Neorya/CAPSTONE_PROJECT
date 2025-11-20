@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 
 /**
- * Custom hook for managing match setting details popup state
+ * hook for managing match setting details popup state
  * 
  * @returns {Object} Popup state and handlers
  * @returns {Object|null} selectedMatchSetting - Currently selected match setting
