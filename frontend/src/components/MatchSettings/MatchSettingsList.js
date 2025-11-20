@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Card, Radio, Space, Table, Tag, Typography, Tooltip } from "antd";
-import { ArrowLeftOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, EyeOutlined } from "@ant-design/icons";
 import { fetchMatchSettings } from "../../services/matchSettingsService.js";
 import { useMatchSettingDetails } from "./hooks/useMatchSettingDetails";
 import MatchSettingDetailsPopup from "./components/MatchSettingDetailsPopup";
@@ -67,6 +67,18 @@ const MatchSettingsList = () => {
         <Tag color={STATUS_COLOR[status] || "default"}>{status}</Tag>
       ),
     },
+    {
+      key: "action",
+      width: 120,
+      render: (_, record) => (
+        <Button 
+          icon={<EyeOutlined />} 
+          onClick={() => openPopup(record)}
+        >
+          Details
+        </Button>
+      ),
+    },
   ];
 
   // Render component
@@ -120,10 +132,6 @@ const MatchSettingsList = () => {
           rowKey="id"
           className="match-settings-table"
           locale={{ emptyText: "No match settings found." }}
-          onRow={(record) => ({
-            onClick: () => openPopup(record),
-            style: { cursor: 'pointer' }
-          })}
         />
       </Card>
 
