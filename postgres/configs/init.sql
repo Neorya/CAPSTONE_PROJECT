@@ -24,6 +24,8 @@ CREATE TABLE capstone_app.match_setting (
     title VARCHAR(150) NOT NULL UNIQUE,
     description TEXT NOT NULL,
     is_ready BOOLEAN NOT NULL DEFAULT FALSE,
+    public_test VARCHAR(500),
+    private_test VARCHAR(500),
     
     creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id)
 );
@@ -128,34 +130,34 @@ VALUES ('Paolo', 'Gialli', 'p.gialli@capstone.it');
 -- ######################################
 
 -- Match Settings created by Teacher 1 (ID 1)
-INSERT INTO capstone_app.match_setting (title, description, is_ready, creator_id)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, public_test, private_test, creator_id)
 VALUES 
-('Standard Mode 1', 'Quick match, 5 rounds.', TRUE, 1),
-('Advanced Algebra', '15-round math challenge.', TRUE, 1);
+('Standard Mode 1', 'Quick match, 5 rounds.', TRUE, 'Input: 5, Output: 25', 'Input: 10, Output: 100', 1),
+('Advanced Algebra', '15-round math challenge.', TRUE, 'Input: x=3 y=4, Output: 7', 'Input: x=7 y=9, Output: 16', 1);
 
 -- Match Settings created by Teacher 2 (ID 2)
-INSERT INTO capstone_app.match_setting (title, description, is_ready, creator_id)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, public_test, private_test, creator_id)
 VALUES 
-('History Facts', 'Review of Roman Empire history.', FALSE, 2),
-('Geography Quiz', 'Quiz on European capitals.', TRUE, 2);
+('History Facts', 'Review of Roman Empire history.', FALSE, 'Input: Julius Caesar, Output: 44 BC', 'Input: Augustus, Output: 27 BC', 2),
+('Geography Quiz', 'Quiz on European capitals.', TRUE, 'Input: France, Output: Paris', 'Input: Germany, Output: Berlin', 2);
 
 -- Match Settings created by Teacher 3 (ID 3)
-INSERT INTO capstone_app.match_setting (title, description, is_ready, creator_id)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, public_test, private_test, creator_id)
 VALUES 
-('Science Fundamentals', 'Basics of Physics.', TRUE, 3),
-('Chemistry Equations', 'Balancing basic equations.', FALSE, 3);
+('Science Fundamentals', 'Basics of Physics.', TRUE, 'Input: mass=10kg acceleration=2m/s², Output: Force=20N', 'Input: mass=5kg acceleration=9.8m/s², Output: Force=49N', 3),
+('Chemistry Equations', 'Balancing basic equations.', FALSE, 'Input: H2+O2, Output: 2H2O', 'Input: C+O2, Output: CO2', 3);
 
 -- Match Settings created by Teacher 4 (ID 4)
-INSERT INTO capstone_app.match_setting (title, description, is_ready, creator_id)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, public_test, private_test, creator_id)
 VALUES 
-('Literature Review 1', '19th Century English novels.', TRUE, 4),
-('Grammar Practice', 'Advanced Italian grammar.', TRUE, 4);
+('Literature Review 1', '19th Century English novels.', TRUE, 'Input: Pride and Prejudice, Output: Jane Austen', 'Input: Wuthering Heights, Output: Emily Brontë', 4),
+('Grammar Practice', 'Advanced Italian grammar.', TRUE, 'Input: io mangio, Output: presente indicativo', 'Input: io ho mangiato, Output: passato prossimo', 4);
 
 -- Match Settings created by Teacher 5 (ID 5)
-INSERT INTO capstone_app.match_setting (title, description, is_ready, creator_id)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, public_test, private_test, creator_id)
 VALUES 
-('Coding Basics', 'Introduction to Python syntax.', TRUE, 5),
-('Data Structures Review', 'Review of linked lists and trees.', FALSE, 5);
+('Coding Basics', 'Introduction to Python syntax.', TRUE, 'Input: 1 2 3, Output: 6', 'Input: 5 10 15, Output: 30', 5),
+('Data Structures Review', 'Review of linked lists and trees.', FALSE, 'Input: 1 2 3, Output: Linked List', 'Input: 4 5 6, Output: Binary Tree', 5);
 
 
 
