@@ -7,16 +7,19 @@ const { Title } = Typography;
 const MatchSettingDetailsPopup = ({ visible, onClose, matchSetting }) => {
   if (!matchSetting) return null;
 
-  // Mock data for tests as they are not yet available in the API
-  const publicTests = [
-    { id: 1, input: "Input A", output: "Output A" },
-    { id: 2, input: "Input B", output: "Output B" },
-  ];
+  const parseTestString = (testString) => {
+    if (!testString) return null;
+    // Try to match "Input: ..., Output: ..." pattern
+    const match = testString.match(/Input:\s*(.*?),\s*Output:\s*(.*)/i);
+    if (match) {
+      return { input: match[1], output: match[2] };
+    }
+    // Fallback if format doesn't match
+    return { input: testString, output: '-' };
+  };
 
-  const privateTests = [
-    { id: 1, input: "Hidden 1", output: "Hidden 1" },
-    { id: 2, input: "Hidden 2", output: "Hidden 2" },
-  ];
+  const publicTest = parseTestString(matchSetting.public_test);
+  const privateTest = parseTestString(matchSetting.private_test);
 
   return (
     <Modal
@@ -42,13 +45,13 @@ const MatchSettingDetailsPopup = ({ visible, onClose, matchSetting }) => {
 
         <div className="tests-section">
           <Title level={4}>Public Tests</Title>
-          {publicTests.length > 0 ? (
+          {publicTest ? (
             <List
-              grid={{ gutter: 16, column: 2 }}
-              dataSource={publicTests}
-              renderItem={item => (
+              grid={{ gutter: 16, column: 1 }}
+              dataSource={[publicTest]}
+              renderItem={(item, index) => (
                 <List.Item>
-                  <Card size="small" title={`Test Case ${item.id}`}>
+                  <Card size="small" title={`Test Case ${index + 1}`}>
                     <p><strong>Input:</strong> {item.input}</p>
                     <p><strong>Output:</strong> {item.output}</p>
                   </Card>
@@ -62,13 +65,13 @@ const MatchSettingDetailsPopup = ({ visible, onClose, matchSetting }) => {
 
         <div className="tests-section">
           <Title level={4}>Private Tests</Title>
-          {privateTests.length > 0 ? (
+          {privateTest ? (
             <List
-              grid={{ gutter: 16, column: 2 }}
-              dataSource={privateTests}
-              renderItem={item => (
+              grid={{ gutter: 16, column: 1 }}
+              dataSource={[privateTest]}
+              renderItem={(item, index) => (
                 <List.Item>
-                  <Card size="small" title={`Test Case ${item.id}`}>
+                  <Card size="small" title={`Test Case ${index + 1}`}>
                     <p><strong>Input:</strong> {item.input}</p>
                     <p><strong>Output:</strong> {item.output}</p>
                   </Card>

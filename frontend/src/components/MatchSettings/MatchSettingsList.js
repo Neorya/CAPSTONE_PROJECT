@@ -36,6 +36,8 @@ const MatchSettingsList = () => {
           id: item.match_set_id,
           name: item.title,
           description: item.description,
+          public_test: item.public_test,
+          private_test: item.private_test,
           status: item.is_ready ? "Ready" : "Draft",
         }));
         setItems(formatted);
