@@ -25,8 +25,6 @@ class MatchSettingResponse(BaseModel):
         title: Name/title of the match setting
         description: Detailed description of the match setting
         is_ready: Readiness status (True = ready, False = draft)
-        public_test: The public tests (input and expected output)
-        private_test: The private tests (input and expected output)
         creator_id: ID of the teacher who created this setting
     """
 
@@ -36,8 +34,6 @@ class MatchSettingResponse(BaseModel):
     title: str = Field(..., description="Title of the match setting")
     description: str = Field(..., description="Detailed description")
     is_ready: bool = Field(..., description="Readiness status: true=ready, false=draft")
-    public_test: str = Field(..., description="Public tests (input and expected output)")
-    private_test: str = Field(..., description="Private tests (input and expected output)")
     creator_id: int = Field(
         ..., description="ID of the teacher who created this setting"
     )
