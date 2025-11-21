@@ -43,6 +43,7 @@ class MatchSetting(Base):
     is_ready = Column(Boolean, nullable=False, default=False)
     public_test = Column(Text, nullable=False)
     private_test = Column(Text, nullable=False)
+    reference_solution = Column(Text, nullable=False)
     creator_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.teacher.teacher_id"))
     
     # Relationship: This setting belongs to one teacher

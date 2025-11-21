@@ -27,6 +27,7 @@ class MatchSettingResponse(BaseModel):
         is_ready: Readiness status (True = ready, False = draft)
         public_test: The public tests (input and expected output)
         private_test: The private tests (input and expected output)
+        reference_solution: The reference solution code
         creator_id: ID of the teacher who created this setting
     """
 
@@ -38,6 +39,7 @@ class MatchSettingResponse(BaseModel):
     is_ready: bool = Field(..., description="Readiness status: true=ready, false=draft")
     public_test: str = Field(..., description="Public tests (input and expected output)")
     private_test: str = Field(..., description="Private tests (input and expected output)")
+    reference_solution: str = Field(..., description="Reference solution code")
     creator_id: int = Field(
         ..., description="ID of the teacher who created this setting"
     )
