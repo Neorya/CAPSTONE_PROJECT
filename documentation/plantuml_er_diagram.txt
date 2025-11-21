@@ -23,6 +23,7 @@ entity "MATCH_SETTINGS" as match_settings {
   is_ready : BOOLEAN          ' true = ready, false = draft
   public_test : VARCHAR        ' TODO: need to create a table and refer them later
   private_test : VARCHAR       ' TODO: need to create a table and refer them later
+  reference_solution : VARCHAR ' code solution
   creator_id : INTEGER <<FK>> ' FK -> TEACHER.teacher_id
 }
 
