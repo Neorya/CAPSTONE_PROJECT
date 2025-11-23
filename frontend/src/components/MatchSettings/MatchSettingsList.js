@@ -72,6 +72,7 @@ const MatchSettingsList = () => {
       width: 120,
       render: (_, record) => (
         <Button 
+          id={`btn-details-${record.id}`}
           icon={<EyeOutlined />} 
           onClick={() => openPopup(record)}
         >
@@ -95,7 +96,7 @@ const MatchSettingsList = () => {
               size="large"
             />
           </Tooltip>
-          <Title level={2} className="page-title">
+          <Title level={2} className="page-title" id="page-title">
             Match Settings
           </Title>
           <span />
@@ -111,15 +112,16 @@ const MatchSettingsList = () => {
           <Space size="middle" align="center" wrap>
             <Text strong>Filter:</Text>
             <Radio.Group
+              id="filter-radio-group"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
               className="filter-radio-group"
               optionType="button"
               buttonStyle="solid"
             >
-              <Radio.Button value="All">All</Radio.Button>
-              <Radio.Button value="Ready">Ready</Radio.Button>
-              <Radio.Button value="Draft">Draft</Radio.Button>
+              <Radio.Button id="filter-opt-all"value="All">All</Radio.Button>
+              <Radio.Button id="filter-opt-ready" value="Ready">Ready</Radio.Button>
+              <Radio.Button id="filter-opt-draft" value="Draft">Draft</Radio.Button>
             </Radio.Group>
           </Space>
         </div>

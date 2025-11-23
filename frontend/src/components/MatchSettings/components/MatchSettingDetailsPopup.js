@@ -21,7 +21,8 @@ const MatchSettingDetailsPopup = ({ visible, onClose, matchSetting }) => {
 
   return (
     <Modal
-      title={<Title level={3} style={{ margin: 0 }}>{matchSetting.name}</Title>}
+      id="match-details-modal"
+      title={<Title level={3} id="popup-header-title"style={{ margin: 0 }}>{matchSetting.name}</Title>}
       open={visible}
       onCancel={onClose}
       footer={null}
@@ -30,13 +31,16 @@ const MatchSettingDetailsPopup = ({ visible, onClose, matchSetting }) => {
     >
       <div className="popup-content">
         <div className="status-section">
-          <Tag color={matchSetting.status === 'Ready' ? 'success' : 'default'}>
+          <Tag 
+            id="popup-status-tag"
+            color={matchSetting.status === 'Ready' ? 'success' : 'default'}
+          >
             {matchSetting.status}
           </Tag>
         </div>
 
-        <Descriptions title="Description" bordered column={1}>
-          <Descriptions.Item label="Details">
+        <Descriptions title="Description" bordered column={1} id="popup-description-table">
+          <Descriptions.Item label="Details" id="popup-description-text">
             {matchSetting.description || <span style={{ color: '#999' }}>No description provided</span>}
           </Descriptions.Item>
         </Descriptions>
@@ -49,9 +53,9 @@ const MatchSettingDetailsPopup = ({ visible, onClose, matchSetting }) => {
               dataSource={[publicTest]}
               renderItem={(item, index) => (
                 <List.Item>
-                  <Card size="small" title={`Test Case ${index + 1}`}>
-                    <p><strong>Input:</strong> {item.input}</p>
-                    <p><strong>Output:</strong> {item.output}</p>
+                  <Card size="small" title={`Test Case ${index + 1}`} id={`public-test-card-${index}`}>
+                    <p><strong>Input:</strong> <span id={`public-test-${index}-input`}>{item.input}</span></p>
+                    <p><strong>Output:</strong> <span id={`public-test-${index}-output`}>{item.output}</span></p>
                   </Card>
                 </List.Item>
               )}
