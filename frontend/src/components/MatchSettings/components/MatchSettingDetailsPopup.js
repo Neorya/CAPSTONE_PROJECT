@@ -40,8 +40,10 @@ const MatchSettingDetailsPopup = ({ visible, onClose, matchSetting }) => {
         </div>
 
         <Descriptions title="Description" bordered column={1} id="popup-description-table">
-          <Descriptions.Item label="Details" id="popup-description-text">
-            {matchSetting.description || <span style={{ color: '#999' }}>No description provided</span>}
+          <Descriptions.Item label="Details">
+            <span id="popup-description-text">
+              {matchSetting.description || <span style={{ color: '#999' }}>No description provided</span>}
+            </span>
           </Descriptions.Item>
         </Descriptions>
 
