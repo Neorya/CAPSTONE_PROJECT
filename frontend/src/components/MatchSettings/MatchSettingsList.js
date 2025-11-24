@@ -38,6 +38,7 @@ const MatchSettingsList = () => {
           description: item.description,
           public_test: item.public_test,
           private_test: item.private_test,
+          reference_solution: item.reference_solution,
           status: item.is_ready ? "Ready" : "Draft",
         }));
         setItems(formatted);
