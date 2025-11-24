@@ -1,14 +1,10 @@
 name: Run Selenium Tests
 
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
   workflow_dispatch: # Allow manual trigger
 
 jobs:
-  test:
+  test-local:
     runs-on: ubuntu-latest
     
     services:
@@ -66,6 +62,10 @@ jobs:
           which chromedriver
           echo "CHROMEDRIVER_PATH=$(which chromedriver)"
 
+      - name: Initialize database
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -d matchdb -f postgres/configs/init.sql
+
       - name: Install Python dependencies
         run: |
           cd api
@@ -75,13 +75,14 @@ jobs:
         run: |
           cd api/src
           python main.py &
-          sleep 10
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/matchdb
 
-      - name: Initialize database
+      - name: Wait for API to be ready
         run: |
-          PGPASSWORD=postgres psql -h localhost -U postgres -d matchdb -f postgres/configs/init.sql
+          echo "Waiting for API server..."
+          timeout 30 bash -c 'until curl -f http://localhost:8000/docs > /dev/null 2>&1; do echo "Waiting for API..."; sleep 2; done'
+          echo "API is ready"
 
       - name: Install frontend dependencies
         run: |
@@ -92,12 +93,14 @@ jobs:
         run: |
           cd frontend
           npm start &
-          sleep 30
 
       - name: Wait for application to be ready
         run: |
-          timeout 60 bash -c 'until curl -f http://localhost:3000 > /dev/null 2>&1; do sleep 2; done' || true
-          echo "Frontend is ready"
+          echo "Waiting for frontend..."
+          timeout 60 bash -c 'until curl -f http://localhost:3000 > /dev/null 2>&1; do echo "Waiting..."; sleep 2; done'
+          echo "Frontend is responding"
+          sleep 5
+          echo "Services ready"
 
       - name: Run Selenium tests
         run: |

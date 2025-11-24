@@ -25,6 +25,18 @@ public class MatchAddTest extends BaseTest {
     public void navigateToPage() {
         // Navigate to the create match page before each test
         navigateTo("/create-match");
+        
+        // Give extra time for page to load in CI environments
+        if (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        
+        // Wait for page to be fully loaded
+        matchAddPage.isPageLoaded();
     }
     
     @Test
@@ -368,15 +380,16 @@ public class MatchAddTest extends BaseTest {
     @Order(24)
     @DisplayName("Verify at least one empty required field shows error and prevents submission")
     public void testMultipleInvalidFields() {
-        // Leave title empty (required field)
-        matchAddPage.getTitleInput().clear();
-        
-        // Set other fields to valid values
+        // Set all fields to valid values first
+        matchAddPage.setMatchTitle("");
         matchAddPage.setDifficultyLevel("Medium");
-        matchAddPage.setRevNumber(3);
+        matchAddPage.setRevNumber(1);
         matchAddPage.setDurationFirst(10);
         matchAddPage.setDurationSecond(5);
         matchAddPage.clickMatchSettingAtIndex(1);
+        
+        // Now clear the title (required field) to make form invalid
+        matchAddPage.getTitleInput().clear();
         
         // Click somewhere else to trigger validation
         matchAddPage.getDurationFirst().click();

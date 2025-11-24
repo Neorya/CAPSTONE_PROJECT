@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.SettingListingTest" time="22.382" tests="26" errors="0" skipped="0" failures="1">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.tests.MatchAddTest" time="117.269" tests="25" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -13,7 +13,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="/usr/lib/jvm/java-21-openjdk-amd64/lib"/>
-    <property name="sun.java.command" value="/home/sahar/Desktop/CP/CAPSTONE_PROJECT/test/target/surefire/surefirebooter-20251111163752721_3.jar /home/sahar/Desktop/CP/CAPSTONE_PROJECT/test/target/surefire 2025-11-11T16-37-52_585-jvmRun1 surefire-20251111163752721_1tmp surefire_0-20251111163752721_2tmp"/>
+    <property name="sun.java.command" value="/home/sahar/Desktop/CP/CAPSTONE_PROJECT/test/target/surefire/surefirebooter-20251119183217703_3.jar /home/sahar/Desktop/CP/CAPSTONE_PROJECT/test/target/surefire 2025-11-19T18-32-17_534-jvmRun1 surefire-20251119183217703_1tmp surefire_0-20251119183217703_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="/home/sahar/Desktop/CP/CAPSTONE_PROJECT/test/target/test-classes:/home/sahar/Desktop/CP/CAPSTONE_PROJECT/test/target/classes:/home/sahar/.m2/repository/org/junit/jupiter/junit-jupiter/5.10.0/junit-jupiter-5.10.0.jar:/home/sahar/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.10.0/junit-jupiter-api-5.10.0.jar:/home/sahar/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/sahar/.m2/repository/org/junit/platform/junit-platform-commons/1.10.0/junit-platform-commons-1.10.0.jar:/home/sahar/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/sahar/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.10.0/junit-jupiter-params-5.10.0.jar:/home/sahar/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.10.0/junit-jupiter-engine-5.10.0.jar:/home/sahar/.m2/repository/org/junit/platform/junit-platform-engine/1.10.0/junit-platform-engine-1.10.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-java/4.25.0/selenium-java-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-api/4.25.0/selenium-api-4.25.0.jar:/home/sahar/.m2/repository/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-chrome-driver/4.25.0/selenium-chrome-driver-4.25.0.jar:/home/sahar/.m2/repository/com/google/auto/service/auto-service-annotations/1.1.1/auto-service-annotations-1.1.1.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-chromium-driver/4.25.0/selenium-chromium-driver-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-json/4.25.0/selenium-json-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-manager/4.25.0/selenium-manager-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-devtools-v127/4.25.0/selenium-devtools-v127-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-devtools-v128/4.25.0/selenium-devtools-v128-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-devtools-v129/4.25.0/selenium-devtools-v129-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-devtools-v85/4.25.0/selenium-devtools-v85-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-edge-driver/4.25.0/selenium-edge-driver-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-firefox-driver/4.25.0/selenium-firefox-driver-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-http/4.25.0/selenium-http-4.25.0.jar:/home/sahar/.m2/repository/dev/failsafe/failsafe/3.3.2/failsafe-3.3.2.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-ie-driver/4.25.0/selenium-ie-driver-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-remote-driver/4.25.0/selenium-remote-driver-4.25.0.jar:/home/sahar/.m2/repository/com/google/guava/guava/33.3.0-jre/guava-33.3.0-jre.jar:/home/sahar/.m2/repository/com/google/guava/failureaccess/1.0.2/failureaccess-1.0.2.jar:/home/sahar/.m2/repository/com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar:/home/sahar/.m2/repository/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar:/home/sahar/.m2/repository/org/checkerframework/checker-qual/3.43.0/checker-qual-3.43.0.jar:/home/sahar/.m2/repository/com/google/errorprone/error_prone_annotations/2.28.0/error_prone_annotations-2.28.0.jar:/home/sahar/.m2/repository/com/google/j2objc/j2objc-annotations/3.0.0/j2objc-annotations-3.0.0.jar:/home/sahar/.m2/repository/io/opentelemetry/semconv/opentelemetry-semconv/1.25.0-alpha/opentelemetry-semconv-1.25.0-alpha.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-api/1.42.1/opentelemetry-api-1.42.1.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-context/1.42.1/opentelemetry-context-1.42.1.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-exporter-logging/1.42.1/opentelemetry-exporter-logging-1.42.1.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-sdk-common/1.42.1/opentelemetry-sdk-common-1.42.1.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-sdk-extension-autoconfigure-spi/1.42.1/opentelemetry-sdk-extension-autoconfigure-spi-1.42.1.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-sdk-extension-autoconfigure/1.42.1/opentelemetry-sdk-extension-autoconfigure-1.42.1.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-api-incubator/1.42.1-alpha/opentelemetry-api-incubator-1.42.1-alpha.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-sdk-trace/1.42.1/opentelemetry-sdk-trace-1.42.1.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-sdk/1.42.1/opentelemetry-sdk-1.42.1.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-sdk-metrics/1.42.1/opentelemetry-sdk-metrics-1.42.1.jar:/home/sahar/.m2/repository/io/opentelemetry/opentelemetry-sdk-logs/1.42.1/opentelemetry-sdk-logs-1.42.1.jar:/home/sahar/.m2/repository/net/bytebuddy/byte-buddy/1.15.1/byte-buddy-1.15.1.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-os/4.25.0/selenium-os-4.25.0.jar:/home/sahar/.m2/repository/org/apache/commons/commons-exec/1.4.0/commons-exec-1.4.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-safari-driver/4.25.0/selenium-safari-driver-4.25.0.jar:/home/sahar/.m2/repository/org/seleniumhq/selenium/selenium-support/4.25.0/selenium-support-4.25.0.jar:"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -22,19 +22,19 @@
     <property name="java.specification.vendor" value="Oracle Corporation"/>
     <property name="java.version.date" value="2025-07-15"/>
     <property name="java.home" value="/usr/lib/jvm/java-21-openjdk-amd64"/>
-    <property name="file.separator" value="/"/>
     <property name="basedir" value="/home/sahar/Desktop/CP/CAPSTONE_PROJECT/test"/>
+    <property name="file.separator" value="/"/>
     <property name="java.vm.compressedOopsMode" value="Zero based"/>
     <property name="line.separator" value="&#10;"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
-    <property name="surefire.real.class.path" value="/home/sahar/Desktop/CP/CAPSTONE_PROJECT/test/target/surefire/surefirebooter-20251111163752721_3.jar"/>
+    <property name="surefire.real.class.path" value="/home/sahar/Desktop/CP/CAPSTONE_PROJECT/test/target/surefire/surefirebooter-20251119183217703_3.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="21.0.8+9-Ubuntu-0ubuntu124.04.1"/>
     <property name="user.name" value="sahar"/>
     <property name="stdout.encoding" value="UTF-8"/>
     <property name="path.separator" value=":"/>
-    <property name="os.version" value="6.14.0-34-generic"/>
+    <property name="os.version" value="6.14.0-35-generic"/>
     <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
     <property name="file.encoding" value="UTF-8"/>
     <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
@@ -45,6 +45,7 @@
     <property name="user.dir" value="/home/sahar/Desktop/CP/CAPSTONE_PROJECT/test"/>
     <property name="os.arch" value="amd64"/>
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="headless" value="true"/>
     <property name="native.encoding" value="UTF-8"/>
     <property name="java.library.path" value="/usr/java/packages/lib:/usr/lib/x86_64-linux-gnu/jni:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/usr/lib/jni:/lib:/usr/lib"/>
     <property name="java.vm.info" value="mixed mode, sharing"/>
@@ -54,48 +55,35 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="testPageLoads" classname="com.example.SettingListingTest" time="1.757">
-    <system-err><![CDATA[Nov 11, 2025 4:37:55 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+  <testcase name="testPageLoads" classname="com.example.tests.MatchAddTest" time="5.133">
+    <system-err><![CDATA[Nov 19, 2025 6:32:20 PM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
 WARNING: Unable to find CDP implementation matching 141
-Nov 11, 2025 4:37:55 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
+Nov 19, 2025 6:32:20 PM org.openqa.selenium.chromium.ChromiumDriver lambda$new$5
 WARNING: Unable to find version of CDP to use for 141.0.7390.107. You may need to include a dependency on a specific version of the CDP using something similar to `org.seleniumhq.selenium:selenium-devtools-v86:4.25.0` where the version ("v86") matches the version of the chromium-based browser you're using and the version number of the artifact is the same as Selenium's.
 ]]></system-err>
   </testcase>
-  <testcase name="testAllPageElementsDisplayed" classname="com.example.SettingListingTest" time="0.784"/>
-  <testcase name="testPageTitle" classname="com.example.SettingListingTest" time="0.482"/>
-  <testcase name="testSubheaderText" classname="com.example.SettingListingTest" time="0.429"/>
-  <testcase name="testBackToHomeButton" classname="com.example.SettingListingTest" time="0.448"/>
-  <testcase name="testTableDisplayed" classname="com.example.SettingListingTest" time="0.453"/>
-  <testcase name="testTableHeaders" classname="com.example.SettingListingTest" time="0.552"/>
-  <testcase name="testTableHasRows" classname="com.example.SettingListingTest" time="0.457"/>
-  <testcase name="testDefaultFilterSelection" classname="com.example.SettingListingTest" time="0.56"/>
-  <testcase name="testSelectReadyFilter" classname="com.example.SettingListingTest" time="1.274"/>
-  <testcase name="testSelectDraftFilter" classname="com.example.SettingListingTest" time="1.171"/>
-  <testcase name="testSelectAllFilter" classname="com.example.SettingListingTest" time="1.472"/>
-  <testcase name="testSettingNamesDisplayed" classname="com.example.SettingListingTest" time="0.495"/>
-  <testcase name="testStatusTagsDisplayed" classname="com.example.SettingListingTest" time="0.462"/>
-  <testcase name="testGetSettingNameByIndex" classname="com.example.SettingListingTest" time="0.393"/>
-  <testcase name="testGetStatusByIndex" classname="com.example.SettingListingTest" time="0.387"/>
-  <testcase name="testRowCount" classname="com.example.SettingListingTest" time="0.404"/>
-  <testcase name="testFindSettingByName" classname="com.example.SettingListingTest" time="0.445"/>
-  <testcase name="testCountSettingsByStatus" classname="com.example.SettingListingTest" time="0.446"/>
-  <testcase name="testReadyFilterShowsOnlyReadySettings" classname="com.example.SettingListingTest" time="1.794"/>
-  <testcase name="testDraftFilterShowsOnlyDraftSettings" classname="com.example.SettingListingTest" time="1.693"/>
-  <testcase name="testPaginationPreviousButton" classname="com.example.SettingListingTest" time="0.516">
-    <failure message="Previous page button should be disabled on first page ==&gt; expected: &lt;false&gt; but was: &lt;true&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: Previous page button should be disabled on first page ==> expected: <false> but was: <true>
-	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
-	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
-	at org.junit.jupiter.api.AssertFalse.failNotFalse(AssertFalse.java:63)
-	at org.junit.jupiter.api.AssertFalse.assertFalse(AssertFalse.java:36)
-	at org.junit.jupiter.api.Assertions.assertFalse(Assertions.java:235)
-	at com.example.SettingListingTest.testPaginationPreviousButton(SettingListingTest.java:316)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
-]]></failure>
-  </testcase>
-  <testcase name="testCurrentPageNumber" classname="com.example.SettingListingTest" time="0.466"/>
-  <testcase name="testFilterLabelDisplayed" classname="com.example.SettingListingTest" time="0.436"/>
-  <testcase name="testFilterNavigationMaintainsState" classname="com.example.SettingListingTest" time="1.34"/>
-  <testcase name="testTableDataIntegrity" classname="com.example.SettingListingTest" time="0.893"/>
+  <testcase name="testCreateButtonState" classname="com.example.tests.MatchAddTest" time="4.063"/>
+  <testcase name="testCancelButton" classname="com.example.tests.MatchAddTest" time="3.793"/>
+  <testcase name="testSetDifficultyLevel" classname="com.example.tests.MatchAddTest" time="4.319"/>
+  <testcase name="testSetDurationFirst" classname="com.example.tests.MatchAddTest" time="4.21"/>
+  <testcase name="testSetDurationSecond" classname="com.example.tests.MatchAddTest" time="3.835"/>
+  <testcase name="testSelectMatchSetting" classname="com.example.tests.MatchAddTest" time="3.836"/>
+  <testcase name="testBackToHomeButton" classname="com.example.tests.MatchAddTest" time="3.727"/>
+  <testcase name="testPageTitle" classname="com.example.tests.MatchAddTest" time="3.675"/>
+  <testcase name="testSetMatchTitle" classname="com.example.tests.MatchAddTest" time="4.413"/>
+  <testcase name="testCreateMatch" classname="com.example.tests.MatchAddTest" time="7.436"/>
+  <testcase name="testReviewNumberBelowMinimum" classname="com.example.tests.MatchAddTest" time="4.236"/>
+  <testcase name="testReviewNumberAboveMaximum" classname="com.example.tests.MatchAddTest" time="4.145"/>
+  <testcase name="testNegativeReviewNumber" classname="com.example.tests.MatchAddTest" time="4.169"/>
+  <testcase name="testDurationFirstZero" classname="com.example.tests.MatchAddTest" time="4.236"/>
+  <testcase name="testDurationFirstNegative" classname="com.example.tests.MatchAddTest" time="4.179"/>
+  <testcase name="testDurationSecondZero" classname="com.example.tests.MatchAddTest" time="4.083"/>
+  <testcase name="testDurationSecondNegative" classname="com.example.tests.MatchAddTest" time="4.013"/>
+  <testcase name="testShortTitle" classname="com.example.tests.MatchAddTest" time="6.496"/>
+  <testcase name="testEmptyTitle" classname="com.example.tests.MatchAddTest" time="5.259"/>
+  <testcase name="testMissingDifficultyLevel" classname="com.example.tests.MatchAddTest" time="5.245"/>
+  <testcase name="testMissingMatchSetting" classname="com.example.tests.MatchAddTest" time="6.203"/>
+  <testcase name="testMultipleInvalidFields" classname="com.example.tests.MatchAddTest" time="5.759"/>
+  <testcase name="testErrorMessageContent" classname="com.example.tests.MatchAddTest" time="4.188"/>
+  <testcase name="testFormSubmissionWithAllInvalidInputs" classname="com.example.tests.MatchAddTest" time="4.653"/>
 </testsuite>

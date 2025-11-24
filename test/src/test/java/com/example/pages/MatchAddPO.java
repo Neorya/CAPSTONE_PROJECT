@@ -4,6 +4,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import java.time.Duration;
 
 /**
  * Page Object for the Create Match page.
@@ -11,6 +14,7 @@ import org.openqa.selenium.WebElement;
  */
 public class MatchAddPO {
     private WebDriver driver;
+    private WebDriverWait wait;
     
     // Locators
     private static final String PAGE_TITLE_XPATH = "//h2[contains(text(),'Create New Match')]";
@@ -26,12 +30,15 @@ public class MatchAddPO {
     private static final String MATCH_SETTINGS_RADIO_GROUP_ID = "match-settings-radio-group";
     private static final String MATCH_SETTINGS_LIST_XPATH = "//div[@class='ant-space css-dev-only-do-not-override-hofb1t ant-space-vertical ant-space-gap-row-small ant-space-gap-col-small']";
     private static final String TITLE_ERROR_XPATH = "//div[@id='title_help']";
-    private static final String REV_NUMBER_ERROR_XPATH = "//div[@id='review_number_help']";
-    private static final String DURATION_FIRST_ERROR_XPATH = "//div[@id='duration_phase1_help']";
-    private static final String DURATION_SECOND_ERROR_XPATH = "//div[@id='duration_phase2_help']";
+    private static final String REV_NUMBER_ERROR_XPATH = "//div[@id='review_number_help']//div[contains(@class,'ant-form-item-explain-error')]";
+    private static final String DURATION_FIRST_ERROR_XPATH = "//div[@id='duration_phase1_help']//div[contains(@class,'ant-form-item-explain-error')]";
+    private static final String DURATION_SECOND_ERROR_XPATH = "//div[@id='duration_phase2_help']//div[contains(@class,'ant-form-item-explain-error')]";
     
     public MatchAddPO(WebDriver driver) {
         this.driver = driver;
+        // Use longer timeout in CI environments
+        int waitTimeout = (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) ? 30 : 10;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(waitTimeout));
     }
     
     // Actions
@@ -58,7 +65,10 @@ public class MatchAddPO {
     
     public void setDifficultyLevel(String level) {
         getDifficultyLevelBox().click();
-        getDifficultyDropdownOption(level).click();
+        // Wait for dropdown to appear and option to be clickable
+        String xpath = "//div[@class='ant-select-item-option-content' and text()='" + level + "']";
+        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpath)));
+        option.click();
     }
     
     public void setRevNumber(int revNumber) {
@@ -80,23 +90,23 @@ public class MatchAddPO {
     
     // Element getters
     public WebElement getPageTitle() {
-        return driver.findElement(By.xpath(PAGE_TITLE_XPATH));
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(PAGE_TITLE_XPATH)));
     }
     
     public WebElement getBackToHomeButton() {
-        return driver.findElement(By.id(BACK_TO_HOME_BUTTON_ID));
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(BACK_TO_HOME_BUTTON_ID)));
     }
     
     public WebElement getTitleInput() {
-        return driver.findElement(By.id(TITLE_INPUT_ID));
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(TITLE_INPUT_ID)));
     }
     
     public WebElement getCreateButton() {
-        return driver.findElement(By.id(SAVE_MATCH_BUTTON_ID));
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(SAVE_MATCH_BUTTON_ID)));
     }
     
     public WebElement getCancelButton() {
-        return driver.findElement(By.id(RESET_BUTTON_ID));
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(RESET_BUTTON_ID)));
     }
     
     public WebElement getDifficultyLevelBox() {
@@ -105,11 +115,6 @@ public class MatchAddPO {
     
     public WebElement getSelectedDifficultyLevel() {
         return driver.findElement(By.xpath(DIFFICULTY_LEVEL_SELECTED_XPATH));
-    }
-    
-    private WebElement getDifficultyDropdownOption(String level) {
-        String xpath = "//div[@class='ant-select-item-option-content' and text()='" + level + "']";
-        return driver.findElement(By.xpath(xpath));
     }
     
     public WebElement getRevNumber() {

@@ -14,7 +14,7 @@ public class settingListingPO {
     private WebDriverWait wait;
     
     // Locators for Page Header
-    private By backToHomeButton = By.xpath("//button[contains(@class, 'ant-btn')]//span[text()='Back to Home']");
+    private By backToHomeButton = By.id("back-to-home-button");
     private By pageTitle = By.xpath("//h2[contains(@class, 'page-title') and text()='Match Settings']");
     
     // Locators for Subheader
@@ -48,7 +48,9 @@ public class settingListingPO {
     // Constructor
     public settingListingPO(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        // Use longer timeout in CI environments
+        int waitTimeout = (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) ? 30 : 10;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(waitTimeout));
     }
     
     // Page Header Methods
@@ -57,7 +59,11 @@ public class settingListingPO {
     }
     
     public boolean isBackToHomeButtonDisplayed() {
-        return driver.findElement(backToHomeButton).isDisplayed();
+        try {
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(backToHomeButton)).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
     }
     
     public String getPageTitle() {
@@ -65,16 +71,24 @@ public class settingListingPO {
     }
     
     public boolean isPageTitleDisplayed() {
-        return driver.findElement(pageTitle).isDisplayed();
+        try {
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(pageTitle)).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
     }
     
     // Subheader Methods
     public String getSubheaderText() {
-        return driver.findElement(subheaderText).getText();
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(subheaderText)).getText();
     }
     
     public boolean isSubheaderDisplayed() {
-        return driver.findElement(subheaderText).isDisplayed();
+        try {
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(subheaderText)).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
     }
     
     // Filter Methods
@@ -103,7 +117,11 @@ public class settingListingPO {
     }
     
     public boolean isFilterLabelDisplayed() {
-        return driver.findElement(filterLabel).isDisplayed();
+        try {
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(filterLabel)).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
     }
     
     // Table Methods
@@ -215,10 +233,22 @@ public class settingListingPO {
     // Verification Methods
     public boolean isPageLoaded() {
         try {
+            // Wait for the page title first
             wait.until(ExpectedConditions.visibilityOfElementLocated(pageTitle));
-            wait.until(ExpectedConditions.visibilityOfElementLocated(matchSettingsTable));
+            
+            // Wait for back button to be visible
+            wait.until(ExpectedConditions.visibilityOfElementLocated(backToHomeButton));
+            
+            // Wait for the table container (even if empty)
+            wait.until(ExpectedConditions.presenceOfElementLocated(matchSettingsTable));
+            
+            // Additional check to ensure back button is interactive
+            wait.until(ExpectedConditions.elementToBeClickable(backToHomeButton));
+            
             return true;
         } catch (Exception e) {
+            System.err.println("Page load failed: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }

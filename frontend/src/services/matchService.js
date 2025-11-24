@@ -1,4 +1,4 @@
-import {API_BASE_URL, API_ENDPOINTS} from './config';
+import { API_BASE_URL, API_ENDPOINTS } from './config';
 
 /**
  * Create a new match
@@ -25,32 +25,70 @@ export const createMatch = async (matchData) => {
 
     if (!response.ok) {
       let errorMessage = `Failed to create match: ${response.statusText}`;
-      
-      // Try to parse JSON error response, fallback to text if parsing fails
+      const status = response.status;
       const contentType = response.headers.get('content-type');
+
       try {
         if (contentType && contentType.includes('application/json')) {
           const errorData = await response.json();
-          errorMessage = errorData.detail || errorData.message || errorMessage;
+          const serverMessage = errorData.detail || errorData.message;
+
+          if (status === 400) {
+            errorMessage = serverMessage || 'Invalid match data. Please check your inputs.';
+          } else if (status === 404) {
+            errorMessage = 'The selected match setting was not found. It may have been deleted.';
+          } else if (status === 409) {
+            errorMessage = serverMessage || 'A match with this configuration already exists.';
+          } else if (status >= 500) {
+            errorMessage = 'Server error. Please try again later.';
+          } else {
+            errorMessage = serverMessage || `Failed to create match: ${response.statusText}`;
+          }
         } else {
-          // Non-JSON response (HTML, plain text, etc.)
           const errorText = await response.text();
-          if (errorText) {
-            errorMessage = `Server error: ${errorText.substring(0, 200)}`;
+          if (errorText && status >= 500) {
+            errorMessage = 'Server error. Please try again later.';
+          } else {
+            errorMessage = errorText.substring(0, 200) + (errorText.length > 200 ? '...' : '') || `Failed to create match: ${response.statusText}`;
           }
         }
       } catch (parseError) {
-        // If parsing fails, keep the default error message
-        console.warn('Failed to parse error response:', parseError);
+        if (status >= 500) {
+          errorMessage = 'Server error. Please try again later.';
+        } else if (status >= 400) {
+          errorMessage = 'Invalid request. Please check your inputs.';
+        } else {
+          errorMessage = `Failed to create match: ${response.statusText}`;
+        }
       }
-      
+
       throw new Error(errorMessage);
     }
 
     return await response.json();
   } catch (error) {
-    console.error('Error creating match:', error);
     throw error;
   }
 };
 
+/**
+ * TODO: Delete this function after removal of all the usages of it
+ * Fetch the list of matches
+ * @returns {Promise<Array<Object>>} List of match objects
+ */
+export const getMatches = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.MATCHES}`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error fetching matches: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data; // Return the list of matches
+  } catch (error) {
+    throw error;
+  }
+}

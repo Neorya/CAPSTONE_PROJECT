@@ -1,0 +1,65 @@
+@startuml
+' Theme and skin
+hide circle
+skinparam linetype ortho
+skinparam entity {
+  BorderColor #2b3a42
+  BackgroundColor #f7f9fb
+}
+
+' Sprint 1 entities
+entity "TEACHER" as teacher {
+  * teacher_id : INTEGER <<PK>>
+  --
+  name : VARCHAR
+  email : VARCHAR
+}
+
+entity "MATCH_SETTINGS" as match_settings {
+  * match_set_id : INTEGER <<PK>>
+  --
+  title : VARCHAR
+  description : TEXT
+  is_ready : BOOLEAN          ' true = ready, false = draft
+  public_test : VARCHAR        ' TODO: need to create a table and refer them later
+  private_test : VARCHAR       ' TODO: need to create a table and refer them later
+  reference_solution : VARCHAR ' code solution
+  creator_id : INTEGER <<FK>> ' FK -> TEACHER.teacher_id
+}
+
+entity "MATCH" as match {
+  * match_id : INTEGER <<PK>>
+  --
+  title : VARCHAR
+  match_set_id : INTEGER <<FK>>
+  creator_id : INTEGER <<FK>> ' FK -> TEACHER.teacher_id
+  difficulty_level : INTEGER
+  review_number : INTEGER
+  duration_phase1 : INTEGER   ' minutes
+  duration_phase2 : INTEGER   ' minutes
+}
+
+entity "GAME_SESSION" as game_session {
+  * game_ses_id : INTEGER <<PK>>
+  --
+  creator_id : INTEGER <<FK>> ' FK -> TEACHER.teacher_id
+  title : VARCHAR
+  status : ENUM(active, inactive)
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+' Relationships
+teacher ||--o{ match_settings : "creates (1,n)"
+teacher ||--o{ match : "creates (1,n)"
+teacher ||--o{ game_session : "creates (1,n)"
+
+match_settings ||--o{ match : "template for (1,n)"
+game_session ||--o{ match : "contains (1,n)"
+
+' Notes for clarification
+note bottom of match
+duration_phase1 and duration_phase2 are expressed in minutes.
+end note
+
+@enduml
