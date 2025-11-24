@@ -29,4 +29,4 @@ Thumbs.db
 .cursor/
 
 # Builds
-tets/target/
+test/target/
