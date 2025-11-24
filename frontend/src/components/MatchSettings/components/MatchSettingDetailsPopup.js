@@ -14,6 +14,7 @@ const MatchSettingDetailsPopup = ({ visible, onClose, matchSetting }) => {
     if (match) {
       return { input: match[1], output: match[2] };
     }
+    return null;
   };
 
   const publicTest = parseTestString(matchSetting.public_test);
