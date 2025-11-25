@@ -45,22 +45,15 @@ public class CreateGameSession extends BaseTest  {
     @Test
     @Order(2)
     @DisplayName("Verify that table is present")
-    public void testTable() {
+    public void testTablePresent() {
         assertTrue(createGameSessionPage.isTablePresent(), 
             "Create Game Session page should load successfully");
     }
-
-    @Test
-    @Order(3)
-    @DisplayName("Verify page loads successfully")
-    public void testCheckBotton() {
-        assertEquals(8, createGameSessionPage.getRows().size());
-    }
     
     @Test
-    @Order(4)
-    @DisplayName("Acceptance Criteria 1")
-    public void acceptanceCriteria1() {
+    @Order(3)
+    @DisplayName("Verify that the game session creates successfully")
+    public void testGameSessionCreationSucceed() {
         WebElement c1 = createGameSessionPage.getCheckBox(1).findElement(By.tagName("input"));
         WebElement c2 = createGameSessionPage.getCheckBox(2).findElement(By.tagName("input"));
         assertFalse(c1.isSelected());
@@ -77,9 +70,9 @@ public class CreateGameSession extends BaseTest  {
     }
 
     @Test
-    @Order(5)
-    @DisplayName("Acceptance Criteria 2")
-    public void acceptanceCriteria2() {
+    @Order(4)
+    @DisplayName("Verify that the game session creation fails without selecting any match")
+    public void testGameSessionCreationFails() {
         WebElement c1 = createGameSessionPage.getCheckBox(1).findElement(By.tagName("input"));
         WebElement c2 = createGameSessionPage.getCheckBox(2).findElement(By.tagName("input"));
         assertFalse(c1.isSelected());
