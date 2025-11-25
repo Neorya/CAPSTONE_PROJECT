@@ -1,10 +1,22 @@
 package com.example.tests;
 
-import org.junit.jupiter.api.*;
-import org.openqa.selenium.WebElement;
 import java.util.List;
-import com.example.pages.*;
-import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.openqa.selenium.WebElement;
+
+import com.example.pages.settingListingPO;
 
 /**
  * Test class for Match Settings Listing page functionality.
@@ -93,12 +105,13 @@ public class SettingListingTest extends BaseTest {
     @Order(7)
     @DisplayName("Verify table has correct number of headers")
     public void testTableHeaders() {
-        assertEquals(2, settingListingPage.getTableHeaderCount(), 
-            "Table should have 2 headers (Name and Status)");
-        assertTrue(settingListingPage.isNameColumnHeaderDisplayed(), 
+        assertEquals(3, settingListingPage.getTableHeaderCount(),
+            "Table should have 3 headers (Name, Status, and Details)");
+        assertTrue(settingListingPage.isNameColumnHeaderDisplayed(),
             "Name column header should be displayed");
-        assertTrue(settingListingPage.isStatusColumnHeaderDisplayed(), 
+        assertTrue(settingListingPage.isStatusColumnHeaderDisplayed(),
             "Status column header should be displayed");
+        // Note: Details column may not have a text header, so we don't check for it specifically
     }
     
     @Test
@@ -340,6 +353,242 @@ public class SettingListingTest extends BaseTest {
             assertTrue(status.equals("Ready") || status.equals("Draft"), 
                 "Status at index " + i + " should be either 'Ready' or 'Draft'");
         }
+    }
+    
+    @Test
+    @Order(27)
+    @DisplayName("Verify details buttons are displayed")
+    public void testDetailsButtonsDisplayed() {
+        List<WebElement> buttons = settingListingPage.getDetailsButtons();
+        int rowCount = settingListingPage.getTableRowCount();
+        
+        assertFalse(buttons.isEmpty(), 
+            "Details buttons list should not be empty");
+        assertEquals(rowCount, buttons.size(), 
+            "Number of details buttons should match number of table rows");
+    }
+    
+    @Test
+    @Order(28)
+    @DisplayName("Verify clicking details button opens modal")
+    public void testClickDetailsButtonOpensModal() {
+        // Click the first details button
+        settingListingPage.clickFirstDetailsButton();
+        
+        // Wait for modal to appear
+        settingListingPage.waitForModalToAppear();
+        
+        // Verify modal is displayed
+        assertTrue(settingListingPage.isModalDisplayed(), 
+            "Modal should be displayed after clicking details button");
+    }
+    
+    @Test
+    @Order(29)
+    @DisplayName("Verify modal contains all required elements")
+    public void testModalContainsAllElements() {
+        // Click the first details button
+        settingListingPage.clickFirstDetailsButton();
+        settingListingPage.waitForModalToAppear();
+        
+        // Verify all modal elements are present
+        assertTrue(settingListingPage.verifyModalElements(), 
+            "All modal elements should be displayed");
+    }
+    
+    @Test
+    @Order(30)
+    @DisplayName("Verify modal title is displayed")
+    public void testModalTitleDisplayed() {
+        settingListingPage.clickFirstDetailsButton();
+        settingListingPage.waitForModalToAppear();
+        
+        assertTrue(settingListingPage.isModalTitleDisplayed(), 
+            "Modal title should be displayed");
+        
+        String title = settingListingPage.getModalTitle();
+        assertNotNull(title, "Modal title should not be null");
+        assertFalse(title.trim().isEmpty(), "Modal title should not be empty");
+    }
+    
+    @Test
+    @Order(31)
+    @DisplayName("Verify modal status tag is displayed")
+    public void testModalStatusTagDisplayed() {
+        settingListingPage.clickFirstDetailsButton();
+        settingListingPage.waitForModalToAppear();
+        
+        assertTrue(settingListingPage.isModalStatusTagDisplayed(), 
+            "Modal status tag should be displayed");
+        
+        String status = settingListingPage.getModalStatus();
+        assertNotNull(status, "Modal status should not be null");
+        assertTrue(status.equals("Ready") || status.equals("Draft"), 
+            "Modal status should be either 'Ready' or 'Draft'");
+    }
+    
+    @Test
+    @Order(32)
+    @DisplayName("Verify modal description is displayed")
+    public void testModalDescriptionDisplayed() {
+        settingListingPage.clickFirstDetailsButton();
+        settingListingPage.waitForModalToAppear();
+        
+        assertTrue(settingListingPage.isModalDescriptionTableDisplayed(), 
+            "Modal description table should be displayed");
+        assertTrue(settingListingPage.isModalDescriptionDisplayed(), 
+            "Modal description text should be displayed");
+        
+        String description = settingListingPage.getModalDescription();
+        assertNotNull(description, "Modal description should not be null");
+    }
+    
+    @Test
+    @Order(33)
+    @DisplayName("Verify modal reference solution is displayed")
+    public void testModalReferenceSolutionDisplayed() {
+        settingListingPage.clickFirstDetailsButton();
+        settingListingPage.waitForModalToAppear();
+        
+        assertTrue(settingListingPage.isModalReferenceSolutionTableDisplayed(), 
+            "Modal reference solution table should be displayed");
+        assertTrue(settingListingPage.isModalReferenceSolutionDisplayed(), 
+            "Modal reference solution text should be displayed");
+        
+        String referenceSolution = settingListingPage.getModalReferenceSolution();
+        assertNotNull(referenceSolution, "Modal reference solution should not be null");
+    }
+    
+    @Test
+    @Order(34)
+    @DisplayName("Verify modal public tests section is displayed")
+    public void testModalPublicTestsDisplayed() {
+        settingListingPage.clickFirstDetailsButton();
+        settingListingPage.waitForModalToAppear();
+        
+        assertTrue(settingListingPage.isPublicTestsSectionDisplayed(), 
+            "Public tests section should be displayed");
+        
+        int publicTestCount = settingListingPage.getPublicTestCardsCount();
+        assertTrue(publicTestCount > 0, 
+            "At least one public test card should be displayed");
+    }
+    
+    @Test
+    @Order(35)
+    @DisplayName("Verify modal private tests section is displayed")
+    public void testModalPrivateTestsDisplayed() {
+        settingListingPage.clickFirstDetailsButton();
+        settingListingPage.waitForModalToAppear();
+        
+        assertTrue(settingListingPage.isPrivateTestsSectionDisplayed(), 
+            "Private tests section should be displayed");
+    }
+    
+    @Test
+    @Order(36)
+    @DisplayName("Verify public test card contents")
+    public void testPublicTestCardContents() {
+        settingListingPage.clickFirstDetailsButton();
+        settingListingPage.waitForModalToAppear();
+        
+        // Verify first public test card
+        assertTrue(settingListingPage.isPublicTestCardDisplayed(0), 
+            "First public test card should be displayed");
+        
+        String input = settingListingPage.getPublicTestInput(0);
+        String output = settingListingPage.getPublicTestOutput(0);
+        
+        assertNotNull(input, "Public test input should not be null");
+        assertNotNull(output, "Public test output should not be null");
+        assertFalse(input.trim().isEmpty(), "Public test input should not be empty");
+        assertFalse(output.trim().isEmpty(), "Public test output should not be empty");
+    }
+    
+    @Test
+    @Order(37)
+    @DisplayName("Verify modal close button is displayed")
+    public void testModalCloseButtonDisplayed() {
+        settingListingPage.clickFirstDetailsButton();
+        settingListingPage.waitForModalToAppear();
+        
+        assertTrue(settingListingPage.isModalCloseButtonDisplayed(), 
+            "Modal close button should be displayed");
+    }
+    
+    @Test
+    @Order(38)
+    @DisplayName("Verify closing modal with close button")
+    public void testCloseModalWithCloseButton() {
+        settingListingPage.clickFirstDetailsButton();
+        settingListingPage.waitForModalToAppear();
+        
+        assertTrue(settingListingPage.isModalDisplayed(), 
+            "Modal should be displayed before closing");
+        
+        // Close the modal
+        settingListingPage.closeModal();
+        settingListingPage.waitForModalToDisappear();
+        
+        assertFalse(settingListingPage.isModalDisplayed(), 
+            "Modal should not be displayed after closing");
+    }
+    
+    @Test
+    @Order(39)
+    @DisplayName("Verify modal data matches table data")
+    public void testModalDataMatchesTableData() {
+        // Get data from the first row in the table
+        String tableName = settingListingPage.getSettingNameByIndex(0);
+        String tableStatus = settingListingPage.getStatusByIndex(0);
+        
+        // Open the modal
+        settingListingPage.clickFirstDetailsButton();
+        settingListingPage.waitForModalToAppear();
+        
+        // Get data from the modal
+        String modalTitle = settingListingPage.getModalTitle();
+        String modalStatus = settingListingPage.getModalStatus();
+        
+        // Verify they match
+        assertEquals(tableName, modalTitle, 
+            "Modal title should match the setting name from the table");
+        assertEquals(tableStatus, modalStatus, 
+            "Modal status should match the status from the table");
+        
+        // Close modal for cleanup
+        settingListingPage.closeModal();
+    }
+    
+    @Test
+    @Order(40)
+    @DisplayName("Verify opening different details shows different data")
+    public void testDifferentDetailsShowDifferentData() {
+        int rowCount = settingListingPage.getTableRowCount();
+        
+        // Only run if we have at least 2 rows
+        if (rowCount < 2) {
+            return; // Skip test if not enough data
+        }
+        
+        // Get first setting's name
+        String firstName = settingListingPage.getSettingNameByIndex(0);
+        settingListingPage.clickDetailsButtonByIndex(0);
+        settingListingPage.waitForModalToAppear();
+        String firstModalTitle = settingListingPage.getModalTitle();
+        assertEquals(firstName, firstModalTitle, 
+            "First modal title should match first setting name");
+        settingListingPage.closeModal();
+        settingListingPage.waitForModalToDisappear();
+        
+        // Get second setting's name
+        String secondName = settingListingPage.getSettingNameByIndex(1);
+        settingListingPage.clickDetailsButtonByIndex(1);
+        settingListingPage.waitForModalToAppear();
+        String secondModalTitle = settingListingPage.getModalTitle();
+        assertEquals(secondName, secondModalTitle, 
+            "Second modal title should match second setting name");
+        settingListingPage.closeModal();
     }
     
     @AfterAll
