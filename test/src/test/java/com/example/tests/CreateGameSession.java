@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.example.pages.CreateGameSessionPO;
 import com.example.pages.MatchAddPO;
@@ -54,7 +55,7 @@ public class CreateGameSession extends BaseTest  {
     @Order(3)
     @DisplayName("Verify page loads successfully")
     public void testCheckBotton() {
-        assertEquals(createGameSessionPage.getRows().size(), 2);
+        assertEquals(8, createGameSessionPage.getRows().size());
     }
     
     @Test
@@ -71,7 +72,8 @@ public class CreateGameSession extends BaseTest  {
         c2.click();
         assertEquals(c2.isSelected(), true);
         createGameSessionPage.getButton().click();
-        Alert alert = driver.switchTo().alert();
+
+        WebElement alert = createGameSessionPage.waitSuccessAlert();
         assertEquals(alert.getText(), "The game session has been created");
     }
 
@@ -84,7 +86,7 @@ public class CreateGameSession extends BaseTest  {
         assertEquals(c1.isSelected(), false);
         assertEquals(c2.isSelected(), false);
         createGameSessionPage.getButton().click();
-        Alert alert = driver.switchTo().alert();
+        WebElement alert = createGameSessionPage.waitErrorAlert();
         assertEquals(alert.getText(), "You should select at least a match to create a game session");
     }
     
