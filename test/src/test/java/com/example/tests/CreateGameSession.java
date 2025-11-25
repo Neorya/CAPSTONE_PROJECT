@@ -12,9 +12,11 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer;
 import com.example.pages.CreateGameSessionPO;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CreateGameSession extends BaseTest  {
     private static CreateGameSessionPO createGameSessionPage;
 
