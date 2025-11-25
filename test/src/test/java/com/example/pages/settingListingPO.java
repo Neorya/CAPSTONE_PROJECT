@@ -1,12 +1,13 @@
 package com.example.pages;
 
+import java.time.Duration;
+import java.util.List;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import java.time.Duration;
-import java.util.List;
 
 public class settingListingPO {
     
@@ -34,6 +35,7 @@ public class settingListingPO {
     private By tableHeaders = By.xpath("//thead[@class='ant-table-thead']//th");
     private By nameColumnHeader = By.xpath("//th[text()='Name']");
     private By statusColumnHeader = By.xpath("//th[text()='Status']");
+    private By detailsColumnHeader = By.xpath("//th[text()='Details']");
     private By tableRows = By.xpath("//tbody[@class='ant-table-tbody']//tr");
     
     // Locators for Table Cells
@@ -44,6 +46,26 @@ public class settingListingPO {
     private By previousPageButtonParent = By.xpath("//li[contains(@class, 'ant-pagination-prev')]");
     private By nextPageButton = By.xpath("//li[contains(@class, 'ant-pagination-next')]//button");
     private By currentPageNumber = By.xpath("//li[contains(@class, 'ant-pagination-item-active')]");
+    
+    // Locators for Details Button (dynamic ID pattern: btn-details-{id})
+    private By detailsButtons = By.xpath("//button[starts-with(@id, 'btn-details-')]");
+    
+    // Locators for Details Popup/Modal
+    private By modal = By.xpath("//div[@class='ant-modal-content']");
+    private By modalHeader = By.id("popup-header-title");
+    private By modalCloseButton = By.xpath("//button[@aria-label='Close']");
+    private By modalStatusTag = By.id("popup-status-tag");
+    private By modalDescriptionText = By.id("popup-description-text");
+    private By modalDescriptionTable = By.id("popup-description-table");
+    private By modalReferenceSolutionTable = By.id("popup-reference-solution-table");
+    private By modalReferenceSolutionText = By.id("popup-reference-solution-text");
+    
+    // Locators for Public Tests Section
+    private By publicTestsSection = By.xpath("//div[@class='tests-section'][.//h4[text()='Public Tests']]");
+    private By publicTestCards = By.xpath("//div[starts-with(@id, 'public-test-card-')]");
+    
+    // Locators for Private Tests Section  
+    private By privateTestsSection = By.xpath("//div[@class='tests-section'][.//h4[text()='Private Tests']]");
     
     // Constructor
     public settingListingPO(WebDriver driver) {
@@ -144,6 +166,14 @@ public class settingListingPO {
     public boolean isStatusColumnHeaderDisplayed() {
         return driver.findElement(statusColumnHeader).isDisplayed();
     }
+
+    public boolean isDetailsColumnHeaderDisplayed() {
+        try {
+            return driver.findElement(detailsColumnHeader).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
     
     public List<WebElement> getTableRows() {
         return wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(tableRows));
@@ -228,6 +258,185 @@ public class settingListingPO {
     
     public String getCurrentPageNumber() {
         return driver.findElement(currentPageNumber).getText();
+    }
+    
+    // Details Button Methods
+    public List<WebElement> getDetailsButtons() {
+        return driver.findElements(detailsButtons);
+    }
+    
+    public void clickDetailsButtonByIndex(int index) {
+        List<WebElement> buttons = getDetailsButtons();
+        if (index >= 0 && index < buttons.size()) {
+            // Get the button ID to create a proper By locator for fresh element lookup
+            String buttonId = buttons.get(index).getAttribute("id");
+            By buttonLocator = By.id(buttonId);
+            wait.until(ExpectedConditions.elementToBeClickable(buttonLocator)).click();
+        }
+    }
+    
+    public void clickDetailsButtonById(String buttonId) {
+        By buttonLocator = By.id(buttonId);
+        wait.until(ExpectedConditions.elementToBeClickable(buttonLocator)).click();
+    }
+    
+    public void clickFirstDetailsButton() {
+        clickDetailsButtonByIndex(0);
+    }
+    
+    public boolean isDetailsButtonDisplayedByIndex(int index) {
+        try {
+            List<WebElement> buttons = getDetailsButtons();
+            return index >= 0 && index < buttons.size() && buttons.get(index).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    // Modal/Popup Methods
+    public boolean isModalDisplayed() {
+        try {
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(modal)).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    public void waitForModalToAppear() {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(modal));
+    }
+    
+    public void waitForModalToDisappear() {
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(modal));
+    }
+    
+    public void closeModal() {
+        wait.until(ExpectedConditions.elementToBeClickable(modalCloseButton)).click();
+    }
+    
+    public String getModalTitle() {
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(modalHeader)).getText();
+    }
+    
+    public boolean isModalTitleDisplayed() {
+        try {
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(modalHeader)).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    public String getModalStatus() {
+        return driver.findElement(modalStatusTag).getText();
+    }
+    
+    public boolean isModalStatusTagDisplayed() {
+        try {
+            return driver.findElement(modalStatusTag).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    public String getModalDescription() {
+        return driver.findElement(modalDescriptionText).getText();
+    }
+    
+    public boolean isModalDescriptionDisplayed() {
+        try {
+            return driver.findElement(modalDescriptionText).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    public boolean isModalDescriptionTableDisplayed() {
+        try {
+            return driver.findElement(modalDescriptionTable).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    public String getModalReferenceSolution() {
+        return driver.findElement(modalReferenceSolutionText).getText();
+    }
+    
+    public boolean isModalReferenceSolutionDisplayed() {
+        try {
+            return driver.findElement(modalReferenceSolutionText).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    public boolean isModalReferenceSolutionTableDisplayed() {
+        try {
+            return driver.findElement(modalReferenceSolutionTable).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    public boolean isPublicTestsSectionDisplayed() {
+        try {
+            return driver.findElement(publicTestsSection).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    public boolean isPrivateTestsSectionDisplayed() {
+        try {
+            return driver.findElement(privateTestsSection).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    public List<WebElement> getPublicTestCards() {
+        return driver.findElements(publicTestCards);
+    }
+    
+    public int getPublicTestCardsCount() {
+        return getPublicTestCards().size();
+    }
+    
+    public String getPublicTestInput(int testIndex) {
+        By inputLocator = By.id("public-test-" + testIndex + "-input");
+        return driver.findElement(inputLocator).getText();
+    }
+    
+    public String getPublicTestOutput(int testIndex) {
+        By outputLocator = By.id("public-test-" + testIndex + "-output");
+        return driver.findElement(outputLocator).getText();
+    }
+    
+    public boolean isPublicTestCardDisplayed(int testIndex) {
+        try {
+            By cardLocator = By.id("public-test-card-" + testIndex);
+            return driver.findElement(cardLocator).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    public boolean isModalCloseButtonDisplayed() {
+        try {
+            return driver.findElement(modalCloseButton).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    public boolean verifyModalElements() {
+        return isModalTitleDisplayed() 
+            && isModalStatusTagDisplayed() 
+            && isModalDescriptionTableDisplayed() 
+            && isModalReferenceSolutionTableDisplayed()
+            && isPublicTestsSectionDisplayed() 
+            && isPrivateTestsSectionDisplayed()
+            && isModalCloseButtonDisplayed();
     }
     
     // Verification Methods
