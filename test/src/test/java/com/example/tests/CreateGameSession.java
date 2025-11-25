@@ -2,8 +2,7 @@ package com.example.tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.List;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +11,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
+
 
 import com.example.pages.CreateGameSessionPO;
 
@@ -62,13 +61,13 @@ public class CreateGameSession extends BaseTest  {
     public void acceptanceCriteria1() {
         WebElement c1 = createGameSessionPage.getCheckBox(1).findElement(By.tagName("input"));
         WebElement c2 = createGameSessionPage.getCheckBox(2).findElement(By.tagName("input"));
-        assertEquals(c1.isSelected(), false);
-        assertEquals(c2.isSelected(), false);
+        assertFalse(c1.isSelected());
+        assertFalse(c2.isSelected());
         c1.click();
         assertTrue(c1.isSelected());
-        assertEquals(c2.isSelected(), false);
+        assertFalse(c2.isSelected());
         c2.click();
-        assertEquals(c2.isSelected(), true);
+        assertTrue(c2.isSelected());
         createGameSessionPage.getButton().click();
 
         WebElement alert = createGameSessionPage.waitSuccessAlert();
@@ -81,8 +80,8 @@ public class CreateGameSession extends BaseTest  {
     public void acceptanceCriteria2() {
         WebElement c1 = createGameSessionPage.getCheckBox(1).findElement(By.tagName("input"));
         WebElement c2 = createGameSessionPage.getCheckBox(2).findElement(By.tagName("input"));
-        assertEquals(c1.isSelected(), false);
-        assertEquals(c2.isSelected(), false);
+        assertFalse(c1.isSelected());
+        assertFalse(c2.isSelected());
         createGameSessionPage.getButton().click();
         WebElement alert = createGameSessionPage.waitErrorAlert();
         assertEquals(alert.getText(), "You should select at least a match to create a game session");
