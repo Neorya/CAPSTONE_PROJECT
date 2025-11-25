@@ -65,7 +65,7 @@ public class CreateGameSession extends BaseTest  {
         assertEquals(c1.isSelected(), false);
         assertEquals(c2.isSelected(), false);
         c1.click();
-        assertEquals(c1.isSelected(), true);
+        assertTrue(c1.isSelected());
         assertEquals(c2.isSelected(), false);
         c2.click();
         assertEquals(c2.isSelected(), true);
