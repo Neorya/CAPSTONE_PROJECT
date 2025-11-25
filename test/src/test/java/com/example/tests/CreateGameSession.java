@@ -15,7 +15,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.example.pages.CreateGameSessionPO;
-import com.example.pages.MatchAddPO;
 
 public class CreateGameSession extends BaseTest  {
     private static CreateGameSessionPO createGameSessionPage;
