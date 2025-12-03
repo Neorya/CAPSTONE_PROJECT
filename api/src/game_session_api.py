@@ -129,7 +129,7 @@ async def create_game_session(
             detail=f"Server error"
         )
 
-    return new_game_session
+    return GameSessionResponse(game_id=new_game_session.game_id)
 
 @router.get(
     "/game_session/by_creator/{creator_id}",
