@@ -292,7 +292,6 @@ async def update_game_session(
     """
     Update the details of an existing game session.
     """
-
     # check that the game session exists
     game_session = db.query(GameSession).filter(GameSession.game_id == game_id).first()
     if not game_session:
