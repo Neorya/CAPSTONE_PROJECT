@@ -191,14 +191,14 @@ async def list_game_sessions_by_creator(
     "/game_session/{game_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a game session",
-    description="Deletes a game session and its associated matches."
+    description="Deletes a game session and its associated match links."
 )
 async def delete_game_session(
     game_id: int,
     db: Session = Depends(get_db)
 ) -> None:
     """
-    Delete a game session and its associated matches.
+    Delete a game session and its associated match links.
     """
     
     # check that the game session exists
