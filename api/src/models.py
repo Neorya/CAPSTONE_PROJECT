@@ -3,7 +3,7 @@ This file defines Python classes (ORM) that map to database tables.
 """
 
 import enum
-from sqlalchemy import Boolean, Column, Integer, String, Text, ForeignKey, Enum
+from sqlalchemy import Boolean, Column, Integer, String, Text, ForeignKey, Enum, DateTime
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -83,15 +83,12 @@ class MatchesForGame(Base):
     match_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.match.match_id"))
     game_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.game_session.game_id"))
 
-class GameStatusEnum(enum.Enum):
-    active = "active"
-    inactive = "inactive"
-
 class GameSession(Base):
     __tablename__ = "game_session"
     __table_args__ = {'schema': SCHEMA_NAME}
 
     game_id = Column(Integer, primary_key=True)
-    status = Column(Enum(GameStatusEnum, name='game_status', schema='capstone_app'), nullable=False, default=GameStatusEnum.inactive)
+    name = Column(String(150), nullable=False)
+    start_date = Column(DateTime, nullable=False)
     creator_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.teacher.teacher_id"))
     creator = relationship("Teacher", back_populates="game_sessions")

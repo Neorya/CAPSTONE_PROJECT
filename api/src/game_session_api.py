@@ -4,7 +4,8 @@ Matches API Module
 Provides endpoints for creating, browsing matches.
 """
 
-from typing import List
+from typing import List, Optional
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -25,7 +26,7 @@ class GameSessionCreate(BaseModel):
     match_id: List[int] = Field(..., description="List of the Match Ids to insert in the Game Session")
     name: str = Field(..., description="Name of the Game Session")
     creator_id: int = Field(..., description="Id of the Teachet that creates the Game Session")
-    start_date: str = Field(..., description="Start date of the Game Session")
+    start_date: datetime = Field(..., description="Start date of the Game Session")
     
 class GameSessionResponse(BaseModel):
     """
@@ -41,16 +42,23 @@ class GameSessionDetail(BaseModel):
     game_id: int = Field(..., description="Id of the Game Session")
     name: str = Field(..., description="Name of the Game Session")
     creator_id: int = Field(..., description="Id of the Teacher that created the Game Session")
-    start_date: str = Field(..., description="Start date of the Game Session")
+    start_date: datetime = Field(..., description="Start date of the Game Session")
     match_id: List[int] = Field(..., description="List of Match Ids associated with the Game Session")
 
 class GameSessionUpdate(BaseModel):
     """
     Request model for updating an existing Game Session.
+    All fields are optional, so that partial updates are possible.
     """
-    match_id: List[int] = Field(..., description="List of the Match Ids to insert in the Game Session")
-    name: str = Field(..., description="Name of the Game Session")
-    start_date: str = Field(..., description="Start date of the Game Session")
+    match_id: Optional[List[int]] = Field(
+        None, description="List of the Match Ids to insert in the Game Session"
+    )
+    name: Optional[str] = Field(
+        None, description="Name of the Game Session"
+    )
+    start_date: Optional[datetime] = Field(
+        None, description="Start date of the Game Session"
+    )
 
 # ============================================================================
 # Router
@@ -273,6 +281,7 @@ async def clone_game_session(
 @router.put(
     "/game_session/{game_id}",
     status_code=status.HTTP_200_OK,
+    response_model=GameSessionDetail,
     summary="Update a game session",
     description="Updates the details of an existing game session."
 )
@@ -284,7 +293,7 @@ async def update_game_session(
     """
     Update the details of an existing game session.
     """
-    
+
     # check that the game session exists
     game_session = db.query(GameSession).filter(GameSession.game_id == game_id).first()
     if not game_session:
@@ -292,54 +301,78 @@ async def update_game_session(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Game session with id {game_id} not found"
         )
-        
-    # validate new match list:
-    # 1) at least one match is required
-    if len(game_session_data.match_id) <= 0:
-         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Request error, at least one match setting is required"
-        )
-         
-    # 2) check that all provided match ids exist
-    matches = db.query(Match).filter(Match.match_id.in_(game_session_data.match_id)).all()
-    
-    # update name and start date
-    game_session.name = game_session_data.name
-    game_session.start_date = game_session_data.start_date
-    
-    # replace the match links
-    try:
-        # remove previous match links
-        db.query(MatchesForGame).filter(MatchesForGame.game_id == game_id).delete(synchronize_session=False)    
-        # synchronize_session tells SQLAlchemy how to handle the session state (we set it to False for performance since we are deleting all links)
-        
-        # add new match links
-        for match in matches:
-            match_link = MatchesForGame(
-                game_id=game_session.game_id,
-                match_id=match.match_id
+
+    # update simple fields if provided
+    if game_session_data.name is not None:
+        game_session.name = game_session_data.name
+
+    if game_session_data.start_date is not None:
+        game_session.start_date = game_session_data.start_date
+
+    # update matches only if match_id is provided
+    if game_session_data.match_id is not None:
+        if len(game_session_data.match_id) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Request error, at least one match setting is required"
             )
-            db.add(match_link)
-            
+
+        # validate matches exist
+        matches = db.query(Match).filter(
+            Match.match_id.in_(game_session_data.match_id)
+        ).all()
+
+        if len(matches) != len(game_session_data.match_id):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Request error, one or more match IDs do not exist"
+            )
+
+        # replace match links
+        try:
+            db.query(MatchesForGame).filter(
+                MatchesForGame.game_id == game_id
+            ).delete(synchronize_session=False)
+
+            for match in matches:
+                match_link = MatchesForGame(
+                    game_id=game_session.game_id,
+                    match_id=match.match_id
+                )
+                db.add(match_link)
+
+        except Exception:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Server error while updating game session matches"
+            )
+
+    # commit everything 
+    try:
         db.commit()
         db.refresh(game_session)
-        
     except Exception:
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Server error while updating game session"
         )
-        
+
+    # get current match ids for response
+    current_links = db.query(MatchesForGame).filter(
+        MatchesForGame.game_id == game_id
+    ).all()
+    match_ids = [link.match_id for link in current_links]
+
     return GameSessionDetail(
         game_id=game_session.game_id,
         name=game_session.name,
         creator_id=game_session.creator_id,
         start_date=game_session.start_date,
-        match_id=game_session_data.match_id
+        match_id=match_ids
     )
-    
+   
 @router.get(
     "/game_session/{game_id}",
     response_model=GameSessionDetail,
