@@ -224,7 +224,6 @@ async def delete_game_session(
             detail="Server error while deleting game session"
         )
         
-    return
     
 @router.post(
     "/game_session/{game_id}/clone",
