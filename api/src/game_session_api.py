@@ -304,9 +304,19 @@ async def update_game_session(
 
     # update simple fields if provided
     if game_session_data.name is not None:
+        if not game_session_data.name.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Game session name cannot be empty"
+            )
         game_session.name = game_session_data.name
 
     if game_session_data.start_date is not None:
+        if game_session_data.start_date < datetime.utcnow():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Start date cannot be in the past"
+            )
         game_session.start_date = game_session_data.start_date
 
     # update matches only if match_id is provided
