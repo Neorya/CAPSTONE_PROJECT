@@ -25,7 +25,7 @@ class GameSessionCreate(BaseModel):
     """
     match_id: List[int] = Field(..., description="List of the Match Ids to insert in the Game Session")
     name: str = Field(..., description="Name of the Game Session")
-    creator_id: int = Field(..., description="Id of the Teachet that creates the Game Session")
+    creator_id: int = Field(..., description="Id of the Teacher that creates the Game Session")
     start_date: datetime = Field(..., description="Start date of the Game Session")
     
 class GameSessionResponse(BaseModel):
