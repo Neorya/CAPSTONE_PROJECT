@@ -17,6 +17,7 @@ services:
     networks:
       - backend
     # added port for local debugging
+    # TODO REMOVE BEFORE PRODUCTION
     ports:
       - "5432:5432"
     #Without this the api endpoint can try to reach postgres before It's ready to accept connection
