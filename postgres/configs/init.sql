@@ -54,11 +54,11 @@ CREATE TABLE capstone_app.match (
 -- Creation of the game session table: (User story 3)
 
 DROP TABLE IF EXISTS capstone_app.game_session;
-CREATE TYPE capstone_app.game_status AS ENUM ('active', 'inactive');
 
 CREATE TABLE capstone_app.game_session (
     game_id SERIAL PRIMARY KEY,
-    status capstone_app.game_status NOT NULL DEFAULT 'inactive',
+    name VARCHAR(150) NOT NULL,
+    start_date TIMESTAMP NOT NULL,
     creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id) NOT NULL
 );
 
@@ -195,13 +195,13 @@ VALUES
 -- INSERT DATA INTO GAME_SESSION TABLE (5 RECORDS)
 -- ######################################
 
-INSERT INTO capstone_app.game_session (status, creator_id)
+INSERT INTO capstone_app.game_session (name, start_date, creator_id)
 VALUES 
-('active', 1),
-('inactive', 2),
-('active', 3),
-('inactive', 4),
-('active', 5);
+('Spring Semester Game Session', '2024-01-15 09:00:00', 1),
+('Summer Workshop Session', '2024-01-16 10:30:00', 2),
+('Fall Competition Session', '2024-01-17 14:00:00', 3),
+('Winter Training Session', '2024-01-18 11:00:00', 4),
+('Annual Championship Session', '2024-01-19 15:30:00', 5);
 
 
 
@@ -211,22 +211,22 @@ VALUES
 
 INSERT INTO capstone_app.matches_for_game (match_id, game_id)
 VALUES
--- Game Session 1 (active) - Teacher 1
+-- Game Session 1 - Teacher 1
 (1, 1),
 (2, 1),
 
--- Game Session 2 (inactive) - Teacher 2
+-- Game Session 2 - Teacher 2
 (3, 2),
 (4, 2),
 
--- Game Session 3 (active) - Teacher 3
+-- Game Session 3 - Teacher 3
 (5, 3),
 (6, 3),
 
--- Game Session 4 (inactive) - Teacher 4
+-- Game Session 4 - Teacher 4
 (7, 4),
 (8, 4),
 
--- Game Session 5 (active) - Teacher 5
+-- Game Session 5 - Teacher 5
 (9, 5),
 (10, 5);
