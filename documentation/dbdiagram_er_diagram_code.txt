@@ -29,7 +29,8 @@ duration_phase2 integer [not null] // in minutes
 
 Table game_session {
 game_id integer [primary key]
-status varchar [not null, default: 'inactive'] // ENUM: 'active', 'inactive'
+name varchar [not null]
+start_date timestamp [not null]
 creator_id integer [not null] // FK -> teacher.teacher_id
 }
 
