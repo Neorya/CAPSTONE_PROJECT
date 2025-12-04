@@ -75,9 +75,9 @@ const JoinGameSession = () => {
           </Text>
         </div>
 
-        <div style={{ marginTop: '20px' }}>
+        <div>
           {fetchingSession ? (
-            <div style={{ textAlign: 'center', padding: '20px' }}>
+            <div>
               <Spin tip="Looking for games..." />
             </div>
           ) : gameSession ? (
@@ -88,8 +88,8 @@ const JoinGameSession = () => {
               loading={joining}
             />
           ) : (
-            <div style={{ textAlign: 'center', padding: '40px 0' }}>
-              <Text type="secondary" style={{ fontSize: '16px' }}>
+            <div>
+              <Text type="secondary">
                 No game session available
               </Text>
             </div>

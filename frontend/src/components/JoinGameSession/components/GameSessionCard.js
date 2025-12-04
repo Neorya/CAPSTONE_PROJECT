@@ -12,7 +12,7 @@ const GameSessionCard = ({ name, time, onJoin, loading }) => {
         </Text>
       </div>
 
-      <div style={{ margin: '10px 0' }}>
+      <div>
         <Text strong>
           {name} at {time}
         </Text>

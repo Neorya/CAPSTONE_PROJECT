@@ -1,7 +1,7 @@
 
 import { API_BASE_URL, API_ENDPOINTS } from "./config";
 
-export async function joiGameSession(gameId, studentId) {
+export async function joinGameSession(gameId, studentId) {
   try {
     const url = new URL(API_ENDPOINTS.JOIN_GAME, API_BASE_URL);
     const res = await fetch(url.toString(), {
