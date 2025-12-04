@@ -11,7 +11,12 @@ User Story 3: Teacher starts game session and views joined students and matches
 
 from typing import List, Dict, Any
 from datetime import datetime
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
+from sqlalchemy.orm import Session
+from pydantic import BaseModel, Field, field_validator
+
+
+from database import get_db
 
 # Import Pydantic models
 from models import (
@@ -23,101 +28,41 @@ from models import (
     GameSessionStartResponse,
 )
 
-# ============================================================================
-# MOCK DATA - REMOVE AFTER CONNECTING TO DATABASE
-# ============================================================================
-# This mock data mirrors the init.sql sample data for testing purposes.
-# TODO: Replace with actual database queries using SQLAlchemy ORM
 
-MOCK_STUDENTS: Dict[int, Dict[str, Any]] = {
-    1: {"student_id": 1, "email": "mario.rossi@studenti.it", "first_name": "Mario", "last_name": "Rossi", "score": 95},
-    2: {"student_id": 2, "email": "sara.bianchi@studenti.it", "first_name": "Sara", "last_name": "Bianchi", "score": 78},
-    3: {"student_id": 3, "email": "andrea.verdi@studenti.it", "first_name": "Andrea", "last_name": "Verdi", "score": 55},
-    4: {"student_id": 4, "email": "chiara.neri@studenti.it", "first_name": "Chiara", "last_name": "Neri", "score": 88},
-    5: {"student_id": 5, "email": "luca.gialli@studenti.it", "first_name": "Luca", "last_name": "Gialli", "score": 62},
-    6: {"student_id": 6, "email": "elena.ferri@studenti.it", "first_name": "Elena", "last_name": "Ferri", "score": 72},
-    7: {"student_id": 7, "email": "marco.conti@studenti.it", "first_name": "Marco", "last_name": "Conti", "score": 81},
-    8: {"student_id": 8, "email": "giulia.romano@studenti.it", "first_name": "Giulia", "last_name": "Romano", "score": 90},
-    9: {"student_id": 9, "email": "francesco.marino@studenti.it", "first_name": "Francesco", "last_name": "Marino", "score": 67},
-    10: {"student_id": 10, "email": "alessia.costa@studenti.it", "first_name": "Alessia", "last_name": "Costa", "score": 85},
-}
 
-MOCK_MATCHES: Dict[int, Dict[str, Any]] = {
-    1: {"match_id": 1, "title": "Standard Match - Class 5A", "match_set_id": 1, "creator_id": 1, "difficulty_level": 1, "review_number": 5, "duration_phase1": 7, "duration_phase2": 10},
-    2: {"match_id": 2, "title": "Standard Match - Class 5B", "match_set_id": 1, "creator_id": 1, "difficulty_level": 1, "review_number": 5, "duration_phase1": 7, "duration_phase2": 10},
-    3: {"match_id": 3, "title": "Functions Lab - Group 1", "match_set_id": 4, "creator_id": 2, "difficulty_level": 4, "review_number": 3, "duration_phase1": 10, "duration_phase2": 5},
-    4: {"match_id": 4, "title": "Functions Lab - Group 2", "match_set_id": 4, "creator_id": 2, "difficulty_level": 4, "review_number": 3, "duration_phase1": 10, "duration_phase2": 5},
-    5: {"match_id": 5, "title": "Variable Declarations - Section A", "match_set_id": 5, "creator_id": 3, "difficulty_level": 3, "review_number": 4, "duration_phase1": 15, "duration_phase2": 10},
-    6: {"match_id": 6, "title": "Variable Declarations - Section B", "match_set_id": 5, "creator_id": 3, "difficulty_level": 3, "review_number": 4, "duration_phase1": 15, "duration_phase2": 10},
-    7: {"match_id": 7, "title": "If Statement - Group 1", "match_set_id": 8, "creator_id": 4, "difficulty_level": 5, "review_number": 3, "duration_phase1": 10, "duration_phase2": 5},
-    8: {"match_id": 8, "title": "If Statement - Group 2", "match_set_id": 8, "creator_id": 4, "difficulty_level": 5, "review_number": 3, "duration_phase1": 10, "duration_phase2": 5},
-    9: {"match_id": 9, "title": "Pointers Basics - Section A", "match_set_id": 9, "creator_id": 5, "difficulty_level": 8, "review_number": 3, "duration_phase1": 15, "duration_phase2": 10},
-    10: {"match_id": 10, "title": "Pointers Basics - Section B", "match_set_id": 9, "creator_id": 5, "difficulty_level": 8, "review_number": 3, "duration_phase1": 15, "duration_phase2": 10},
-}
+class Student(BaseModel):
+    student_id: int = Field(..., description="Unique identifier for the student")
+    email: str = Field(..., description="Email address of the student")
+    first_name: str = Field(..., description="First name of the student")
+    last_name: str = Field(..., description="Last name of the student")
+    score: int = Field(..., description="Score of the student")
 
-MOCK_GAME_SESSIONS: Dict[int, Dict[str, Any]] = {
-    1: {"game_id": 1, "name": "Spring Semester Game Session", "start_date": datetime(2024, 1, 15, 9, 0, 0), "creator_id": 1, "is_active": False},
-    2: {"game_id": 2, "name": "Summer Workshop Session", "start_date": datetime(2024, 1, 16, 10, 30, 0), "creator_id": 2, "is_active": False},
-    3: {"game_id": 3, "name": "Fall Competition Session", "start_date": datetime(2024, 1, 17, 14, 0, 0), "creator_id": 3, "is_active": True},
-    4: {"game_id": 4, "name": "Winter Training Session", "start_date": datetime(2024, 1, 18, 11, 0, 0), "creator_id": 4, "is_active": False},
-    5: {"game_id": 5, "name": "Annual Championship Session", "start_date": datetime(2024, 1, 19, 15, 30, 0), "creator_id": 5, "is_active": False},
-}
 
-# Maps game_id -> list of match_ids
-MOCK_MATCHES_FOR_GAME: Dict[int, List[int]] = {
-    1: [1, 2],
-    2: [3, 4],
-    3: [5, 6],
-    4: [7, 8],
-    5: [9, 10],
-}
+class GameSession(BaseModel):
+    game_id: int = Field(..., description="Unique identifier for the game session")
+    name: str = Field(..., description="Name of the game session")
+    start_date: datetime = Field(..., description="Start date and time of the game session")
+    creator_id: int = Field(..., description="ID of the teacher who created the session")
+    is_active: bool = Field(..., description="Indicates if the session is active")
 
-# Maps game_id -> list of {student_id, assigned_match_id}
-MOCK_STUDENT_JOIN_GAME: Dict[int, List[Dict[str, Any]]] = {
-    1: [
-        {"student_id": 1, "assigned_match_id": None},
-        {"student_id": 2, "assigned_match_id": None},
-        {"student_id": 3, "assigned_match_id": None},
-        {"student_id": 4, "assigned_match_id": None},
-        {"student_id": 5, "assigned_match_id": None},
-    ],
-    2: [
-        {"student_id": 1, "assigned_match_id": None},
-        {"student_id": 3, "assigned_match_id": None},
-        {"student_id": 5, "assigned_match_id": None},
-        {"student_id": 6, "assigned_match_id": None},
-        {"student_id": 7, "assigned_match_id": None},
-        {"student_id": 8, "assigned_match_id": None},
-    ],
-    3: [
-        {"student_id": 2, "assigned_match_id": 5},
-        {"student_id": 4, "assigned_match_id": 6},
-        {"student_id": 6, "assigned_match_id": 5},
-        {"student_id": 8, "assigned_match_id": 6},
-        {"student_id": 9, "assigned_match_id": 5},
-        {"student_id": 10, "assigned_match_id": 6},
-    ],
-    4: [
-        {"student_id": 1, "assigned_match_id": None},
-        {"student_id": 2, "assigned_match_id": None},
-        {"student_id": 7, "assigned_match_id": None},
-        {"student_id": 9, "assigned_match_id": None},
-    ],
-    5: [
-        {"student_id": 3, "assigned_match_id": None},
-        {"student_id": 4, "assigned_match_id": None},
-        {"student_id": 5, "assigned_match_id": None},
-        {"student_id": 6, "assigned_match_id": None},
-        {"student_id": 7, "assigned_match_id": None},
-        {"student_id": 8, "assigned_match_id": None},
-        {"student_id": 9, "assigned_match_id": None},
-        {"student_id": 10, "assigned_match_id": None},
-    ],
-}
+class Match(BaseModel):
+    match_id: int = Field(..., description="Unique identifier for the match")
+    title: str = Field(..., description="Title of the match")
+    match_set_id: int = Field(..., description="ID of the parent Match Setting")
+    creator_id: int = Field(..., description="ID of the teacher")
+    difficulty_level: int = Field(..., description="Difficulty level")
+    review_number: int = Field(..., description="Number of reviews")
+    duration_phase1: int = Field(..., description="Duration of phase 1 in minutes")
+    duration_phase2: int = Field(..., description="Duration of phase 2 in minutes")
 
-# ============================================================================
-# END OF MOCK DATA
-# ============================================================================
+class StudentJoinGame(BaseModel):
+    student_id: int = Field(..., description="ID of the student")
+    assigned_match_id: int | None = Field(None, description="ID of the assigned match")
+
+class MatchForGame(BaseModel):
+    game_id: int = Field(..., description="ID of the game session")
+    match_id: int = Field(..., description="ID of the match")
+
 
 
 # ============================================================================
@@ -175,7 +120,7 @@ router = APIRouter(
     description="Retrieves complete game session details including joined students, matches, and active status."
 )
 async def get_game_session_full_details(
-    game_id: int
+    game_id: int, db: Session = Depends(get_db)
 ) -> GameSessionFullDetailResponse:
     """
     Get full details of a game session including:
@@ -185,52 +130,63 @@ async def get_game_session_full_details(
     - Total student count
     """
     # TODO: Replace with database query
-    # game_session = db.query(GameSession).filter(GameSession.game_id == game_id).first()
+    game_session = db.query(GameSession).filter(GameSession.game_id == game_id).first()
     
-    if game_id not in MOCK_GAME_SESSIONS:
+    if not game_session:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Game session with id {game_id} not found"
         )
     
-    game_session = MOCK_GAME_SESSIONS[game_id]
-    
     # Get joined students
     # TODO: Replace with database join query
-    joined_records = MOCK_STUDENT_JOIN_GAME.get(game_id, [])
+
+    joined_records = db.query(Student).join(StudentJoinGame, Student.student_id == StudentJoinGame.student_id).filter(StudentJoinGame.game_id == game_id).all()
+
     students = []
     for record in joined_records:
-        student_data = MOCK_STUDENTS.get(record["student_id"])
+        student_data = {
+            "student_id": record.student_id,
+            "first_name": record.first_name,
+            "last_name": record.last_name,
+            "email": record.email
+        }
         if student_data:
             students.append(StudentResponse(
-                student_id=student_data["student_id"],
-                first_name=student_data["first_name"],
-                last_name=student_data["last_name"],
-                email=student_data["email"]
+                student_id=student_data["student_id"],  #should be student_data.student_id
+                first_name=student_data["first_name"],  #should be student_data.first_name
+                last_name=student_data["last_name"],  #should be student_data.last_name
+                email=student_data["email"]  #should be student_data.email
             ))
     
     # Get matches for this game session
     # TODO: Replace with database join query
-    match_ids = MOCK_MATCHES_FOR_GAME.get(game_id, [])
+    match_ids = db.query(Match).join(MatchForGame, Match.match_id == MatchForGame.match_id).filter(MatchForGame.game_id == game_id).all()
     matches = []
     for match_id in match_ids:
-        match_data = MOCK_MATCHES.get(match_id)
+        match_data =    {
+            "match_id": match_id.match_id,
+            "title": match_id.title,
+            "difficulty_level": match_id.difficulty_level,
+            "duration_phase1": match_id.duration_phase1,
+            "duration_phase2": match_id.duration_phase2
+        }
         if match_data:
             matches.append(MatchInfoResponse(
-                match_id=match_data["match_id"],
-                title=match_data["title"],
-                difficulty_level=match_data["difficulty_level"],
-                duration_phase1=match_data["duration_phase1"],
-                duration_phase2=match_data["duration_phase2"]
+                match_id=match_data["match_id"],  
+                title=match_data["title"],  
+                difficulty_level=match_data["difficulty_level"],  
+                duration_phase1=match_data["duration_phase1"],  
+                duration_phase2=match_data["duration_phase2"]  
             ))
     
     return GameSessionFullDetailResponse(
-        game_id=game_session["game_id"],
-        name=game_session["name"],
-        start_date=game_session["start_date"],
-        creator_id=game_session["creator_id"],
-        is_active=game_session["is_active"],
-        total_students=len(students),
+        game_id=game_session["game_id"], #should be game_session.game_id?
+        name=game_session["name"],  #should be game_session.name?
+        start_date=game_session["start_date"],  #should be game_session.start_date?
+        creator_id=game_session["creator_id"],  #should be game_session.creator_id?
+        is_active=game_session["is_active"],    #should be game_session.is_active?
+        total_students=len(students),   
         students=students,
         matches=matches
     )
@@ -244,16 +200,16 @@ async def get_game_session_full_details(
     description="Retrieves the list of all students who have joined a specific game session."
 )
 async def get_game_session_students(
-    game_id: int
+    game_id: int, db: Session = Depends(get_db)
 ) -> GameSessionStudentsResponse:
     """
     Get all students who have joined a specific game session.
     Returns student details including name and email.
     """
     # TODO: Replace with database query
-    # game_session = db.query(GameSession).filter(GameSession.game_id == game_id).first()
+    game_session = db.query(GameSession).filter(GameSession.game_id == game_id).first()
     
-    if game_id not in MOCK_GAME_SESSIONS:
+    if not game_session:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Game session with id {game_id} not found"
@@ -261,16 +217,21 @@ async def get_game_session_students(
     
     # Get joined students
     # TODO: Replace with database join query on student_join_game and student tables
-    joined_records = MOCK_STUDENT_JOIN_GAME.get(game_id, [])
+    joined_records = db.query(Student).join(StudentJoinGame, Student.student_id == StudentJoinGame.student_id).filter(StudentJoinGame.game_id == game_id).all()
     students = []
     for record in joined_records:
-        student_data = MOCK_STUDENTS.get(record["student_id"])
+        student_data = {
+            "student_id": record.student_id,
+            "first_name": record.first_name,
+            "last_name": record.last_name,
+            "email": record.email
+        }
         if student_data:
             students.append(StudentResponse(
-                student_id=student_data["student_id"],
-                first_name=student_data["first_name"],
-                last_name=student_data["last_name"],
-                email=student_data["email"]
+                student_id=student_data["student_id"],  
+                first_name=student_data["first_name"],  
+                last_name=student_data["last_name"],  
+                email=student_data["email"]  
             ))
     
     return GameSessionStudentsResponse(
@@ -288,7 +249,7 @@ async def get_game_session_students(
     description="Starts a game session by setting is_active to true and assigning students to matches fairly."
 )
 async def start_game_session(
-    game_id: int
+    game_id: int, db: Session = Depends(get_db)
 ) -> GameSessionStartResponse:
     """
     Start a game session:
@@ -299,25 +260,25 @@ async def start_game_session(
     5. Returns the assignments
     """
     # TODO: Replace with database query
-    # game_session = db.query(GameSession).filter(GameSession.game_id == game_id).first()
+    game_session = db.query(GameSession).filter(GameSession.game_id == game_id).first()
     
-    if game_id not in MOCK_GAME_SESSIONS:
+    if not game_session:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Game session with id {game_id} not found"
         )
     
-    game_session = MOCK_GAME_SESSIONS[game_id]
+    # game_session = MOCK_GAME_SESSIONS[game_id]
     
     # Check if session is already active
-    if game_session["is_active"]:
+    if game_session.is_active:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Game session is already active"
         )
     
     # Get joined students
-    joined_records = MOCK_STUDENT_JOIN_GAME.get(game_id, [])
+    joined_records = db.query(StudentJoinGame).filter(StudentJoinGame.game_id == game_id).all()
     if not joined_records:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -325,7 +286,7 @@ async def start_game_session(
         )
     
     # Get matches for this game session
-    match_ids = MOCK_MATCHES_FOR_GAME.get(game_id, [])
+    match_ids = db.query(MatchForGame).filter(MatchForGame.game_id == game_id).all()
     if not match_ids:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -333,7 +294,8 @@ async def start_game_session(
         )
     
     # Get student IDs
-    student_ids = [record["student_id"] for record in joined_records]
+    student_ids = [record.student_id for record in joined_records]
+    #match_ids = [match.match_id for match in match_ids]
     
     # Distribute students to matches fairly
     raw_assignments = _distribute_students_to_matches(student_ids, match_ids)
@@ -342,26 +304,29 @@ async def start_game_session(
     # 1. Update game_session.is_active = True
     # 2. Update student_join_game.assigned_match_id for each student
     
-    # Update mock data (simulating DB update)
-    MOCK_GAME_SESSIONS[game_id]["is_active"] = True
+    game_session.is_active = True
+    #db.commit()
     for assignment in raw_assignments:
-        for record in MOCK_STUDENT_JOIN_GAME[game_id]:
-            if record["student_id"] == assignment["student_id"]:
-                record["assigned_match_id"] = assignment["assigned_match_id"]
+        for record in joined_records:
+            if record.student_id == assignment["student_id"]:
+                record.assigned_match_id = assignment["assigned_match_id"]
                 break
+    db.commit()
     
     # Build response with full assignment details
     assignments = []
     for assignment in raw_assignments:
-        student_data = MOCK_STUDENTS.get(assignment["student_id"])
-        match_data = MOCK_MATCHES.get(assignment["assigned_match_id"])
+        student_data = db.query(Student).filter(Student.id == assignment["student_id"]).first()
+        match_data = db.query(Match).filter(Match.id == assignment["assigned_match_id"]).first()
         if student_data and match_data:
             assignments.append(StudentMatchAssignment(
-                student_id=assignment["student_id"],
-                student_name=f"{student_data['first_name']} {student_data['last_name']}",
-                assigned_match_id=assignment["assigned_match_id"],
-                assigned_match_title=match_data["title"]
+                student_id=assignment["student_id"],  
+                student_name=f"{student_data.first_name} {student_data.last_name}", 
+                assigned_match_id=assignment["assigned_match_id"], 
+                assigned_match_title=match_data.title
             ))
+
+
     
     return GameSessionStartResponse(
         game_id=game_id,
