@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, Typography, Space } from "antd";
-import { PlusOutlined, SettingOutlined, PlayCircleOutlined} from "@ant-design/icons";
+import { PlusOutlined, SettingOutlined, PlayCircleOutlined, UnorderedListOutlined } from "@ant-design/icons";
 import "./HomePage.css";
 
 const { Title, Paragraph } = Typography;
@@ -68,13 +68,32 @@ const HomePage = () => {
             onClick={() => navigate("/create-game-session")}
           >
             <Space>
-              <PlayCircleOutlined style={{ fontSize: 24, color: "#52c41a" }} />
+              <PlayCircleOutlined style={{ fontSize: 24, color: "#fa8c16" }} />
               <div>
                 <Title level={4} style={{ margin: 0 }}>
                   Create Game Session
                 </Title>
                 <Paragraph style={{ margin: 0, color: "#8c8c8c" }}>
                   Create a new game session for students to join
+                </Paragraph>
+              </div>
+            </Space>
+          </Card>
+
+          <Card
+            hoverable
+            bordered={false}
+            className="action-card"
+            onClick={() => navigate("/game-sessions")}
+          >
+            <Space>
+              <UnorderedListOutlined style={{ fontSize: 24, color: "#722ed1" }} />
+              <div>
+                <Title level={4} style={{ margin: 0 }}>
+                  View Game Sessions
+                </Title>
+                <Paragraph style={{ margin: 0, color: "#8c8c8c" }}>
+                  Browse, clone, delete, view, or modify your created game sessions
                 </Paragraph>
               </div>
             </Space>
