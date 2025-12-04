@@ -1,0 +1,80 @@
+.start-session-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f2f5;
+    padding: 20px;
+}
+
+.session-card-dark {
+    width: 100%;
+    max-width: 600px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.header-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.back-button {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+}
+
+.back-button:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.timer-large {
+    font-size: 48px;
+    font-weight: bold;
+    color: #1f1f1f;
+    margin: 10px 0;
+}
+
+.subtitle {
+    font-size: 16px;
+    color: #666;
+}
+
+.student-list-section {
+    border: 1px solid #e8e4d9;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+}
+
+.student-list-section .ant-list-item {
+    justify-content: center;
+}
+
+.list-title {
+    display: block;
+    margin-bottom: 12px;
+    font-size: 20px;
+}
+
+.student-name {
+    font-size: 18px;
+    color: #333;
+    width: 100%;
+    text-align: center;
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
