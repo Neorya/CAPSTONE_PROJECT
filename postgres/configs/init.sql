@@ -10,7 +10,8 @@ CREATE TABLE capstone_app.teacher (
     teacher_id SERIAL PRIMARY KEY,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,	
-    email VARCHAR(150) UNIQUE NOT NULL
+    email VARCHAR(150) UNIQUE NOT NULL 
+--    login_id   INTEGER REFERENCES capstone_app.login(login_id) NOT NULL  --- user story 5 for modification
 );
 
 
@@ -77,6 +78,46 @@ CREATE TABLE capstone_app.matches_for_game (
 );
 
 
+
+-- The creation of students table: (User Story 5)
+
+DROP TABLE IF EXISTS capstone_app.student;
+
+CREATE TABLE capstone_app.student (
+  student_id SERIAL PRIMARY KEY,
+  email      VARCHAR(150) UNIQUE NOT NULL,
+  first_name VARCHAR(100) NOT NULL,
+  last_name  VARCHAR(100) NOT NULL,
+  score      INTEGER NOT NULL DEFAULT 0
+  CONSTRAINT check_max_score CHECK (score <= 2000000)
+--  login_id   INTEGER REFERENCES capstone_app.login(login_id) NOT NULL
+);
+
+
+
+--- The creation of login table: (User Story 5)
+
+DROP TABLE IF EXISTS capstone_app.login;
+
+CREATE TABLE capstone_app.login (
+  login_id SERIAL PRIMARY KEY,
+  sub VARCHAR(255) NOT NULL, 
+  auth_provider VARCHAR(50) NOT NULL,
+  CONSTRAINT uc_sub_auth UNIQUE (sub, auth_provider)
+);
+
+
+
+--- The creation of table for relationship between students and game session: (User Story 5)
+
+DROP TABLE IF EXISTS capstone_app.student_join_game;
+
+CREATE TABLE capstone_app.student_join_game (
+  student_join_game_id SERIAL PRIMARY KEY, 
+  student_id INTEGER REFERENCES capstone_app.student(student_id) NOT NULL,
+  game_id    INTEGER REFERENCES capstone_app.game_session(game_id) NOT NULL,
+  CONSTRAINT uc_student_game UNIQUE (student_id, game_id)
+);
 
 --Create a user for that schema: (User story 1)
 
@@ -230,3 +271,32 @@ VALUES
 -- Game Session 5 - Teacher 5
 (9, 5),
 (10, 5);
+
+
+
+-- Populate script (user story 5)
+
+-- ######################################
+-- INSERT DATA INTO STUDENT TABLE (5 RECORDS)
+-- ######################################
+
+
+-- student 1: Mario Rossi
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('mario.rossi@studenti.it', 'Mario', 'Rossi', 95);
+
+-- student 2: Sara Bianchi
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('sara.bianchi@studenti.it', 'Sara', 'Bianchi', 78);
+
+-- student 3: Andrea Verdi 
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('andrea.verdi@studenti.it', 'Andrea', 'Verdi', 55);
+
+-- student 4: Chiara Neri 
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('chiara.neri@studenti.it', 'Chiara', 'Neri', 88);
+
+-- student 5: Luca Gialli
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('luca.gialli@studenti.it', 'Luca', 'Gialli', 62);
