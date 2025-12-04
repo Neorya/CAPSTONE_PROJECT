@@ -85,10 +85,11 @@ DROP TABLE IF EXISTS capstone_app.student;
 
 CREATE TABLE capstone_app.student (
   student_id SERIAL PRIMARY KEY,
-  email VARCHAR(150) UNIQUE NOT NULL,
+  email      VARCHAR(150) UNIQUE NOT NULL,
   first_name VARCHAR(100) NOT NULL,
   last_name  VARCHAR(100) NOT NULL,
   score      INTEGER NOT NULL DEFAULT 0
+  CONSTRAINT check_max_score CHECK (score <= 2000000)
 --  login_id   INTEGER REFERENCES capstone_app.login(login_id) NOT NULL
 );
 
