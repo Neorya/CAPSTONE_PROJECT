@@ -81,7 +81,39 @@ class MatchesForGame(Base):
 
     match_for_game_id = Column(Integer, primary_key=True)
     match_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.match.match_id"))
-    game_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.game_session.game_id"))
+    game_id  = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.game_session.game_id"))
+
+
+class Student(Base):
+    __tablename__ = "student"
+    __table_args__ = {'schema': SCHEMA_NAME}
+
+    student_id      = Column(Integer    , primary_key=True)
+    email           = Column(String(150), nullable=False)
+    first_name      = Column(String(100), nullable=False)
+    last_name       = Column(String(100), nullable=False)
+    score           = Column(Integer    , default=0, nullable=False)
+
+class Login(Base):
+    __tablename__   = "login"
+    __table_args__  = {'schema': SCHEMA_NAME}
+
+    login_id        =   Column(Integer    , primary_key=True)
+    sub             =   Column(String(255), nullable=False)
+    auth_provider   =   Column(String(50), nullable=False)
+
+class StudentJoinGame(Base):
+    __tablename__   = "student_join_game"
+    __table_args__  = {'schema': SCHEMA_NAME}
+
+    student_join_game_id = Column(Integer    , primary_key=True)
+    student_id    = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student.student_id"))        
+    game_id       = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.game_session.game_id"))
+    
+
+class GameStatusEnum(enum.Enum):
+    active = "active"
+    inactive = "inactive"
 
 class GameSession(Base):
     __tablename__ = "game_session"
