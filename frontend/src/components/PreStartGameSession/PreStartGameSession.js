@@ -17,10 +17,10 @@ const PreStartGameSession = () => {
         return <Alert message="Error" description={error} type="error" showIcon />;
     }
    
-    if (!session) { console.log("indefiniito"); return null; }
+    if (!session) { return null; }
 
     const handleStartSession = () => {
-        navigate(`/start-game-session`);
+        navigate(`/start-game-session/${gameId}`);
     };
     
     return (

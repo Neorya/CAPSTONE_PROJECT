@@ -28,8 +28,8 @@ function App() {
                         <Route path="/match-settings" element={<MatchSettingsList />} />
                         <Route path="/create-game-session" element={<GameSessionCreation />} />
                         <Route path="/game-sessions" element={<GameSessionList />} />
-                        <Route path="/start-game-session" element={<StartGameSession />} />
-                        <Route path="/pre-start-game-session" element={<PreStartGameSession />} />                        
+                        <Route path="/start-game-session/:id" element={<StartGameSession />} />
+                        <Route path="/pre-start-game-session/:id" element={<PreStartGameSession />} />                        
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </div>

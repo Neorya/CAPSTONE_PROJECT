@@ -181,4 +181,32 @@ export async function getGameSessionById(gameId) {
   }
 }
 
+/**
+ * Fetches a game session by its ID.
+ *
+ * @param {string|number} gameId - The ID of the game session to fetch.
+ * @returns {Promise<Object>} A promise that resolves to the game session object.
+ */
+export async function getGameSessionDetails(gameId) {
+  try {
+    const url = new URL(`${API_ENDPOINTS.GAME_SESSIONS}/${gameId}/details`, API_BASE_URL);
+    const res = await fetch(url.toString());
+    if (!res.ok) {
+      let errorMessage = `Failed to fetch game session details: ${res.statusText}`;
+      try {
+        const errorData = await res.json();
+        if (errorData && errorData.detail) {
+          errorMessage = errorData.detail;
+        }
+      } catch (jsonErr) {
+        // Ignore JSON parse errors, use statusText
+      }
+      throw new Error(errorMessage);
+    }
+    return await res.json();
+  } catch (err) {
+    throw new Error(`Failed to fetch game session: ${err.message}`);
+  }
+}
+
 
