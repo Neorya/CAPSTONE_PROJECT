@@ -98,6 +98,25 @@ const HomePage = () => {
               </div>
             </Space>
           </Card>
+          <Card
+            hoverable
+            bordered={false}
+            className="action-card"
+            onClick={() => navigate("/join-game-session")}
+          >
+            <Space>
+              <UnorderedListOutlined style={{ fontSize: 24, color: "#722ed1" }} />
+              <div>
+                <Title level={4} style={{ margin: 0 }}>
+                  Join Available Game sessions
+                </Title>
+                <Paragraph style={{ margin: 0, color: "#8c8c8c" }}>
+                  Join or list future and past game sessions
+                </Paragraph>
+              </div>
+            </Space>
+          </Card>
+
         </Space>
       </Card>
     </div>
