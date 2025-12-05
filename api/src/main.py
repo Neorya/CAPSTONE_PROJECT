@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
-from match_settings_api import router as match_settings_router
-from match_api import router as match_router
-from game_session_api import router as game_session_router
+from match_settings_api import router   as match_settings_router
+from match_api          import router   as match_router
+from game_session_api   import router   as game_session_router
+from join_game_session  import router   as student_join_router
 
 app = FastAPI()
 
@@ -19,6 +20,7 @@ app.add_middleware(
 app.include_router(match_settings_router)
 app.include_router(match_router)
 app.include_router(game_session_router)
+app.include_router(student_join_router)
 
 
 @app.get("/")

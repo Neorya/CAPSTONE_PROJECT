@@ -1,0 +1,69 @@
+.game-session-list-container {
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: 100vh;
+}
+
+.game-session-card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08),
+        0 1px 3px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.game-session-card .ant-card-body {
+    padding: 32px;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.page-header .ant-typography {
+    margin-bottom: 0;
+}
+
+.subheader {
+    margin-top: 4px;
+    margin-bottom: 24px;
+}
+
+.loading-container {
+    text-align: center;
+    padding: 50px;
+}
+
+.session-table .ant-table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.session-table .ant-table-thead>tr>th {
+    background: #fafafa;
+    font-weight: 600;
+}
+
+.session-table .ant-table-tbody>tr:hover>td {
+    background: #f5f9ff;
+}
+
+/* Adjust Button Spacing */
+.ant-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .game-session-list-container {
+        padding: 16px;
+    }
+
+    .game-session-card .ant-card-body {
+        padding: 24px 16px;
+    }
+}
