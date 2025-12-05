@@ -19,7 +19,7 @@ const JoinGameSession = () => {
       try {
         const session = await getAvailableGame();
 
-        if (session && session.id) {
+        if (session && session.game_id) {
           setGameSession(session);
         } else {
           setGameSession(null);
@@ -40,7 +40,7 @@ const JoinGameSession = () => {
 
     setJoining(true);
     try {
-      await joinGameSession(gameSession.id);
+      await joinGameSession(gameSession.game_id);
       message.success('Joined successfully!');
       navigate('/lobby');
     } catch (error) {
@@ -51,7 +51,12 @@ const JoinGameSession = () => {
     }
   };
 
-  const isExpired = gameSession && new Date(gameSession.time) < new Date();
+
+  const sessionDate = gameSession?.start_date ? new Date(gameSession.start_date) : null;
+  const isExpired = sessionDate && !isNaN(sessionDate.getTime())
+    ? sessionDate.getTime() < Date.now()
+    : false;
+  console.log(isExpired);
 
   return (
     <div className="create-match-container">
@@ -83,7 +88,7 @@ const JoinGameSession = () => {
           ) : gameSession ? (
             <GameSessionCard
               name={gameSession.name}
-              time={gameSession.time}
+              time={gameSession.start_date}
               onJoin={isExpired ? null : handleJoin}
               loading={joining}
             />

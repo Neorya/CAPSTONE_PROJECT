@@ -41,6 +41,7 @@ export async function getAvailableGame() {
     if (!response.ok) {
       throw new Error(`Error fetching game session: ${response.statusText}`);
     }
+
     const data = await response.json();
     return data;
   } catch (error) {

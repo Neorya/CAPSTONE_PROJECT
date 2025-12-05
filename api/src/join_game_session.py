@@ -6,12 +6,14 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func, extract
 from database import get_db
 from models import Student, StudentJoinGame, GameSession
+from datetime import datetime
 
 
 class JoinGameSession(BaseModel):
     """
     Request model for a student to join a game session
     """
+
     student_id: int = Field(
         ..., description="Student that will join to the game session"
     )
@@ -22,6 +24,7 @@ class JoinGameSessionResponse(BaseModel):
     """
     Response model after a student joins a game session
     """
+
     msg: str
 
 
@@ -29,7 +32,10 @@ class GetNextUpcomingGameResponse(BaseModel):
     """
     Response model for the next upcoming game session
     """
+
     game_id: int
+    name: str
+    start_date: datetime
 
 
 router = APIRouter(prefix="/api", tags=["join_game_session"])
@@ -98,7 +104,9 @@ async def student_join_game(
     summary="Get the next upcoming game session",
     description="Allows a student to get next upcoming game session",
 )
-async def get_next_upcoming_game(db: Session = Depends(get_db)) -> GetNextUpcomingGameResponse:
+async def get_next_upcoming_game(
+    db: Session = Depends(get_db),
+) -> GetNextUpcomingGameResponse:
     """
     Allows a student to get the next upcoming game session
     If no game sessions are found, it raises a 404 Not Found error
@@ -112,4 +120,6 @@ async def get_next_upcoming_game(db: Session = Depends(get_db)) -> GetNextUpcomi
             status_code=status.HTTP_404_NOT_FOUND, detail="No game session found"
         )
 
-    return GetNextUpcomingGameResponse(game_id=result.game_id)
+    return GetNextUpcomingGameResponse(
+        game_id=result.game_id, name=result.name, start_date=result.start_date
+    )
