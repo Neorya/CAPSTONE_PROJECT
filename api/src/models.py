@@ -1,10 +1,16 @@
 """
-This file defines Python classes (ORM) that map to database tables.
+This file defines Python classes (ORM) that map to database tables,
+and Pydantic models for API request/response schemas.
 """
 
 import enum
+from datetime import datetime as dt
+from typing import List
+
+from pydantic import BaseModel, Field
 from sqlalchemy import Boolean, Column, Integer, String, Text, ForeignKey, Enum, DateTime
 from sqlalchemy.orm import relationship
+
 from database import Base
 
 # Note: The 'capstone_app' schema is specified here
@@ -124,3 +130,73 @@ class GameSession(Base):
     start_date = Column(DateTime, nullable=False)
     creator_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.teacher.teacher_id"))
     creator = relationship("Teacher", back_populates="game_sessions")
+
+
+# ============================================================================
+# Pydantic Models for Game Session Management API (User Story 3)
+# ============================================================================
+
+
+class StudentResponse(BaseModel):
+    """
+    Response model for individual student information.
+    """
+    student_id: int = Field(..., description="Unique identifier of the student")
+    first_name: str = Field(..., description="First name of the student")
+    last_name: str = Field(..., description="Last name of the student")
+    email: str = Field(..., description="Email address of the student")
+
+
+class GameSessionStudentsResponse(BaseModel):
+    """
+    Response model for listing all students joined to a game session.
+    """
+    game_id: int = Field(..., description="ID of the game session")
+    total_students: int = Field(..., description="Total number of students joined")
+    students: List[StudentResponse] = Field(..., description="List of joined students")
+
+
+class MatchInfoResponse(BaseModel):
+    """
+    Response model for match information within a game session.
+    """
+    match_id: int = Field(..., description="Unique identifier of the match")
+    title: str = Field(..., description="Title of the match")
+    difficulty_level: int = Field(..., description="Difficulty level of the match")
+    duration_phase1: int = Field(..., description="Duration of phase 1 in minutes")
+    duration_phase2: int = Field(..., description="Duration of phase 2 in minutes")
+
+
+class GameSessionFullDetailResponse(BaseModel):
+    """
+    Response model for full game session details including students and matches.
+    """
+    game_id: int = Field(..., description="ID of the game session")
+    name: str = Field(..., description="Name of the game session")
+    start_date: dt = Field(..., description="Start date of the game session")
+    creator_id: int = Field(..., description="ID of the teacher who created the session")
+    is_active: bool = Field(..., description="Whether the session has been started")
+    total_students: int = Field(..., description="Total number of students joined")
+    students: List[StudentResponse] = Field(..., description="List of joined students")
+    matches: List[MatchInfoResponse] = Field(..., description="List of matches in the session")
+
+
+class StudentMatchAssignment(BaseModel):
+    """
+    Response model for individual student-to-match assignment.
+    """
+    student_id: int = Field(..., description="ID of the student")
+    student_name: str = Field(..., description="Full name of the student")
+    assigned_match_id: int = Field(..., description="ID of the assigned match")
+    assigned_match_title: str = Field(..., description="Title of the assigned match")
+
+
+class GameSessionStartResponse(BaseModel):
+    """
+    Response model after starting a game session.
+    """
+    game_id: int = Field(..., description="ID of the game session")
+    message: str = Field(..., description="Success message")
+    is_active: bool = Field(..., description="New status of the session (should be True)")
+    total_students_assigned: int = Field(..., description="Number of students assigned to matches")
+    assignments: List[StudentMatchAssignment] = Field(..., description="List of student-to-match assignments")

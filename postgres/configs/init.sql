@@ -60,7 +60,8 @@ CREATE TABLE capstone_app.game_session (
     game_id SERIAL PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
     start_date TIMESTAMP NOT NULL,
-    creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id) NOT NULL
+    creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 
@@ -116,6 +117,7 @@ CREATE TABLE capstone_app.student_join_game (
   student_join_game_id SERIAL PRIMARY KEY, 
   student_id INTEGER REFERENCES capstone_app.student(student_id) NOT NULL,
   game_id    INTEGER REFERENCES capstone_app.game_session(game_id) NOT NULL,
+  assigned_match_id INTEGER REFERENCES capstone_app.match(match_id),
   CONSTRAINT uc_student_game UNIQUE (student_id, game_id)
 );
 
@@ -236,13 +238,13 @@ VALUES
 -- INSERT DATA INTO GAME_SESSION TABLE (5 RECORDS)
 -- ######################################
 
-INSERT INTO capstone_app.game_session (name, start_date, creator_id)
+INSERT INTO capstone_app.game_session (name, start_date, creator_id, is_active)
 VALUES 
-('Spring Semester Game Session', '2024-01-15 09:00:00', 1),
-('Summer Workshop Session', '2024-01-16 10:30:00', 2),
-('Fall Competition Session', '2024-01-17 14:00:00', 3),
-('Winter Training Session', '2024-01-18 11:00:00', 4),
-('Annual Championship Session', '2024-01-19 15:30:00', 5);
+('Spring Semester Game Session', '2024-01-15 09:00:00', 1, FALSE),
+('Summer Workshop Session', '2024-01-16 10:30:00', 2, FALSE),
+('Fall Competition Session', '2024-01-17 14:00:00', 3, TRUE),
+('Winter Training Session', '2024-01-18 11:00:00', 4, FALSE),
+('Annual Championship Session', '2024-01-19 15:30:00', 5, FALSE);
 
 
 
@@ -300,3 +302,78 @@ VALUES ('chiara.neri@studenti.it', 'Chiara', 'Neri', 88);
 -- student 5: Luca Gialli
 INSERT INTO capstone_app.student (email, first_name, last_name, score)
 VALUES ('luca.gialli@studenti.it', 'Luca', 'Gialli', 62);
+
+-- student 6: Elena Ferri
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('elena.ferri@studenti.it', 'Elena', 'Ferri', 72);
+
+-- student 7: Marco Conti
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('marco.conti@studenti.it', 'Marco', 'Conti', 81);
+
+-- student 8: Giulia Romano
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('giulia.romano@studenti.it', 'Giulia', 'Romano', 90);
+
+-- student 9: Francesco Marino
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('francesco.marino@studenti.it', 'Francesco', 'Marino', 67);
+
+-- student 10: Alessia Costa
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('alessia.costa@studenti.it', 'Alessia', 'Costa', 85);
+
+
+
+-- ######################################
+-- INSERT DATA INTO STUDENT_JOIN_GAME TABLE (User Story 3/5)
+-- ######################################
+
+-- Students joining Game Session 1 (Spring Semester - has 2 matches)
+INSERT INTO capstone_app.student_join_game (student_id, game_id, assigned_match_id)
+VALUES 
+(1, 1, NULL),
+(2, 1, NULL),
+(3, 1, NULL),
+(4, 1, NULL),
+(5, 1, NULL);
+
+-- Students joining Game Session 2 (Summer Workshop - has 2 matches)
+INSERT INTO capstone_app.student_join_game (student_id, game_id, assigned_match_id)
+VALUES 
+(1, 2, NULL),
+(3, 2, NULL),
+(5, 2, NULL),
+(6, 2, NULL),
+(7, 2, NULL),
+(8, 2, NULL);
+
+-- Students joining Game Session 3 (Fall Competition - ACTIVE, has 2 matches, students already assigned)
+INSERT INTO capstone_app.student_join_game (student_id, game_id, assigned_match_id)
+VALUES 
+(2, 3, 5),
+(4, 3, 6),
+(6, 3, 5),
+(8, 3, 6),
+(9, 3, 5),
+(10, 3, 6);
+
+-- Students joining Game Session 4 (Winter Training - has 2 matches)
+INSERT INTO capstone_app.student_join_game (student_id, game_id, assigned_match_id)
+VALUES 
+(1, 4, NULL),
+(2, 4, NULL),
+(7, 4, NULL),
+(9, 4, NULL);
+
+-- Students joining Game Session 5 (Annual Championship - has 2 matches)
+INSERT INTO capstone_app.student_join_game (student_id, game_id, assigned_match_id)
+VALUES 
+(3, 5, NULL),
+(4, 5, NULL),
+(5, 5, NULL),
+(6, 5, NULL),
+(7, 5, NULL),
+(8, 5, NULL),
+(9, 5, NULL),
+(10, 5, NULL);
