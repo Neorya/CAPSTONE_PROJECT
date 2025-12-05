@@ -98,25 +98,6 @@ const HomePage = () => {
               </div>
             </Space>
           </Card>
-
-          <Card
-            hoverable
-            bordered={false}
-            className="action-card"
-            onClick={() => navigate("/pre-start-game-session")}
-          >
-            <Space>
-              <PlayCircleOutlined style={{ fontSize: 24, color: "#52c41a" }} />
-              <div>
-                <Title level={4} style={{ margin: 0 }}>
-                  Start Game Session
-                </Title>
-                <Paragraph style={{ margin: 0, color: "#8c8c8c" }}>
-                  Start new game session so the students can join in it
-                </Paragraph>
-              </div>
-            </Space>
-          </Card>
         </Space>
       </Card>
     </div>

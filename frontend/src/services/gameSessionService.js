@@ -209,4 +209,28 @@ export async function getGameSessionDetails(gameId) {
   }
 }
 
+export async function startGameSession(gameId) {
+  try {
+    const url = new URL(`${API_ENDPOINTS.GAME_SESSIONS}/${gameId}/start`, API_BASE_URL);
+    const res = await fetch(url.toString(), {
+      method: "POST",
+    });
+    if (!res.ok) {
+      let errorMessage = `Failed to start game session: ${res.statusText}`;
+      try {
+        const errorData = await res.json();
+        if (errorData && errorData.detail) {
+          errorMessage = errorData.detail;
+        }
+      } catch (jsonErr) {
+        // Ignore JSON parse errors
+      }
+      throw new Error(errorMessage);
+    }
+    return await res.json();
+  } catch (err) {
+    throw new Error(err.message);
+  }
+}
+
 

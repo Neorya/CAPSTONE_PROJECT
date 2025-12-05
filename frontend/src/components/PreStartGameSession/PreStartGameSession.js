@@ -10,7 +10,7 @@ const { Title, Text } = Typography;
 
 const PreStartGameSession = () => {
     const navigate = useNavigate();
-    const { session, loading, error, gameId, elapsedTime } = usePreStartGameSession();
+    const { session, loading, error, gameId, elapsedTime, startSession } = usePreStartGameSession();
 
 
     if (error) {
@@ -20,7 +20,8 @@ const PreStartGameSession = () => {
     if (!session) { return null; }
 
     const handleStartSession = () => {
-        navigate(`/start-game-session/${gameId}`);
+        if (startSession())
+            navigate(`/start-game-session/${gameId}`);
     };
     
     return (

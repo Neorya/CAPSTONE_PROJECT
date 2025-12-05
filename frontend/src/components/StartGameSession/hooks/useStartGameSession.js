@@ -33,8 +33,11 @@ export const useStartGameSession = () => {
     
     const interval = setInterval(() => {
         const now = new Date().getTime();
-        const diff = Math.max(0, ((session.start_date+ ( session.duration_first_phase * 60 * 1000)) - now ));
-        
+        const startDate = new Date(session.start_date).getTime();
+
+        const durationFirstPhase = session.matches[0].duration_phase1;
+   
+        const diff = Math.max(0, ((startDate + ( durationFirstPhase * 60 * 1000)) - now ));
         const minutes = Math.floor(diff / 60000);
         const seconds = Math.floor((diff % 60000) / 1000);
         

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { getGameSessionDetails } from '../../../services/gameSessionService';
+import { getGameSessionDetails, startGameSession } from '../../../services/gameSessionService';
 
 
 
@@ -11,6 +11,7 @@ export const usePreStartGameSession = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [elapsedTime, setElapsedTime] = useState('00:00');
+
 
 
 
@@ -25,6 +26,17 @@ export const usePreStartGameSession = () => {
       setLoading(false);
     }
   }, [id, session]);
+
+  const startSession = useCallback(async () => {
+   try {
+      await startGameSession(id);
+    } catch (err) {
+      setError(err.message);
+      return false;
+    } finally {
+      return true;
+    }
+}, [id]);
 
   useEffect(() => {
     if (id) {
@@ -65,6 +77,7 @@ export const usePreStartGameSession = () => {
     loading,
     error,
     gameId: id,
-    elapsedTime
+    elapsedTime,
+    startSession
   };
 };
