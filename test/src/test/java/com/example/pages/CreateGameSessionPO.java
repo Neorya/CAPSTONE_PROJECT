@@ -17,8 +17,11 @@ public class CreateGameSessionPO {
     private static final String ANTD_DIV_TABLE_XPATH = "//*[@id=\"game-session-creation-table\"]";
     private static final String TABLE_BODY_XPATH = ANTD_DIV_TABLE_XPATH + "//tbody[contains(@class,'ant-table-tbody')]";
     private static final String BUTTON_XPATH = "//*[@id=\"create-game-session-button\"]/button";
-    private static final String SUCCESS_MESSAGE_XPATH = "//div[contains(@class,'ant-message')]//span[text()='The game session has been created']";
+    private static final String SUCCESS_MESSAGE_XPATH = "//div[contains(@class,'ant-message')]//span[text()='The game session has been created successfully!']";
     private static final String WARNING_MESSAGE_XPATH = "//div[contains(@class,'ant-message')]//span[text()='You should select at least a match to create a game session']";
+    private static final String SESSION_NAME_INPUT_XPATH = "//*[@id=\"session-name\"]";
+    private static final String START_DATE_INPUT_XPATH = "//*[@id=\"start-date\"]";
+    private static final String CALENDAR_OK_BUTTON_XPATH = "//button[@class='ant-btn css-dev-only-do-not-override-hofb1t ant-btn-primary ant-btn-color-primary ant-btn-variant-solid ant-btn-sm']";
 
     public CreateGameSessionPO(WebDriver driver) {
         this.driver = driver;
@@ -70,5 +73,26 @@ public class CreateGameSessionPO {
                 By.xpath(WARNING_MESSAGE_XPATH)));
     }
 
+    public WebElement getSessionNameInput() {
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(SESSION_NAME_INPUT_XPATH)));
+    }
 
+    public WebElement getStartDateInput() {
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(START_DATE_INPUT_XPATH)));
+    }
+
+    public void fillSessionName(String sessionName) {
+        WebElement sessionNameInput = getSessionNameInput();
+        sessionNameInput.clear();
+        sessionNameInput.sendKeys(sessionName);
+    }
+
+    public void fillStartDate(String startDate) {
+        WebElement startDateInput = getStartDateInput();
+        startDateInput.clear();
+        startDateInput.sendKeys(startDate);
+
+        WebElement okButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(CALENDAR_OK_BUTTON_XPATH)));
+        okButton.click();
+    }
 }
