@@ -17,7 +17,7 @@ import org.junit.jupiter.api.MethodOrderer;
 import com.example.pages.CreateGameSessionPO;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class CreateGameSession extends BaseTest  {
+public class CreateGameSessionTest extends BaseTest  {
     private static CreateGameSessionPO createGameSessionPage;
 
     @BeforeAll
@@ -54,19 +54,27 @@ public class CreateGameSession extends BaseTest  {
     @Order(3)
     @DisplayName("Verify that the game session creates successfully")
     public void testGameSessionCreationSucceed() {
+        String sessionName = "Test Session Full";
+        String startDate = "2125-12-11 21:09";
+        
+        createGameSessionPage.fillSessionName(sessionName);
+        createGameSessionPage.fillStartDate(startDate);
+
         WebElement c1 = createGameSessionPage.getCheckBox(1).findElement(By.tagName("input"));
         WebElement c2 = createGameSessionPage.getCheckBox(2).findElement(By.tagName("input"));
         assertFalse(c1.isSelected());
+
         assertFalse(c2.isSelected());
         c1.click();
         assertTrue(c1.isSelected());
         assertFalse(c2.isSelected());
         c2.click();
         assertTrue(c2.isSelected());
-        createGameSessionPage.getButton().click();
+        createGameSessionPage.getButton().click();      
 
         WebElement alert = createGameSessionPage.waitSuccessAlert();
-        assertEquals(alert.getText(), "The game session has been created");
+        
+        assertEquals(alert.getText(), "The game session has been created successfully!");
     }
 
     @Test
@@ -77,9 +85,6 @@ public class CreateGameSession extends BaseTest  {
         WebElement c2 = createGameSessionPage.getCheckBox(2).findElement(By.tagName("input"));
         assertFalse(c1.isSelected());
         assertFalse(c2.isSelected());
-        createGameSessionPage.getButton().click();
-        WebElement alert = createGameSessionPage.waitErrorAlert();
-        assertEquals(alert.getText(), "You should select at least a match to create a game session");
+        assertFalse(createGameSessionPage.getButton().isEnabled(), "Button should be disabled");
     }
-    
 }
