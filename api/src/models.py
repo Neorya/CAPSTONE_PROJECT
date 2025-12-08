@@ -115,6 +115,17 @@ class StudentJoinGame(Base):
     student_join_game_id = Column(Integer    , primary_key=True)
     student_id    = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student.student_id"))        
     game_id       = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.game_session.game_id"))
+
+    assigned_match_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.match.match_id"), nullable=True)
+
+
+class MatchJoinGame(Base):
+    __tablename__ = "match_for_game"
+    __table_args__ = {'schema': SCHEMA_NAME}
+
+    match_for_game_id = Column(Integer, primary_key=True)
+    match_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.match.match_id"))
+    game_id  = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.game_session.game_id"))
     
 
 class GameStatusEnum(enum.Enum):
@@ -130,7 +141,7 @@ class GameSession(Base):
     start_date = Column(DateTime, nullable=False)
     creator_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.teacher.teacher_id"))
     creator = relationship("Teacher", back_populates="game_sessions")
-
+    is_active = Column(Boolean, default=False, nullable=False)
 
 # ============================================================================
 # Pydantic Models for Game Session Management API (User Story 3)
@@ -200,3 +211,12 @@ class GameSessionStartResponse(BaseModel):
     is_active: bool = Field(..., description="New status of the session (should be True)")
     total_students_assigned: int = Field(..., description="Number of students assigned to matches")
     assignments: List[StudentMatchAssignment] = Field(..., description="List of student-to-match assignments")
+
+
+class MatchJoinGameResponse(BaseModel):
+    """
+    Response model for matches joined to a game session.
+    """
+    match_for_game_id: int = Field(..., description="ID of the match-for-game record")
+    match_id: int = Field(..., description="ID of the match")
+    game_id: int = Field(..., description="ID of the game session")
