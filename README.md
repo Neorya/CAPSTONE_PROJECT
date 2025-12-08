@@ -23,7 +23,7 @@ sp1_st1_db1
 
 ### Format
 
-<JIIRA-ID> Short description of the taks <Other Student>
+< JIIRA-ID / Task ID > Short description of the taks < Other Student >
 
 ### Few example:
 
