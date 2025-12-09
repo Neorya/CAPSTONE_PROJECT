@@ -48,3 +48,21 @@ export async function getAvailableGame() {
     throw error;
   }
 }
+
+// Check if a student has already joined a specific game session
+export async function hasStudentAlreadyJoinedSession(studentId, gameId) {
+  try {
+    const url = new URL(`${API_ENDPOINTS.HAS_STUDENT_JOINED}/${studentId}/${gameId}`, API_BASE_URL);
+
+    const response = await fetch(url.toString());
+
+    if (!response.ok) {
+      throw new Error('Error checking student session');
+    }
+
+    const data = await response.json();
+    return data.joined;
+  } catch (error) {
+    throw error;
+  }
+}

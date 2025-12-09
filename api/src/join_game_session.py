@@ -37,6 +37,12 @@ class GetNextUpcomingGameResponse(BaseModel):
     name: str
     start_date: datetime
 
+class StudentJoinedResponse(BaseModel):
+    """
+    Response model to indicate if a student has joined a specific game session
+    """
+
+    joined: bool
 
 router = APIRouter(prefix="/api", tags=["join_game_session"])
 
@@ -123,3 +129,39 @@ async def get_next_upcoming_game(
     return GetNextUpcomingGameResponse(
         game_id=result.game_id, name=result.name, start_date=result.start_date
     )
+
+
+
+@router.get(
+    "/has_student_joined_game/{student_id}/{game_id}",
+    response_model=StudentJoinedResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Check if a student has joined a specific game session",
+    description="Allows to check if a student has joined a specific game session",
+)
+async def has_student_joined_game(
+    student_id: int,
+    game_id: int,
+    db: Session = Depends(get_db),
+) -> StudentJoinedResponse:
+    """
+    Allows to check if a student has joined a specific game session
+    On success, it returns True if the student has joined the game session, otherwise False
+    """
+    
+    if not db.query(Student).filter(Student.student_id == student_id).first():
+        raise HTTPException(404, "Student not found")
+
+    if not db.query(GameSession).filter(GameSession.game_id == game_id).first():
+        raise HTTPException(404, "Game session not found")
+
+    enrollment = (
+        db.query(StudentJoinGame)
+        .filter(
+            StudentJoinGame.student_id == student_id,
+            StudentJoinGame.game_id == game_id,
+        )
+        .first()
+    )
+
+    return StudentJoinedResponse(joined=enrollment is not None)

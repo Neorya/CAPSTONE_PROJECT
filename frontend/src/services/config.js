@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
   MATCHES: '/api/matches',
   GAME_SESSIONS: '/api/game_session',
   JOIN_GAME: '/api/join_game_session',
-  GET_LAST_GAME: '/api/get_next_upcoming_game'
+  GET_LAST_GAME: '/api/get_next_upcoming_game',
+  HAS_STUDENT_JOINED: '/api/has_student_joined_game'
 };
 
