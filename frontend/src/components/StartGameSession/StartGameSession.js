@@ -28,6 +28,7 @@ const StartGameSession = () => {
                     <div className="header-top">
                         <Tooltip title="Back to Home">
                             <Button 
+                                id="back-to-home-button"
                                 icon={<ArrowLeftOutlined />} 
                                 onClick={() => navigate('/')}
                                 shape="circle"
