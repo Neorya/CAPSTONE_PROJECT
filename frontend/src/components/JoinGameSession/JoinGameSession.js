@@ -40,7 +40,8 @@ const JoinGameSession = () => {
 
     setJoining(true);
     try {
-      await joinGameSession(gameSession.game_id);
+      // TODO change this (1) to actual student id
+      await joinGameSession(1, gameSession.game_id);
       message.success('Joined successfully!');
       navigate('/lobby');
     } catch (error) {

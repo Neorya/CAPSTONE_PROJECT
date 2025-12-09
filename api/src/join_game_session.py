@@ -45,8 +45,8 @@ router = APIRouter(prefix="/api", tags=["join_game_session"])
     "/join_game_session",
     response_model=JoinGameSessionResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="The student has joined to that game session",
-    description="Allows a student to join in a game session",
+    summary="The student joins a game session",
+    description="Allows a student to join a game session",
 )
 async def student_join_game(
     input_data: JoinGameSession, db: Session = Depends(get_db)
