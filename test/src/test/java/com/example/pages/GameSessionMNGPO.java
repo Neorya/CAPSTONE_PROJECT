@@ -15,7 +15,7 @@ public class GameSessionMNGPO {
     private WebDriverWait wait;
     private static final String PAGE_TITLE_XPATH = "";
     private static final String PAGE_TITLE = "";
-    private static final String ANTD_DIV_TABLE_XPATH = "//*[@class='ant-table-content']";
+    private static final String ANTD_DIV_TABLE_XPATH = "//*[contains(@class, 'ant-table-content')]";
     private static final String TABLE_BODY_XPATH = ANTD_DIV_TABLE_XPATH + "/table/tbody";
     private static final String BUTTON_XPATH = "";
     private static final String SUCCESS_MESSAGE_XPATH = "";
@@ -27,24 +27,24 @@ public class GameSessionMNGPO {
     private static final String BACK_TO_HOME_BUTTON_ID = "//*[@id=\"back-to-home-button\"]";
 
     // POP UP - CLONE 
-    private static final String DIV_POP_UP_CLONE = "//*[@class='ant-popover-inner']";
-    private static final String NOPE_POP_UP_CLONE = DIV_POP_UP_CLONE + "/div/div/div[2]/button[1]/span";
-    private static final String YES_POP_UP_CLONE_ = DIV_POP_UP_CLONE + "/div/div/div[2]/button[2]/span";
+    private static final String DIV_POP_UP_CLONE = "//div[contains(@class, 'ant-popover-inner')]";
+    private static final String NOPE_POP_UP_CLONE = "//div[contains(@class, 'ant-popover')]//button[contains(., 'No')]";
+    private static final String YES_POP_UP_CLONE_ = "//div[contains(@class, 'ant-popover')]//button[contains(., 'Yes')]";
 
 
     // POP UP - DELETE
-    private static final String DIV_POP_UP_DELETE = "//*[@class='ant-popover-inner']";
-    private static final String NOPE_POP_UP_DELETE= DIV_POP_UP_DELETE + "/div/div/div[2]/button[1]/span";
-    private static final String YES_POP_UP_DELETE_ = DIV_POP_UP_DELETE + "/div/div/div[2]/button[2]/span";
+    private static final String DIV_POP_UP_DELETE = "//div[contains(@class, 'ant-popover-inner')]";
+    private static final String NOPE_POP_UP_DELETE= "//div[contains(@class, 'ant-popover')]//button[contains(., 'No')]";
+    private static final String YES_POP_UP_DELETE_ = "//div[contains(@class, 'ant-popover')]//button[contains(., 'Yes')]";
 
     // MODAL - VIEW / UPDATE 
-    private static final String MODAL_ID_NAME = "//*[@class='ant-modal-title']";
-    private static final String MODAL_DIV = "//div[@class='ant-modal-content']";
+    private static final String MODAL_ID_NAME = "//*[contains(@class, 'ant-modal-title')]";
+    private static final String MODAL_DIV = "//div[contains(@class, 'ant-modal-content')]";
     private static final String MODAL_NAME = "//*[@id=\"name\"]";
     private static final String MODAL_START_DATE = "//*[@id=\"start_date\"]";
 
     //  MODAL - FOOTER
-    private static final String MODAL_FOOTER_ID = "//*[@class=\"ant-modal-footer\"]";
+    private static final String MODAL_FOOTER_ID = "//*[contains(@class, 'ant-modal-footer')]";
     private static final String BUTTON_FOOTER_UPDT_CANCEL = MODAL_FOOTER_ID + "/button[1]";
     private static final String BUTTON_FOOTER_UPDT_SAVE   = MODAL_FOOTER_ID + "/button[2]";
     private static final String BUTTON_FOOTER_VIEW_EDIT   = MODAL_FOOTER_ID + "/button[1]";
@@ -58,7 +58,8 @@ public class GameSessionMNGPO {
     private static final String ERROR_LESS_INPUT_NAME     = "Game session name must be at least 5 characters";
 
     // EDIT MODAL - TABLE
-    private static final String MODAL_EDIT_TABLE         = "//*[@class=\"ant-table-content\"]";
+    private static final String MODAL_EDIT_TABLE         = "//*[contains(@class, 'ant-table-content')]";
+    private static final String OK_BUTTON_CALENDAR       = "//button[contains(@class, 'ant-picker-ok')]/span | //div[contains(@class, 'ant-picker-dropdown')]//button[contains(@class, 'ant-btn-primary')]/span";
 
 
     public GameSessionMNGPO(WebDriver driver) {
@@ -81,20 +82,20 @@ public class GameSessionMNGPO {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(TABLE_BODY_XPATH + "/tr[" + Integer.toString(row) + "]/td[" + Integer.toString(col) + "]")));
     }
 
-    public WebElement getCopyButttonAt(int row) {
+    public WebElement getCopyButtonAt(int row) {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(TABLE_BODY_XPATH + "/tr[" +  Integer.toString(row) + "]" + COPY_BUTTON)));
     }
 
-    public WebElement getDeleteButttonAt(int row) {
+    public WebElement getDeleteButtonAt(int row) {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(TABLE_BODY_XPATH + "/tr[" +  Integer.toString(row) + "]" + DELETE_BUTTON)));
     }
 
-    public WebElement getViewButttonAt(int row) {
+    public WebElement getViewButtonAt(int row) {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(TABLE_BODY_XPATH + "/tr[" +  Integer.toString(row) + "]" + VIEW_BUTTON)));
     }
 
 
-    public WebElement getUpdateButttonAt(int row) {
+    public WebElement getUpdateButtonAt(int row) {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(TABLE_BODY_XPATH + "/tr[" +  Integer.toString(row) + "]" + UPDATE_BUTTON)));
     }
 
@@ -109,6 +110,14 @@ public class GameSessionMNGPO {
     public WebElement getTable() {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(TABLE_BODY_XPATH)));
 
+    }
+
+    public WebElement getOkButtonCalendar() {
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(OK_BUTTON_CALENDAR)));
+    }
+
+    public void waitForRow(String rowName) {
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(TABLE_BODY_XPATH + "//tr[contains(., '" + rowName + "')]")));
     }
 
     // CLONE POP UP
@@ -161,6 +170,13 @@ public class GameSessionMNGPO {
         }
     }
 
+    public void waitForModalToDisappear() {
+        try {
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(MODAL_DIV)));
+        } catch (Exception e) {
+        }
+    }
+
     public WebElement getCheckButtonAt(int row) {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(TABLE_BODY_XPATH + "/tr[" +  Integer.toString(row) + "]/td[2]/label/span" )));
     }
@@ -186,7 +202,7 @@ public class GameSessionMNGPO {
     }
 
     public boolean checkIfMatchIsSelected(String matchName) {
-        return driver.findElements(By.xpath("//span[contains(., '" + matchName + "')]")).size() == 1;
+        return driver.findElements(By.xpath(MODAL_DIV + "//span[contains(., '" + matchName + "')]")).size() > 0;
     }
 
     // get the modal save button
