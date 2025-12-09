@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Tooltip, Typography, message, Spin } from "antd";
+import { Button, Card, Tooltip, Typography, message, Spin, Empty } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import GameSessionCard from "./components/GameSessionCard";
-import { joinGameSession, getAvailableGame, hasStudentAlreadyJoinedSession } from "../../services/joinGameSessionService";
+import {
+  joinGameSession,
+  getAvailableGame,
+  hasStudentAlreadyJoinedSession,
+} from "../../services/joinGameSessionService";
 
 const { Title, Text } = Typography;
 
@@ -92,7 +96,7 @@ const JoinGameSession = () => {
     <div className="create-match-container">
       <Card className="create-match-card">
         <div className="page-header">
-          <Title level={2}>Join In-Person Game Session</Title>
+          <Title level={2}>Join an in-person Game Session</Title>
           <Tooltip title="Back to Home">
             <Button
               id="back-to-home-button"
@@ -122,7 +126,14 @@ const JoinGameSession = () => {
             />
           ) : (
             <div>
-              <Text type="secondary">No game session available</Text>
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={
+                  <Text type="secondary">
+                    No sessions are currently open. Check back soon!
+                  </Text>
+                }
+              />
             </div>
           )}
         </div>
