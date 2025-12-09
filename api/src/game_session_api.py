@@ -1,7 +1,7 @@
 """
-Matches API Module
+Game sessions API Module
 
-Provides endpoints for creating, browsing matches.
+Provides endpoints for handling game sessions.
 """
 
 from typing import List, Optional
@@ -9,6 +9,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
+import re
 
 # Import the database dependency and ORM models
 from database import get_db
@@ -59,6 +60,74 @@ class GameSessionUpdate(BaseModel):
     start_date: Optional[datetime] = Field(
         None, description="Start date of the Game Session"
     )
+
+# ============================================================================
+# Helpers
+# ============================================================================
+
+def _generate_clone_name(original_name: str, creator_id: int, db: Session) -> str:
+    """
+    Generate a unique clone name with " - Copy N" suffix.
+    If the original name already has " - Copy N", extract the base name.
+    """
+    copy_pattern = re.compile(r'^(.*) - Copy (\d+)$')
+    match = copy_pattern.match(original_name)
+
+    if match:
+        base_name = match.group(1)
+    else:
+        base_name = original_name
+
+    # get all session names for this creator
+    existing_sessions = (
+        db.query(GameSession.name)
+        .filter(GameSession.creator_id == creator_id)
+        .all()
+    )
+
+    # db.query(GameSession.name).all() returns list of tuples like [("Name",), ...]
+    existing_names = [row[0] for row in existing_sessions]
+
+    # find the highest copy number
+    max_copy_num = 0
+    escaped_base = re.escape(base_name)
+    copy_check_pattern = re.compile(rf'^{escaped_base} - Copy (\d+)$')
+
+    for name in existing_names:
+        m = copy_check_pattern.match(name)
+        if m:
+            num = int(m.group(1))
+            if num > max_copy_num:
+                max_copy_num = num
+
+    # if there are no existing " - Copy N" instances, return "base_name - Copy 1"
+    return f"{base_name} - Copy {max_copy_num + 1}"
+
+def _replace_game_session_matches(
+    game_id: int,
+    match_ids: List[int],
+    db: Session
+) -> None:
+    """
+    Replace all MatchesForGame links for a game session with the given match_ids.
+    - First deletes all existing links for the game_id.
+    - Then creates new links for each match_id.
+    - Does NOT commit; caller is responsible for commit/rollback.
+    For the deletion-only cases, pass an empty list for match_ids.
+    """
+    # delete existing links
+    db.query(MatchesForGame).filter(
+        MatchesForGame.game_id == game_id
+    ).delete(synchronize_session=False)
+
+    # add new links
+    for mid in match_ids:
+        link = MatchesForGame(
+            game_id=game_id,
+            match_id=mid
+        )
+        db.add(link)
+
 
 # ============================================================================
 # Router
@@ -211,8 +280,8 @@ async def delete_game_session(
         )
         
     try:
-        # delete associated match links first
-        db.query(MatchesForGame).filter(MatchesForGame.game_id == game_id).delete()
+        # delete associated match links first (no new ones)
+        _replace_game_session_matches(game_id, [], db)
         # then delete the game session
         db.delete(game_session)
         db.commit()
@@ -252,8 +321,9 @@ async def clone_game_session(
     # get all matches linked to the original game session
     original_matches_links = db.query(MatchesForGame).filter(MatchesForGame.game_id == game_id).all()
     
-    # create new game session with the same creator, start date and name appended with " (Clone)"
-    new_game_session = GameSession(creator_id=original_game_session.creator_id, name=original_game_session.name + " (Clone)", start_date=original_game_session.start_date)
+    # create cloned game session
+    cloned_name = _generate_clone_name(original_game_session.name, original_game_session.creator_id, db)
+    new_game_session = GameSession(creator_id=original_game_session.creator_id, name=cloned_name, start_date=original_game_session.start_date)
     db.add(new_game_session)
     db.flush()
     
@@ -292,7 +362,6 @@ async def update_game_session(
     """
     Update the details of an existing game session.
     """
-
     # check that the game session exists
     game_session = db.query(GameSession).filter(GameSession.game_id == game_id).first()
     if not game_session:
@@ -339,16 +408,11 @@ async def update_game_session(
 
         # replace match links
         try:
-            db.query(MatchesForGame).filter(
-                MatchesForGame.game_id == game_id
-            ).delete(synchronize_session=False)
-
-            for match in matches:
-                match_link = MatchesForGame(
-                    game_id=game_session.game_id,
-                    match_id=match.match_id
-                )
-                db.add(match_link)
+            _replace_game_session_matches(
+                game_id=game_id,
+                match_ids=[m.match_id for m in matches],
+                db=db,
+            )
 
         except Exception:
             db.rollback()
