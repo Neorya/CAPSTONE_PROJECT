@@ -1,49 +1,74 @@
 Table teacher {
-teacher_id integer [primary key]
-first_name varchar [not null]
-last_name varchar [not null]
-email varchar [unique, not null]
+  teacher_id integer [primary key]
+  first_name varchar(100) [not null]
+  last_name varchar(100) [not null]
+  email varchar(150) [unique, not null]
 }
 
 Table match_setting {
-match_set_id integer [primary key]
-title varchar [not null, unique]
-description text [not null]
-is_ready boolean [not null, default: false] // true = ready, false = draft
-public_test varchar // TODO: normalize later
-private_test varchar // TODO: normalize later
-reference_solution varchar
-creator_id integer // FK -> teacher.teacher_id
+  match_set_id integer [primary key]
+  title varchar(150) [not null, unique]
+  description text [not null]
+  is_ready boolean [not null, default: false]
+  public_test varchar(500)
+  private_test varchar(500)
+  reference_solution varchar(1000)
+  creator_id integer // FK -> teacher.teacher_id
 }
 
 Table match {
-match_id integer [primary key]
-title varchar [not null]
-match_set_id integer // FK -> match_setting.match_set_id
-creator_id integer // FK -> teacher.teacher_id
-difficulty_level integer [not null]
-review_number integer [not null]
-duration_phase1 integer [not null] // in minutes
-duration_phase2 integer [not null] // in minutes
+  match_id integer [primary key]
+  title varchar(150) [not null]
+  match_set_id integer // FK -> match_setting.match_set_id
+  creator_id integer // FK -> teacher.teacher_id
+  difficulty_level integer [not null]
+  review_number integer [not null]
+  duration_phase1 integer [not null] // in minutes
+  duration_phase2 integer [not null] // in minutes
 }
 
 Table game_session {
-game_id integer [primary key]
-name varchar [not null]
-start_date timestamp [not null]
-creator_id integer [not null] // FK -> teacher.teacher_id
+  game_id integer [primary key]
+  name varchar(150) [not null]
+  start_date timestamp [not null]
+  creator_id integer [not null] // FK -> teacher.teacher_id
+  is_active boolean [not null, default: false]
 }
 
 Table matches_for_game {
-match_for_game_id integer [primary key]
-match_id integer [not null] // FK -> match.match_id
-game_id integer [not null] // FK -> game_session.game_id
+  match_for_game_id integer [primary key]
+  match_id integer [not null] // FK -> match.match_id
+  game_id integer [not null] // FK -> game_session.game_id
 }
 
+Table student {
+  student_id integer [primary key]
+  email varchar(150) [unique, not null]
+  first_name varchar(100) [not null]
+  last_name varchar(100) [not null]
+  score integer [not null, default: 0]
+}
+
+Table login {
+  login_id integer [primary key]
+  sub varchar(255) [not null]
+  auth_provider varchar(50) [not null]
+}
+
+Table student_join_game {
+  student_join_game_id integer [primary key]
+  student_id integer [not null] // FK -> student.student_id
+  game_id integer [not null] // FK -> game_session.game_id
+  assigned_match_id integer // FK -> match.match_id (nullable, set when session starts)
+}
+
+// Relationships
 Ref: match_setting.creator_id > teacher.teacher_id
 Ref: match.creator_id > teacher.teacher_id
 Ref: match.match_set_id > match_setting.match_set_id
 Ref: game_session.creator_id > teacher.teacher_id
 Ref: matches_for_game.match_id > match.match_id
 Ref: matches_for_game.game_id > game_session.game_id
-
+Ref: student_join_game.student_id > student.student_id
+Ref: student_join_game.game_id > game_session.game_id
+Ref: student_join_game.assigned_match_id > match.match_id
