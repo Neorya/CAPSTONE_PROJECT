@@ -58,7 +58,7 @@ public class GameSessionMNGPO {
     private static final String ERROR_LESS_INPUT_NAME     = "Game session name must be at least 5 characters";
 
     // EDIT MODAL - TABLE
-    private static final String MODAL_EDIT_TABLE         = "//*[@class=ant-table-content\"]";
+    private static final String MODAL_EDIT_TABLE         = "//*[@class=\"ant-table-content\"]";
 
 
     public GameSessionMNGPO(WebDriver driver) {
