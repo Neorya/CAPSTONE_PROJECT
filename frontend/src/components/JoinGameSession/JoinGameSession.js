@@ -104,8 +104,8 @@ const JoinGameSession = () => {
           </Tooltip>
         </div>
 
-        <div className="page-subtitle">
-          <Text type="secondary">Compete with your classmates</Text>
+        <div className="subheader">
+          <Text type="secondary">Compete with your classmates!</Text>
         </div>
 
         <div>

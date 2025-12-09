@@ -1,5 +1,7 @@
-import React from 'react';
-import { Button, Card, Typography } from 'antd';
+import React from "react";
+import { Button, Card, Typography, Space, Tag } from "antd";
+import { CalendarOutlined, PlayCircleOutlined } from "@ant-design/icons";
+import "./GameSessionCard.css";
 
 const { Text } = Typography;
 
@@ -8,58 +10,94 @@ const configByState = {
   ready: {
     disabled: false,
     loading: false,
-    label: 'Join Game',
+    label: "Join Game",
+    statusText: "Open",
+    statusColor: "green",
   },
   joining: {
     disabled: true,
     loading: true,
-    label: 'Joining...',
+    label: "Joining...",
+    statusText: "Joining...",
+    statusColor: "blue",
   },
   alreadyJoined: {
     disabled: true,
     loading: false,
-    label: 'Already joined',
+    label: "Already joined",
+    statusText: "Joined",
+    statusColor: "geekblue",
   },
   expired: {
     disabled: true,
     loading: false,
-    label: 'Session expired',
-  }
+    label: "Session expired",
+    statusText: "Expired",
+    statusColor: "red",
+  },
 };
 
-
-const GameSessionCard = ({ name, time, joinState, onJoin}) => {
-
-  const { disabled, loading, label } = configByState[joinState] || configByState.ready;
+const GameSessionCard = ({ name, time, joinState, onJoin }) => {
+  const { disabled, loading, label, statusText, statusColor } =
+    configByState[joinState] || configByState.ready;
 
   const handleClick = () => {
-    if (!disabled && joinState === 'ready') {
+    if (!disabled && joinState === "ready") {
       onJoin?.();
     }
   };
 
+  const date = new Date(time);
+  const formattedDate = date.toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  const formattedTime = date.toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
   return (
-    <Card>
-      <div>
-        <Text>
-          Next scheduled game:
-        </Text>
+    <Card className="game-session-card">
+      <div className="card-header-row">
+        <div className="card-header-left">
+          <Text type="secondary" className="next-game-header">
+            Next scheduled game:
+          </Text>
+
+          <Text strong className="card-title-large">
+            {name}
+          </Text>
+        </div>
+
+        <Tag color={statusColor} className="card-status-tag">
+          {statusText}
+        </Tag>
       </div>
 
-      <div>
-        <Text strong>
-          {name} at {new Date(time).toLocaleString()}
-        </Text>
+      <div className="card-content">
+        <Space direction="vertical" size={4}>
+          <Text type="secondary">
+            <CalendarOutlined /> Scheduled for
+          </Text>
+          <Text strong>
+            {formattedDate} · {formattedTime}
+          </Text>
+        </Space>
       </div>
 
-      <div>
+      <div className="card-footer">
         <Button
           type="primary"
           onClick={handleClick}
           disabled={disabled}
           loading={loading}
+          icon={<PlayCircleOutlined />}
+          block
         >
-        {label}
+          {label}
         </Button>
       </div>
     </Card>
