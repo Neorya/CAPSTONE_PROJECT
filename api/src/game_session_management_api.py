@@ -9,11 +9,9 @@ Provides endpoints for:
 User Story 3: Teacher starts game session and views joined students and matches
 """
 
-from typing import List, Dict, Any
-from datetime import datetime
+from typing import List, Dict
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
-from pydantic import BaseModel, Field, field_validator
 
 # Import ORM models
 from models import (    
@@ -34,8 +32,7 @@ from models import (
     MatchInfoResponse,  #match information within a game session.
     GameSessionFullDetailResponse,  #full game session details including students and matches.
     StudentMatchAssignment, #individual student-to-match assignment.
-    GameSessionStartResponse,   #response model for starting a game session.
-    MatchJoinGameResponse  #response model for matches joined to a game session.
+    GameSessionStartResponse   #response model for starting a game session.
 )
 
 
@@ -259,21 +256,35 @@ async def start_game_session(
                 record.assigned_match_id = assignment["assigned_match_id"]
                 break
     
-    
+    # Fetch student and match details for response
+    student_data = db.query(Student).filter(Student.student_id.in_(student_ids)).all()
+    match_data = db.query(Match).filter(Match.match_id.in_(match_ids)).all()
+
+    # Build lookup dictionaries for O(1) access
+    student_lookup = {s.student_id: s for s in student_data}
+    match_lookup = {m.match_id: m for m in match_data}
+
     # Build response with full assignment details
     assignments = []
     for assignment in raw_assignments:
-        student_data = db.query(Student).filter(Student.student_id == assignment["student_id"]).first()
-        match_data = db.query(Match).filter(Match.match_id == assignment["assigned_match_id"]).first()
-        if student_data and match_data:
+        student = student_lookup.get(assignment["student_id"])
+        match = match_lookup.get(assignment["assigned_match_id"])
+        if student and match:
             assignments.append(StudentMatchAssignment(
                 student_id=assignment["student_id"],  
-                student_name=f"{student_data.first_name} {student_data.last_name}", 
+                student_name=f"{student.first_name} {student.last_name}", 
                 assigned_match_id=assignment["assigned_match_id"], 
-                assigned_match_title=match_data.title
+                assigned_match_title=match.title
             ))
 
-    db.commit() 
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to start game session due to a database error: {str(e)}"
+        )
 
     
     return GameSessionStartResponse(
