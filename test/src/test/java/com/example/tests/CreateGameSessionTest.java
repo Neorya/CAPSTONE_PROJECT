@@ -1,34 +1,28 @@
 package com.example.tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-
-import org.junit.jupiter.api.BeforeAll;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.MethodOrderer;
 import com.example.pages.CreateGameSessionPO;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CreateGameSessionTest extends BaseTest  {
-    private static CreateGameSessionPO createGameSessionPage;
-
-    @BeforeAll
-    public static void setUpTest() {
-        // BaseTest.setUp() is automatically called by JUnit due to @BeforeAll in parent class
-        // Initialize Page Object here
-        createGameSessionPage = new CreateGameSessionPO(driver);
-    }
+    private CreateGameSessionPO createGameSessionPage;
     
     @BeforeEach
     public void navigateToPage() {
+        // Initialize Page Object with the driver from BaseTest
+        createGameSessionPage = new CreateGameSessionPO(driver);
+        
         // Navigate to the create game session page before each test
         navigateTo("/create-game-session");
     }

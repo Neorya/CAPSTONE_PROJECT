@@ -2,12 +2,10 @@ package com.example.tests;
 
 import java.util.List;
 
-import org.junit.jupiter.api.AfterAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -25,17 +23,13 @@ import com.example.pages.settingListingPO;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SettingListingTest extends BaseTest {
     
-    private static settingListingPO settingListingPage;
-    
-    @BeforeAll
-    public static void setUpTest() {
-        // BaseTest.setUp() is automatically called by JUnit due to @BeforeAll in parent class
-        // Just initialize Page Object here
-        settingListingPage = new settingListingPO(driver);
-    }
+    private settingListingPO settingListingPage;
     
     @BeforeEach
     public void navigateToPage() {
+        // Initialize Page Object with the driver from BaseTest
+        settingListingPage = new settingListingPO(driver);
+        
         // Navigate to the settings listing page before each test
         navigateTo("/match-settings");
         
@@ -591,9 +585,4 @@ public class SettingListingTest extends BaseTest {
         settingListingPage.closeModal();
     }
     
-    @AfterAll
-    public static void tearDownTest() {
-        // BaseTest.tearDown() is automatically called by JUnit due to @AfterAll in parent class
-        // No need to call it explicitly here
-    }
 }

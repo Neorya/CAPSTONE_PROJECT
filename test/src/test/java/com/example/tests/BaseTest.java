@@ -1,23 +1,25 @@
 package com.example.tests;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import java.time.Duration;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import java.time.Duration;
 
 /**
  * Base test class that handles WebDriver lifecycle management.
  * All test classes should extend this class to inherit common setup and teardown functionality.
+ * Changed to use @BeforeEach and @AfterEach to create a fresh driver for each test class.
  */
 public abstract class BaseTest {
     
-    protected static WebDriver driver;
+    protected WebDriver driver;
     protected static final String BASE_URL = "http://localhost:3000";
     
-    @BeforeAll
-    public static void setUp() {
+    @BeforeEach
+    public void setUp() {
         // Setup ChromeDriver options
         ChromeOptions options = new ChromeOptions();
         
@@ -47,11 +49,12 @@ public abstract class BaseTest {
         }
     }
     
-    @AfterAll
-    public static void tearDown() {
+    @AfterEach
+    public void tearDown() {
         // Close the browser and quit the driver
         if (driver != null) {
             driver.quit();
+            driver = null;
         }
     }
     

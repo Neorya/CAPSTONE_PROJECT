@@ -1,9 +1,17 @@
 package com.example.tests;
 
-import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.openqa.selenium.WebElement;
-import com.example.pages.*;
-import static org.junit.jupiter.api.Assertions.*;
+
+import com.example.pages.MatchAddPO;
 
 /**
  * Test class for Create Match page functionality.
@@ -12,17 +20,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MatchAddTest extends BaseTest {
     
-    private static MatchAddPO matchAddPage;
-    
-    @BeforeAll
-    public static void setUpTest() {
-        // BaseTest.setUp() is automatically called by JUnit due to @BeforeAll in parent class
-        // Initialize Page Object here
-        matchAddPage = new MatchAddPO(driver);
-    }
+    private MatchAddPO matchAddPage;
     
     @BeforeEach
     public void navigateToPage() {
+        // Initialize Page Object with the driver from BaseTest
+        matchAddPage = new MatchAddPO(driver);
+        
         // Navigate to the create match page before each test
         navigateTo("/create-match");
         
@@ -434,9 +438,4 @@ public class MatchAddTest extends BaseTest {
             "Create button element should not be enabled");
     }
     
-    @AfterAll
-    public static void tearDownTest() {
-        // BaseTest.tearDown() is automatically called by JUnit due to @AfterAll in parent class
-        // No need to call it explicitly here
-    }
 }

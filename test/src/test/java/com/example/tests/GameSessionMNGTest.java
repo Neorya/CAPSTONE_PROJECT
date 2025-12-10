@@ -1,35 +1,29 @@
 package com.example.tests;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
-
 import java.time.Duration;
-import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-
-import org.junit.jupiter.api.BeforeAll;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.MethodOrderer;
-import com.example.pages.CreateGameSessionPO;
+
 import com.example.pages.GameSessionMNGPO;
 
 
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class GameSessionMNGTest extends BaseTest{
-    private static GameSessionMNGPO gameSessionMNGPO;
+    private GameSessionMNGPO gameSessionMNGPO;
     private final String testRowName = "Spring Semester Game Session";
     
     private final String testRowNameMOD = "Spring Semester Game Session MOD";
@@ -42,16 +36,12 @@ public class GameSessionMNGTest extends BaseTest{
     private final String viewModalName = "Game Session Details";
     private final String updtModalName = "Edit Game Session";
     private final String addMatch      = "Variable Declarations - Section A";
-
-    @BeforeAll
-    public static void setUpTest() {
-        // BaseTest.setUp() is automatically called by JUnit due to @BeforeAll in parent class
-        // Initialize Page Object here
-        gameSessionMNGPO = new GameSessionMNGPO(driver);
-    }
     
     @BeforeEach
     public void navigateToPage() {
+        // Initialize Page Object with the driver from BaseTest
+        gameSessionMNGPO = new GameSessionMNGPO(driver);
+        
         // Navigate to the manage game session page before each test
         navigateTo("/game-sessions");
     }
