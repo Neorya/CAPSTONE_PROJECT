@@ -88,7 +88,7 @@ async def student_join_game(
     
     played_match_ids =  db.query(StudentJoinGame.assigned_match_id.label("match_id")).filter(StudentJoinGame.student_id == input_data.student_id)
 
-    remaing_matches = game_match_ids.except_(played_match_ids).all()
+    remaing_matches = game_match_ids.except_(played_match_ids).first()
 
     if not remaing_matches:
         raise HTTPException(
