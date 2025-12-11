@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func, extract
 from database import get_db
-from models import Student, StudentJoinGame, GameSession
+from models import Student, StudentJoinGame, GameSession, MatchesForGame
 from datetime import datetime
 
 
@@ -76,6 +76,24 @@ async def student_join_game(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The game session passed is not the next upcoming one",
+        )
+
+    if result.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The game session has already started",
+        )
+    
+    game_match_ids = db.query(MatchesForGame.match_id).filter(MatchesForGame.game_id == input_data.game_id)
+    
+    played_match_ids =  db.query(StudentJoinGame.assigned_match_id.label("match_id")).filter(StudentJoinGame.student_id == input_data.student_id)
+
+    remaing_matches = game_match_ids.except_(played_match_ids).all()
+
+    if not remaing_matches:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You have already played all the game inside this game_session",
         )
 
     try:
