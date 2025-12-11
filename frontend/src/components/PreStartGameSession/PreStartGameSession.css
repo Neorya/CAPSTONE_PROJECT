@@ -1,0 +1,79 @@
+.pre-start-session-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f2f5;
+    padding: 20px;
+}
+
+.session-card {
+    width: 100%;
+    max-width: 600px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.header-section {
+    margin-bottom: 20px;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.back-button {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+}
+
+.back-button:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.timer-display {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    justify-content: center;
+}
+
+.section {
+    margin-bottom: 20px;
+}
+
+.students-list .ant-list-item {
+    padding: 8px 0;
+}
+
+.matches-list {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.match-item {
+    background-color: #e8e4d9;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.start-button {
+    background-color: #1890ff;
+    border-color: #1890ff;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}

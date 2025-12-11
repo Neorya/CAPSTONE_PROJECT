@@ -5,6 +5,8 @@ import HomePage from './components/Home';
 import { CreateMatchForm } from './components/CreateMatchForm';
 import { MatchSettingsList } from './components/MatchSettings';
 import { GameSessionCreation } from './components/GameSessionCreation';
+import { StartGameSession } from './components/StartGameSession';
+import { PreStartGameSession } from './components/PreStartGameSession';
 import { GameSessionList } from './components/GameSessionList';
 import './App.css';
 
@@ -26,6 +28,8 @@ function App() {
                         <Route path="/match-settings" element={<MatchSettingsList />} />
                         <Route path="/create-game-session" element={<GameSessionCreation />} />
                         <Route path="/game-sessions" element={<GameSessionList />} />
+                        <Route path="/start-game-session" element={<StartGameSession />} />
+                        <Route path="/pre-start-game-session" element={<PreStartGameSession />} />                        
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </div>
