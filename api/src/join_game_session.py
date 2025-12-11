@@ -62,6 +62,8 @@ async def student_join_game(
     If the student is already enrolled in that game session, it raises a 409 Conflict error
     If the game session is not the next upcoming one, it raises a 400 Bad Request error
     If no game sessions are found, it raises a 404 Not Found error
+    If student already played all match settings of that game session, it raises a 400 Bad Request error
+    If the game session has ACTUALLY started it is not possible to join, it raises a 400 Bad Request error
     On success, it returns a message indicating successful enrollment
     """
     time_difference = func.abs(extract("epoch", GameSession.start_date - func.now()))
