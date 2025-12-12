@@ -26,15 +26,6 @@ const JoinGameSession = () => {
   // check if student has already joined the game session
   const [studentAlreadyJoined, setStudentAlreadyJoined] = useState(false);
 
-  // determine if the session is expired
-  const sessionDate = gameSession?.start_date
-    ? new Date(gameSession.start_date)
-    : null;
-  const isExpired =
-    sessionDate && !isNaN(sessionDate.getTime())
-      ? sessionDate.getTime() < Date.now()
-      : false;
-
   // determine join state for button configuration
   const joinState = (() => {
     if (joining) return "joining";
@@ -76,6 +67,12 @@ const JoinGameSession = () => {
 
   // handle join button click
   const handleJoin = async () => {
+    console.log("joinState at click:", joinState);
+    // if already joined, navigate to lobby/game page
+    if (joinState === "alreadyJoined") {
+      navigate("/lobby");
+      return;
+    }
     if (joinState !== "ready" || !gameSession) return;
     setJoining(true);
     try {

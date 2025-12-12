@@ -22,19 +22,12 @@ const configByState = {
     statusColor: "blue",
   },
   alreadyJoined: {
-    disabled: true,
+    disabled: false,
     loading: false,
-    label: "Already joined",
+    label: "Enter",
     statusText: "Joined",
     statusColor: "geekblue",
-  },
-  expired: {
-    disabled: true,
-    loading: false,
-    label: "Session expired",
-    statusText: "Expired",
-    statusColor: "red",
-  },
+  }
 };
 
 const GameSessionCard = ({ name, time, joinState, onJoin }) => {
@@ -42,7 +35,8 @@ const GameSessionCard = ({ name, time, joinState, onJoin }) => {
     configByState[joinState] || configByState.ready;
 
   const handleClick = () => {
-    if (!disabled && joinState === "ready") {
+    if (disabled) return;
+    if (joinState === "ready" || joinState === "alreadyJoined") {
       onJoin?.();
     }
   };
