@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import func, extract
+from sqlalchemy import func, extract, text
 from database import get_db
 from models import Student, StudentJoinGame, GameSession, MatchesForGame
 from datetime import datetime
@@ -135,19 +135,34 @@ async def get_next_upcoming_game(
 ) -> GetNextUpcomingGameResponse:
     """
     Allows a student to get the next upcoming game session
-    If no game sessions are found, it raises a 404 Not Found error
+    The next upcoming game session is defined as: 
+    - the one with the closest start to the current time (can be in the past or future)
+    - the game session hasn't been manually started by the teacher yet (the is_active field is false)
+    - the game starts in the current day
+    If no game sessions are found, it raises a 404 Not Found
     On success, it returns the game ID of the next upcoming game session
     """
-    time_difference = func.abs(extract("epoch", GameSession.start_date - func.now()))
-    result = db.query(GameSession).order_by(time_difference).limit(1).first()
-
+    now = func.now()
+    time_difference = func.abs(extract("epoch", GameSession.start_date - now))
+    
+    result = (
+        db.query(GameSession)
+        .filter(GameSession.is_active.is_(False))                          # not started yet
+        .filter(func.date(GameSession.start_date) == func.current_date())  # same day (today)
+        .order_by(time_difference.asc(), GameSession.start_date.asc())     # closest (can be past or future)
+        .first()
+    )
+    
     if result is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="No game session found"
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="No upcoming game session found"
         )
-
+        
     return GetNextUpcomingGameResponse(
-        game_id=result.game_id, name=result.name, start_date=result.start_date
+        game_id=result.game_id,
+        name=result.name,
+        start_date=result.start_date
     )
 
 

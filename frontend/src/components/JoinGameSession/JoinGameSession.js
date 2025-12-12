@@ -38,7 +38,6 @@ const JoinGameSession = () => {
   // determine join state for button configuration
   const joinState = (() => {
     if (joining) return "joining";
-    if (isExpired) return "expired";
     if (studentAlreadyJoined) return "alreadyJoined";
     return "ready";
   })();
