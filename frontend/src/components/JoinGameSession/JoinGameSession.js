@@ -84,8 +84,8 @@ const JoinGameSession = () => {
       message.success("Joined successfully!");
       navigate("/lobby");
     } catch (error) {
-      console.error("Error joining session:", error);
-      message.error("Failed to join the session. Please try again.");
+      message.warning(error.message || "Failed to join the session.");
+      console.error("Error joining game session:", error);
     } finally {
       setJoining(false);
     }

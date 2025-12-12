@@ -15,20 +15,22 @@ export async function joinGameSession(studentId, gameId) {
       }),
     });
     if (!res.ok) {
-      let errorMessage = `Failed to join game session: ${res.statusText}`;
+      let errorMessage = "Failed to join game session.";
       try {
         const errorData = await res.json();
-        if (errorData && errorData.message) {
-          errorMessage = `Failed to join game session: ${errorData.message}`;
+        
+        // if the error response has a 'detail' field, use it
+        if (errorData?.detail) {
+          errorMessage = errorData.detail;
         }
       } catch (jsonErr) {
-        // Ignore JSON parse errors, use statusText
+        // ignore JSON parse errors
       }
       throw new Error(errorMessage);
     }
     return await res.json();
   } catch (err) {
-    throw new Error(`Failed to join game session: ${err.message}`);
+    throw err;
   }
 }
 

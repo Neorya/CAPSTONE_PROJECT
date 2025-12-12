@@ -83,7 +83,7 @@ async def student_join_game(
     if result.is_active:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="The game session has already started",
+            detail="The game session has already started. It's not possible to join anymore",
         )
     
     game_match_ids = db.query(MatchesForGame.match_id).filter(MatchesForGame.game_id == input_data.game_id)
@@ -147,7 +147,7 @@ async def get_next_upcoming_game(
     
     result = (
         db.query(GameSession)
-        .filter(GameSession.is_active.is_(False))                          # not started yet
+        # .filter(GameSession.is_active.is_(False))                          # not started yet
         .filter(func.date(GameSession.start_date) == func.current_date())  # same day (today)
         .order_by(time_difference.asc(), GameSession.start_date.asc())     # closest (can be past or future)
         .first()
