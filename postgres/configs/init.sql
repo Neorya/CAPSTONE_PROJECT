@@ -85,13 +85,17 @@ CREATE TABLE capstone_app.matches_for_game (
 DROP TABLE IF EXISTS capstone_app.student;
 
 CREATE TABLE capstone_app.student (
-  student_id SERIAL PRIMARY KEY,
-  email      VARCHAR(150) UNIQUE NOT NULL,
-  first_name VARCHAR(100) NOT NULL,
-  last_name  VARCHAR(100) NOT NULL,
-  score      INTEGER NOT NULL DEFAULT 0
+  student_id  SERIAL PRIMARY KEY,
+  email       VARCHAR(150) UNIQUE NOT NULL,
+  first_name  VARCHAR(100) NOT NULL,
+  last_name   VARCHAR(100) NOT NULL,
+  score       INTEGER NOT NULL DEFAULT 0,
+  google_sub  VARCHAR(255) UNIQUE,
+  avatar_url  VARCHAR(2048),       
+  created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(), 
+  updated_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   CONSTRAINT check_max_score CHECK (score <= 2000000)
---  login_id   INTEGER REFERENCES capstone_app.login(login_id) NOT NULL
+-- login_id INTEGER REFERENCES capstone_app.login(login_id)
 );
 
 
@@ -377,3 +381,4 @@ VALUES
 (8, 5, NULL),
 (9, 5, NULL),
 (10, 5, NULL);
+
