@@ -11,6 +11,11 @@ import {
 
 const { Title, Text } = Typography;
 
+/**
+ * JoinGameSession component allows a student to join an available in-person game session.
+ *
+ * @returns {JSX.Element} The rendered component for joining a game session.
+ */
 const JoinGameSession = () => {
   const navigate = useNavigate();
 
@@ -35,6 +40,11 @@ const JoinGameSession = () => {
 
   // get available game + check if student already joined
   useEffect(() => {
+    /**
+     * ================================TODO ==============================
+     * The studentId is currently hardcoded to 1. 
+     * ====================================================================
+     */
     const studentId = 1; // TODO: replace with real logged-in student id
 
     const init = async () => {

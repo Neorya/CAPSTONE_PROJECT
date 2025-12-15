@@ -30,6 +30,16 @@ const configByState = {
   }
 };
 
+/**
+ * Displays a card with information about a game session and allows the user to join or enter the session.
+ *
+ * @param {Object} props - The component props.
+ * @param {string} props.name - The name of the game session.
+ * @param {string} props.time - The scheduled time of the game session (ISO string).
+ * @param {"ready"|"joining"|"alreadyJoined"} props.joinState - The current join state for the session.
+ * @param {function} [props.onJoin] - Callback invoked when the user attempts to join or enter the session.
+ * @returns {JSX.Element} The rendered game session card component.
+ */
 const GameSessionCard = ({ name, time, joinState, onJoin }) => {
   const { disabled, loading, label, statusText, statusColor } =
     configByState[joinState] || configByState.ready;

@@ -108,7 +108,7 @@ const HomePage = () => {
               <UnorderedListOutlined style={{ fontSize: 24, color: "#722ed1" }} />
               <div>
                 <Title level={4} style={{ margin: 0 }}>
-                  Join Available Game sessions
+                  Join Available Game Sessions
                 </Title>
                 <Paragraph style={{ margin: 0, color: "#8c8c8c" }}>
                   Join or list future and past game sessions
