@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import func, extract, text
+from sqlalchemy import func, extract
 from database import get_db
 from models import Student, StudentJoinGame, GameSession, MatchesForGame
 from datetime import datetime
@@ -88,14 +88,17 @@ async def student_join_game(
     
     game_match_ids = db.query(MatchesForGame.match_id).filter(MatchesForGame.game_id == input_data.game_id)
     
-    played_match_ids =  db.query(StudentJoinGame.assigned_match_id.label("match_id")).filter(StudentJoinGame.student_id == input_data.student_id)
+    played_match_ids =  db.query(StudentJoinGame.assigned_match_id.label("match_id")).filter(
+        StudentJoinGame.student_id == input_data.student_id,
+        StudentJoinGame.game_id == input_data.game_id
+    )
 
-    remaing_matches = game_match_ids.except_(played_match_ids).first()
+    remaining_matches = game_match_ids.except_(played_match_ids).first()
 
-    if not remaing_matches:
+    if not remaining_matches:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="You have already played all the game inside this game_session",
+            detail="You have already played all the games inside this game_session",
         )
 
     try:
@@ -185,10 +188,10 @@ async def has_student_joined_game(
     """
     
     if not db.query(Student).filter(Student.student_id == student_id).first():
-        raise HTTPException(404, "Student not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
 
     if not db.query(GameSession).filter(GameSession.game_id == game_id).first():
-        raise HTTPException(404, "Game session not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Game session not found")
 
     enrollment = (
         db.query(StudentJoinGame)
