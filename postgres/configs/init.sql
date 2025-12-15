@@ -2,6 +2,22 @@
 
 CREATE SCHEMA capstone_app;
 
+
+
+--- The creation of login table: (User Story 5)
+
+DROP TABLE IF EXISTS capstone_app.login;
+
+CREATE TABLE capstone_app.login (
+  login_id SERIAL PRIMARY KEY,
+  google_sub  VARCHAR(255) UNIQUE,    
+  sub VARCHAR(255) NOT NULL, 
+  created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(), 
+  CONSTRAINT uc_sub_auth UNIQUE (sub, google_sub)
+);
+
+
+
 -- Creation of Teacher Table :  (User story 1)
 
 DROP TABLE IF EXISTS capstone_app.teacher;
@@ -10,7 +26,8 @@ CREATE TABLE capstone_app.teacher (
     teacher_id SERIAL PRIMARY KEY,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,	
-    email VARCHAR(150) UNIQUE NOT NULL 
+    email VARCHAR(150) UNIQUE NOT NULL,
+    login_fk    INTEGER REFERENCES capstone_app.login(login_id) NOT NULL,
 --    login_id   INTEGER REFERENCES capstone_app.login(login_id) NOT NULL  --- user story 5 for modification
 );
 
@@ -90,25 +107,9 @@ CREATE TABLE capstone_app.student (
   first_name  VARCHAR(100) NOT NULL,
   last_name   VARCHAR(100) NOT NULL,
   score       INTEGER NOT NULL DEFAULT 0,
-  google_sub  VARCHAR(255) UNIQUE,
-  avatar_url  VARCHAR(2048),       
-  created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(), 
-  updated_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  login_fk    INTEGER REFERENCES capstone_app.login(login_id) NOT NULL,
   CONSTRAINT check_max_score CHECK (score <= 2000000)
 -- login_id INTEGER REFERENCES capstone_app.login(login_id)
-);
-
-
-
---- The creation of login table: (User Story 5)
-
-DROP TABLE IF EXISTS capstone_app.login;
-
-CREATE TABLE capstone_app.login (
-  login_id SERIAL PRIMARY KEY,
-  sub VARCHAR(255) NOT NULL, 
-  auth_provider VARCHAR(50) NOT NULL,
-  CONSTRAINT uc_sub_auth UNIQUE (sub, auth_provider)
 );
 
 
@@ -381,4 +382,5 @@ VALUES
 (8, 5, NULL),
 (9, 5, NULL),
 (10, 5, NULL);
+
 
