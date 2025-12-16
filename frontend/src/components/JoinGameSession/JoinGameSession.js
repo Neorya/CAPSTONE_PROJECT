@@ -1,0 +1,151 @@
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button, Card, Tooltip, Typography, message, Spin, Empty } from "antd";
+import { ArrowLeftOutlined } from "@ant-design/icons";
+import GameSessionCard from "./components/GameSessionCard";
+import {
+  joinGameSession,
+  getAvailableGame,
+  hasStudentAlreadyJoinedSession,
+} from "../../services/joinGameSessionService";
+
+const { Title, Text } = Typography;
+
+/**
+ * JoinGameSession component allows a student to join an available in-person game session.
+ *
+ * @returns {JSX.Element} The rendered component for joining a game session.
+ */
+const JoinGameSession = () => {
+  const navigate = useNavigate();
+
+  // state for fetching session and checking if student already joined
+  const [initializing, setInitializing] = useState(true);
+
+  // state for joining process
+  const [joining, setJoining] = useState(false);
+
+  // state for available game session
+  const [gameSession, setGameSession] = useState(null);
+
+  // check if student has already joined the game session
+  const [studentAlreadyJoined, setStudentAlreadyJoined] = useState(false);
+
+  // determine join state for button configuration
+  const joinState = (() => {
+    if (joining) return "joining";
+    if (studentAlreadyJoined) return "alreadyJoined";
+    return "ready";
+  })();
+
+  // get available game + check if student already joined
+  useEffect(() => {
+    /**
+     * ================================TODO ==============================
+     * The studentId is currently hardcoded to 1. 
+     * ====================================================================
+     */
+    const studentId = 1; // TODO: replace with real logged-in student id
+
+    const init = async () => {
+      try {
+        const session = await getAvailableGame();
+
+        if (session && session.game_id) {
+          setGameSession(session);
+
+          // check if student has already joined this session
+          const joined = await hasStudentAlreadyJoinedSession(
+            studentId,
+            session.game_id
+          );
+          setStudentAlreadyJoined(joined);
+        } else {
+          setGameSession(null);
+        }
+      } catch (error) {
+        console.error("Error initializing game session page:", error);
+        setGameSession(null);
+        setStudentAlreadyJoined(false);
+      } finally {
+        setInitializing(false);
+      }
+    };
+
+    init();
+  }, []);
+
+  // handle join button click
+  const handleJoin = async () => {
+    console.log("joinState at click:", joinState);
+    // if already joined, navigate to lobby/game page
+    if (joinState === "alreadyJoined") {
+      navigate("/lobby");
+      return;
+    }
+    if (joinState !== "ready" || !gameSession) return;
+    setJoining(true);
+    try {
+      // TODO change this (1) to actual student id
+      await joinGameSession(1, gameSession.game_id);
+      message.success("Joined successfully!");
+      navigate("/lobby");
+    } catch (error) {
+      message.warning(error.message || "Failed to join the session.");
+      console.error("Error joining game session:", error);
+    } finally {
+      setJoining(false);
+    }
+  };
+
+  return (
+    <div className="create-match-container">
+      <Card className="create-match-card">
+        <div className="page-header">
+          <Title level={2}>Join an in-person Game Session</Title>
+          <Tooltip title="Back to Home">
+            <Button
+              id="back-to-home-button"
+              icon={<ArrowLeftOutlined />}
+              onClick={() => navigate("/")}
+              shape="circle"
+              size="large"
+            />
+          </Tooltip>
+        </div>
+
+        <div className="subheader">
+          <Text type="secondary">Compete with your classmates!</Text>
+        </div>
+
+        <div>
+          {initializing ? (
+            <div>
+              <Spin tip="Looking for games..." />
+            </div>
+          ) : gameSession ? (
+            <GameSessionCard
+              name={gameSession.name}
+              time={gameSession.start_date}
+              joinState={joinState}
+              onJoin={handleJoin}
+            />
+          ) : (
+            <div>
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={
+                  <Text type="secondary">
+                    No sessions are currently open. Check back soon!
+                  </Text>
+                }
+              />
+            </div>
+          )}
+        </div>
+      </Card>
+    </div>
+  );
+};
+
+export default JoinGameSession;
