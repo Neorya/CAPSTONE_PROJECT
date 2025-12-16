@@ -2,9 +2,9 @@ name: Run Selenium Tests with Docker
 
 on:
   push:
-    branches: [ main, develop, sp1_test_github_actions ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main, develop, sp1_test_github_actions ]
+    branches: [ main, develop ]
   workflow_dispatch:
 
 jobs:
