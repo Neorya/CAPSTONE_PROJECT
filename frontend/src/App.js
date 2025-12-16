@@ -8,6 +8,7 @@ import { GameSessionCreation } from './components/GameSessionCreation';
 import { StartGameSession } from './components/StartGameSession';
 import { PreStartGameSession } from './components/PreStartGameSession';
 import { GameSessionList } from './components/GameSessionList';
+import { LoginWrapper } from './components/Login';
 import './App.css';
 
 function App() {
@@ -23,7 +24,8 @@ function App() {
             <Router>
                 <div className="App">
                     <Routes>
-                        <Route path="/" element={<HomePage />} />
+                        <Route path="/" element={<LoginWrapper/>} />
+                        <Route path="/home" element={<HomePage/>} />
                         <Route path="/create-match" element={<CreateMatchForm />} />
                         <Route path="/match-settings" element={<MatchSettingsList />} />
                         <Route path="/create-game-session" element={<GameSessionCreation />} />
