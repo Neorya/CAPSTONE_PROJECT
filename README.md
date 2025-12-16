@@ -3,9 +3,11 @@ For launching the containers use:
 docker compose up --build
 
 Rebuild:
+```bash
 docker compose down -v
 docker compose build --no-cache
 docker compose up -d
+```
 
 ## BRANCH NAMING CONVENTIONS
 
@@ -21,7 +23,7 @@ sp1_st1_db1
 
 ### Format
 
-<JIIRA-ID> Short description of the taks <Other Student>
+< JIIRA-ID / Task ID > Short description of the taks < Other Student >
 
 ### Few example:
 

@@ -15,20 +15,27 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field, field_validator
 
+# Import ORM models
+from models import (    
+    Student,
+    GameSession,
+    Match,
+    MatchesForGame, 
+    StudentJoinGame
+)
+
 
 from database import get_db
 
 # Import Pydantic models
 from models import (
-    StudentResponse,
-    GameSessionStudentsResponse,
-    MatchInfoResponse,
-    GameSessionFullDetailResponse,
-    StudentMatchAssignment,
-    GameSessionStartResponse,
+    StudentResponse, #individual student information.
+    GameSessionStudentsResponse, #listing all students joined to a game session.
+    MatchInfoResponse,  #match information within a game session.
+    GameSessionFullDetailResponse,  #full game session details including students and matches.
+    StudentMatchAssignment, #individual student-to-match assignment.
+    GameSessionStartResponse   #response model for starting a game session.
 )
-
-
 
 class Student(BaseModel):
     student_id: int = Field(..., description="Unique identifier for the student")
@@ -62,7 +69,6 @@ class StudentJoinGame(BaseModel):
 class MatchForGame(BaseModel):
     game_id: int = Field(..., description="ID of the game session")
     match_id: int = Field(..., description="ID of the match")
-
 
 
 # ============================================================================
@@ -129,9 +135,9 @@ async def get_game_session_full_details(
     - List of all matches in the session
     - Total student count
     """
-    # TODO: Replace with database query
-    game_session = db.query(GameSession).filter(GameSession.game_id == game_id).first()
     
+    game_session = db.query(GameSession).filter(GameSession.game_id == game_id).first()
+
     if not game_session:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -139,8 +145,6 @@ async def get_game_session_full_details(
         )
     
     # Get joined students
-    # TODO: Replace with database join query
-
     joined_records = db.query(Student).join(StudentJoinGame, Student.student_id == StudentJoinGame.student_id).filter(StudentJoinGame.game_id == game_id).all()
 
     students = []
@@ -163,29 +167,36 @@ async def get_game_session_full_details(
     # TODO: Replace with database join query
     match_ids = db.query(Match).join(MatchForGame, Match.match_id == MatchForGame.match_id).filter(MatchForGame.game_id == game_id).all()
     matches = []
-    for match_id in match_ids:
-        match_data =    {
-            "match_id": match_id.match_id,
-            "title": match_id.title,
-            "difficulty_level": match_id.difficulty_level,
-            "duration_phase1": match_id.duration_phase1,
-            "duration_phase2": match_id.duration_phase2
-        }
-        if match_data:
-            matches.append(MatchInfoResponse(
-                match_id=match_data["match_id"],  
-                title=match_data["title"],  
-                difficulty_level=match_data["difficulty_level"],  
-                duration_phase1=match_data["duration_phase1"],  
-                duration_phase2=match_data["duration_phase2"]  
-            ))
+
+    joined_records = db.query(Student).join(StudentJoinGame, Student.student_id == StudentJoinGame.student_id).filter(StudentJoinGame.game_id == game_id).all()
+    students = [
+        StudentResponse(
+            student_id=record.student_id,
+            first_name=record.first_name,
+            last_name=record.last_name,
+            email=record.email
+        ) for record in joined_records
+    ]
+
+    # Get matches for this game session
+    
+    match_ids = db.query(Match).join(MatchesForGame, Match.match_id == MatchesForGame.match_id).filter(MatchesForGame.game_id == game_id).all()
+    matches = [
+        MatchInfoResponse(
+            match_id=m.match_id,
+            title=m.title,
+            difficulty_level=m.difficulty_level,
+            duration_phase1=m.duration_phase1,
+            duration_phase2=m.duration_phase2
+        ) for m in match_ids
+    ]
     
     return GameSessionFullDetailResponse(
-        game_id=game_session["game_id"], #should be game_session.game_id?
-        name=game_session["name"],  #should be game_session.name?
-        start_date=game_session["start_date"],  #should be game_session.start_date?
-        creator_id=game_session["creator_id"],  #should be game_session.creator_id?
-        is_active=game_session["is_active"],    #should be game_session.is_active?
+        game_id=game_session.game_id,
+        name=game_session.name,
+        start_date=game_session.start_date,
+        creator_id=game_session.creator_id,
+        is_active=game_session.is_active,
         total_students=len(students),   
         students=students,
         matches=matches
@@ -206,9 +217,9 @@ async def get_game_session_students(
     Get all students who have joined a specific game session.
     Returns student details including name and email.
     """
-    # TODO: Replace with database query
-    game_session = db.query(GameSession).filter(GameSession.game_id == game_id).first()
     
+    game_session = db.query(GameSession).filter(GameSession.game_id == game_id).first()
+
     if not game_session:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -216,23 +227,16 @@ async def get_game_session_students(
         )
     
     # Get joined students
-    # TODO: Replace with database join query on student_join_game and student tables
-    joined_records = db.query(Student).join(StudentJoinGame, Student.student_id == StudentJoinGame.student_id).filter(StudentJoinGame.game_id == game_id).all()
-    students = []
-    for record in joined_records:
-        student_data = {
-            "student_id": record.student_id,
-            "first_name": record.first_name,
-            "last_name": record.last_name,
-            "email": record.email
-        }
-        if student_data:
-            students.append(StudentResponse(
-                student_id=student_data["student_id"],  
-                first_name=student_data["first_name"],  
-                last_name=student_data["last_name"],  
-                email=student_data["email"]  
-            ))
+    joined_records =db.query(Student).join(StudentJoinGame, Student.student_id == StudentJoinGame.student_id).filter(StudentJoinGame.game_id == game_id).all()
+    
+    students = [
+        StudentResponse(
+            student_id=s.student_id,
+            first_name=s.first_name,
+            last_name=s.last_name,
+            email=s.email
+        ) for s in joined_records
+    ]
     
     return GameSessionStudentsResponse(
         game_id=game_id,
@@ -259,16 +263,14 @@ async def start_game_session(
     4. Assigns students to matches using fair distribution (round-robin)
     5. Returns the assignments
     """
-    # TODO: Replace with database query
+
     game_session = db.query(GameSession).filter(GameSession.game_id == game_id).first()
-    
+
     if not game_session:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Game session with id {game_id} not found"
         )
-    
-    # game_session = MOCK_GAME_SESSIONS[game_id]
     
     # Check if session is already active
     if game_session.is_active:
@@ -286,7 +288,8 @@ async def start_game_session(
         )
     
     # Get matches for this game session
-    match_ids = db.query(MatchForGame).filter(MatchForGame.game_id == game_id).all()
+
+    match_ids = db.query(MatchesForGame).filter(MatchesForGame.game_id == game_id).all()
     if not match_ids:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -295,38 +298,53 @@ async def start_game_session(
     
     # Get student IDs
     student_ids = [record.student_id for record in joined_records]
-    #match_ids = [match.match_id for match in match_ids]
+
+    match_ids = [match.match_id for match in match_ids]
     
     # Distribute students to matches fairly
     raw_assignments = _distribute_students_to_matches(student_ids, match_ids)
-    
-    # TODO: Update database
-    # 1. Update game_session.is_active = True
-    # 2. Update student_join_game.assigned_match_id for each student
-    
+
+    # Update game session to active    
     game_session.is_active = True
-    #db.commit()
+
     for assignment in raw_assignments:
         for record in joined_records:
             if record.student_id == assignment["student_id"]:
                 record.assigned_match_id = assignment["assigned_match_id"]
                 break
+
     db.commit()
     
+    # Build response with full assignment details    
+    # Fetch student and match details for response
+    student_data = db.query(Student).filter(Student.student_id.in_(student_ids)).all()
+    match_data = db.query(Match).filter(Match.match_id.in_(match_ids)).all()
+
+    # Build lookup dictionaries for O(1) access
+    student_lookup = {s.student_id: s for s in student_data}
+    match_lookup = {m.match_id: m for m in match_data}
+
     # Build response with full assignment details
     assignments = []
     for assignment in raw_assignments:
-        student_data = db.query(Student).filter(Student.id == assignment["student_id"]).first()
-        match_data = db.query(Match).filter(Match.id == assignment["assigned_match_id"]).first()
-        if student_data and match_data:
+        student = student_lookup.get(assignment["student_id"])
+        match = match_lookup.get(assignment["assigned_match_id"])
+        if student and match:
             assignments.append(StudentMatchAssignment(
                 student_id=assignment["student_id"],  
-                student_name=f"{student_data.first_name} {student_data.last_name}", 
+                student_name=f"{student.first_name} {student.last_name}", 
                 assigned_match_id=assignment["assigned_match_id"], 
-                assigned_match_title=match_data.title
+                assigned_match_title=match.title
             ))
 
-
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to start game session due to a database error: {str(e)}"
+        )
     
     return GameSessionStartResponse(
         game_id=game_id,
@@ -335,4 +353,3 @@ async def start_game_session(
         total_students_assigned=len(assignments),
         assignments=assignments
     )
-

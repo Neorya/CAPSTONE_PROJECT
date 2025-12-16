@@ -86,6 +86,7 @@ const PreStartGameSession = () => {
                     block 
                     onClick={handleStartSession}
                     className="start-button"
+                    id = "start_game_button"
                     style={{ marginTop: '20px', height: '50px', fontSize: '18px' }}
                 >
                     Start session

@@ -28,6 +28,7 @@ const StartGameSession = () => {
                     <div className="header-top">
                         <Tooltip title="Back to Home">
                             <Button 
+                                id="back-to-home-button"
                                 icon={<ArrowLeftOutlined />} 
                                 onClick={() => navigate('/')}
                                 shape="circle"
@@ -38,15 +39,15 @@ const StartGameSession = () => {
                         <Title level={2} style={{ color: '#333', margin: 0 }}>{session.name}</Title>
                         <div style={{ width: 40 }}></div> {/* Spacer for centering */}
                     </div>
-                    <div className="timer-large">
+                    <div className="timer-large" id="timer-large">
                         {elapsedTime}
                     </div>
-                    <Text className="subtitle">
+                    <Text className="subtitle" id="student-answered">
                         {session.students.length} of {session.students.length} students answered
                     </Text>
                 </div>
 
-                <div className="student-list-section">
+                <div className="student-list-section" id="student-list">
                     <Text strong className="list-title">Student list</Text>
                     <List
                         grid={{ gutter: 16, column: 2 }}
