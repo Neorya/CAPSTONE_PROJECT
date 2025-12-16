@@ -4,6 +4,25 @@ CREATE SCHEMA capstone_app;
 
 
 
+
+
+CREATE TYPE user_role AS ENUM ('student', 'teacher', 'admin');
+
+-- The creation of students table: (User Story 5)
+
+DROP TABLE IF EXISTS capstone_app.user CASCADE;
+
+CREATE TABLE capstone_app.user (
+  user_id  SERIAL PRIMARY KEY,
+  email       VARCHAR(150) UNIQUE NOT NULL,
+  first_name  VARCHAR(100) NOT NULL,
+  last_name   VARCHAR(100) NOT NULL,
+  score       INTEGER NOT NULL DEFAULT 0,
+  role        user_role NOT NULL
+  CONSTRAINT check_max_score CHECK (score <= 2000000)
+);
+
+
 --- The creation of login table: (User Story 5)
 
 DROP TABLE IF EXISTS capstone_app.login;
@@ -11,11 +30,9 @@ DROP TABLE IF EXISTS capstone_app.login;
 CREATE TABLE capstone_app.login (
   login_id SERIAL PRIMARY KEY,
   google_sub  VARCHAR(255) UNIQUE NOT NULL,    
-  sub VARCHAR(255) NOT NULL, 
   created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(), 
-  CONSTRAINT uc_sub_auth UNIQUE (sub, google_sub)
+  user_id INTEGER NOT NULL REFERENCES capstone_app.user(user_id) ON DELETE CASCADE
 );
-
 
 
 -- Creation of Teacher Table :  (User story 1)
@@ -25,9 +42,9 @@ DROP TABLE IF EXISTS capstone_app.teacher;
 CREATE TABLE capstone_app.teacher (
     teacher_id SERIAL PRIMARY KEY,
     first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,	
-    email VARCHAR(150) UNIQUE NOT NULL,
-    login_fk    INTEGER REFERENCES capstone_app.login(login_id) NOT NULL
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL
+    -- login_fk    INTEGER REFERENCES capstone_app.login(login_id) NOT NULL
 --    login_id   INTEGER REFERENCES capstone_app.login(login_id) NOT NULL  --- user story 5 for modification
 );
 
@@ -107,7 +124,7 @@ CREATE TABLE capstone_app.student (
   first_name  VARCHAR(100) NOT NULL,
   last_name   VARCHAR(100) NOT NULL,
   score       INTEGER NOT NULL DEFAULT 0,
-  login_fk    INTEGER REFERENCES capstone_app.login(login_id) NOT NULL,
+  -- login_fk    INTEGER REFERENCES capstone_app.login(login_id) NOT NULL,
   CONSTRAINT check_max_score CHECK (score <= 2000000)
 -- login_id INTEGER REFERENCES capstone_app.login(login_id)
 );
@@ -154,102 +171,106 @@ TO api_user;
 -- INSERT DATA INTO LOGIN TABLE (18 RECORDS)
 -- ######################################
 
--- Login 1
-INSERT INTO capstone_app.login (google_sub, sub)
-VALUES ('100123456789012345678', 'auth0|gsuite|abc12345');
+INSERT INTO capstone_app.user (email, first_name, last_name, role, score)
+VALUES 
+('student1@test.com', 'Alice', 'Anderson', 'student', 100),
+('student2@test.com', 'Bob', 'Brown', 'student', 200),
+('student3@test.com', 'Charlie', 'Clark', 'student', 300),
+('student4@test.com', 'David', 'Davis', 'student', 400),
+('student5@test.com', 'Eve', 'Evans', 'student', 500),
+('teacher1@test.com', 'Frank', 'Foster', 'teacher', 0),
+('teacher2@test.com', 'Grace', 'Green', 'teacher', 0),
+('admin1@test.com', 'Hank', 'Harris', 'admin', 0),
+('student6@test.com', 'Ivy', 'Irwin', 'student', 150),
+('student7@test.com', 'Jack', 'Jones', 'student', 250),
+('student8@test.com', 'Kevin', 'King', 'student', 350),
+('student9@test.com', 'Laura', 'Lee', 'student', 450),
+('student10@test.com', 'Mike', 'Miller', 'student', 550),
+('teacher3@test.com', 'Nina', 'Nelson', 'teacher', 0),
+('teacher4@test.com', 'Oscar', 'Owens', 'teacher', 0),
+('admin2@test.com', 'Paul', 'Parker', 'admin', 0),
+('student11@test.com', 'Quinn', 'Quick', 'student', 120),
+('student12@test.com', 'Rachel', 'Ross', 'student', 220);
 
--- Login 2
-INSERT INTO capstone_app.login (google_sub, sub)
-VALUES ('100987654321098765433', 'auth0|email|def67890');
+INSERT INTO capstone_app.login (google_sub, user_id)
+VALUES 
+-- Login 1 -> User 1
+('100123456789012345678', 1),
 
--- Login 3
-INSERT INTO capstone_app.login (google_sub, sub)
-VALUES ('100987654321098765432', 'firebase|gauth|ghi01234');
+-- Login 2 -> User 2
+('100987654321098765433', 2),
 
---- Login 4
-INSERT INTO capstone_app.login (google_sub, sub)
-VALUES ('100987654321098765434', 'cognito|user|jkl56789');
+-- Login 3 -> User 3
+('100987654321098765432', 3),
 
---- Login 5
-INSERT INTO capstone_app.login (google_sub, sub)
-VALUES ('100555444333222111000', 'onelogin|oauth|mno98765');
+-- Login 4 -> User 4
+('100987654321098765434', 4),
 
--- Login 6
-INSERT INTO capstone_app.login (google_sub, sub)
-VALUES ('100111222333444555666', 'auth0|gsuite|xyz11122');
+-- Login 5 -> User 5
+('100555444333222111000', 5),
 
--- Login 7
-INSERT INTO capstone_app.login (google_sub, sub)
-VALUES ('100111222333444666666', 'auth0|email|pqr33344');
+-- Login 6 -> User 6
+('100111222333444555666', 6),
 
--- Login 8
-INSERT INTO capstone_app.login (google_sub, sub)
-VALUES ('100777888999000111222', 'firebase|gauth|stu55566');
+-- Login 7 -> User 7
+('100111222333444666666', 7),
 
--- Login 9
-INSERT INTO capstone_app.login (google_sub, sub)
-VALUES ('100777888999000155555', 'cognito|user|vwx77788');
+-- Login 8 -> User 8
+('100777888999000111222', 8),
 
--- Login 10
-INSERT INTO capstone_app.login (google_sub, sub)
-VALUES ('100333222111000999888', 'onelogin|oauth|zab99900');
+-- Login 9 -> User 9
+('100777888999000155555', 9),
 
--- Login 11
-INSERT INTO capstone_app.login (google_sub, sub)
-VALUES ('144443222111888899888', 'onelogin|oauth|zab99900');
+-- Login 10 -> User 10
+('100333222111000999888', 10),
 
--- Login 12
-INSERT INTO capstone_app.login (google_sub, sub)
-VALUES ('144443266661000999899', 'auth0|email|log22222');
+-- Login 11 -> User 11
+('144443222111888899888', 11),
 
--- Login 13
-INSERT INTO capstone_app.login (google_sub, sub)
-VALUES ('100666777888999000111', 'firebase|gauth|log33333');
+-- Login 12 -> User 12
+('144443266661000999899', 12),
 
--- Login 14
-INSERT INTO capstone_app.login (google_sub, sub)
-VALUES ('133333222111000999888', 'cognito|user|log44444');
+-- Login 13 -> User 13
+('100666777888999000111', 13),
 
--- Login 15
-INSERT INTO capstone_app.login (google_sub, sub)
-VALUES ('100222333444555666777', 'onelogin|oauth|log55555');
+-- Login 14 -> User 14
+('133333222111000999888', 14),
 
--- Login 16
-INSERT INTO capstone_app.login (google_sub, sub)
-VALUES ('100888999000111222333', 'auth0|gsuite|log66666');
+-- Login 15 -> User 15
+('100222333444555666777', 15),
 
--- Login 17
-INSERT INTO capstone_app.login (google_sub, sub)
-VALUES ('100444555666777888999', 'firebase|gauth|log88888');
+-- Login 16 -> User 16
+('100888999000111222333', 16),
 
--- Login 18
-INSERT INTO capstone_app.login (google_sub, sub)
-VALUES ('100101202303404505606', 'onelogin|oauth|log00000');
+-- Login 17 -> User 17
+('100444555666777888999', 17),
 
+-- Login 18 -> User 18
+('100101202303404505606', 18);
 
 -- ######################################
 -- INSERT DATA INTO TEACHER TABLE (5 RECORDS)
 -- ######################################
 
 -- Teacher 1
-INSERT INTO capstone_app.teacher (first_name, last_name, email, login_fk)
-VALUES ('Marco', 'Rossi', 'm.rossi@capstone.it', 1);
+INSERT INTO capstone_app.teacher (first_name, last_name, email)
+VALUES ('Marco', 'Rossi', 'm.rossi@capstone.it');
 
 -- Teacher 2
-INSERT INTO capstone_app.teacher (first_name, last_name, email, login_fk)
-VALUES ('Giulia', 'Verdi', 'g.verdi@capstone.it', 2);
+INSERT INTO capstone_app.teacher (first_name, last_name, email)
+VALUES ('Giulia', 'Verdi', 'g.verdi@capstone.it');
 
 -- Teacher 3
-INSERT INTO capstone_app.teacher (first_name, last_name, email, login_fk)
-VALUES ('Luca', 'Bianchi', 'l.bianchi@capstone.it', 3);
+INSERT INTO capstone_app.teacher (first_name, last_name, email)
+VALUES ('Luca', 'Bianchi', 'l.bianchi@capstone.it');
 
 -- Teacher 4
-INSERT INTO capstone_app.teacher (first_name, last_name, email, login_fk)
-VALUES ('Anna', 'Neri', 'a.neri@capstone.it', 4);
+INSERT INTO capstone_app.teacher (first_name, last_name, email)
+VALUES ('Anna', 'Neri', 'a.neri@capstone.it');
 
 -- Teacher 5
-INSERT INTO capstone_app.teacher (first_name, last_name, email, login_fk)
-VALUES ('Paolo', 'Gialli', 'p.gialli@capstone.it', 5);
+INSERT INTO capstone_app.teacher (first_name, last_name, email)
+VALUES ('Paolo', 'Gialli', 'p.gialli@capstone.it');
 
 
 
@@ -369,44 +390,44 @@ VALUES
 
 -- student 1: Mario Rossi
 
-INSERT INTO capstone_app.student (email, first_name, last_name, score, login_fk)
-VALUES ('mario.rossi@studenti.it', 'Mario', 'Rossi', 95, 6);
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('mario.rossi@studenti.it', 'Mario', 'Rossi', 95);
 
 -- student 2: Sara Bianchi
-INSERT INTO capstone_app.student (email, first_name, last_name, score, login_fk)
-VALUES ('sara.bianchi@studenti.it', 'Sara', 'Bianchi', 78, 7);
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('sara.bianchi@studenti.it', 'Sara', 'Bianchi', 78);
 
 -- student 3: Andrea Verdi 
-INSERT INTO capstone_app.student (email, first_name, last_name, score, login_fk)
-VALUES ('andrea.verdi@studenti.it', 'Andrea', 'Verdi', 55, 8);
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('andrea.verdi@studenti.it', 'Andrea', 'Verdi', 55);
 
 -- student 4: Chiara Neri 
-INSERT INTO capstone_app.student (email, first_name, last_name, score, login_fk)
-VALUES ('chiara.neri@studenti.it', 'Chiara', 'Neri', 88, 9);
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('chiara.neri@studenti.it', 'Chiara', 'Neri', 88);
 
 -- student 5: Luca Gialli
-INSERT INTO capstone_app.student (email, first_name, last_name, score, login_fk)
-VALUES ('luca.gialli@studenti.it', 'Luca', 'Gialli', 62, 10);
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('luca.gialli@studenti.it', 'Luca', 'Gialli', 62);
 
 -- student 6: Elena Ferri
-INSERT INTO capstone_app.student (email, first_name, last_name, score, login_fk)
-VALUES ('elena.ferri@studenti.it', 'Elena', 'Ferri', 72, 11);
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('elena.ferri@studenti.it', 'Elena', 'Ferri', 72);
 
 -- student 7: Marco Conti
-INSERT INTO capstone_app.student (email, first_name, last_name, score, login_fk)
-VALUES ('marco.conti@studenti.it', 'Marco', 'Conti', 81, 12);
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('marco.conti@studenti.it', 'Marco', 'Conti', 81);
 
 -- student 8: Giulia Romano
-INSERT INTO capstone_app.student (email, first_name, last_name, score, login_fk)
-VALUES ('giulia.romano@studenti.it', 'Giulia', 'Romano', 90, 13);
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('giulia.romano@studenti.it', 'Giulia', 'Romano', 90);
 
 -- student 9: Francesco Marino
-INSERT INTO capstone_app.student (email, first_name, last_name, score, login_fk)
-VALUES ('francesco.marino@studenti.it', 'Francesco', 'Marino', 67, 14);
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('francesco.marino@studenti.it', 'Francesco', 'Marino', 67);
 
 -- student 10: Alessia Costa
-INSERT INTO capstone_app.student (email, first_name, last_name, score, login_fk)
-VALUES ('alessia.costa@studenti.it', 'Alessia', 'Costa', 85, 15);
+INSERT INTO capstone_app.student (email, first_name, last_name, score)
+VALUES ('alessia.costa@studenti.it', 'Alessia', 'Costa', 85);
 
 
 
