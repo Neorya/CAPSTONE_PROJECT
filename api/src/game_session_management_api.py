@@ -9,9 +9,11 @@ Provides endpoints for:
 User Story 3: Teacher starts game session and views joined students and matches
 """
 
-from typing import List, Dict
+from typing import List, Dict, Any
+from datetime import datetime
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
+from pydantic import BaseModel, Field, field_validator
 
 # Import ORM models
 from models import (    
@@ -35,7 +37,38 @@ from models import (
     GameSessionStartResponse   #response model for starting a game session.
 )
 
+class Student(BaseModel):
+    student_id: int = Field(..., description="Unique identifier for the student")
+    email: str = Field(..., description="Email address of the student")
+    first_name: str = Field(..., description="First name of the student")
+    last_name: str = Field(..., description="Last name of the student")
+    score: int = Field(..., description="Score of the student")
 
+
+class GameSession(BaseModel):
+    game_id: int = Field(..., description="Unique identifier for the game session")
+    name: str = Field(..., description="Name of the game session")
+    start_date: datetime = Field(..., description="Start date and time of the game session")
+    creator_id: int = Field(..., description="ID of the teacher who created the session")
+    is_active: bool = Field(..., description="Indicates if the session is active")
+
+class Match(BaseModel):
+    match_id: int = Field(..., description="Unique identifier for the match")
+    title: str = Field(..., description="Title of the match")
+    match_set_id: int = Field(..., description="ID of the parent Match Setting")
+    creator_id: int = Field(..., description="ID of the teacher")
+    difficulty_level: int = Field(..., description="Difficulty level")
+    review_number: int = Field(..., description="Number of reviews")
+    duration_phase1: int = Field(..., description="Duration of phase 1 in minutes")
+    duration_phase2: int = Field(..., description="Duration of phase 2 in minutes")
+
+class StudentJoinGame(BaseModel):
+    student_id: int = Field(..., description="ID of the student")
+    assigned_match_id: int | None = Field(None, description="ID of the assigned match")
+
+class MatchForGame(BaseModel):
+    game_id: int = Field(..., description="ID of the game session")
+    match_id: int = Field(..., description="ID of the match")
 
 
 # ============================================================================
@@ -112,6 +145,29 @@ async def get_game_session_full_details(
         )
     
     # Get joined students
+    joined_records = db.query(Student).join(StudentJoinGame, Student.student_id == StudentJoinGame.student_id).filter(StudentJoinGame.game_id == game_id).all()
+
+    students = []
+    for record in joined_records:
+        student_data = {
+            "student_id": record.student_id,
+            "first_name": record.first_name,
+            "last_name": record.last_name,
+            "email": record.email
+        }
+        if student_data:
+            students.append(StudentResponse(
+                student_id=student_data["student_id"],  #should be student_data.student_id
+                first_name=student_data["first_name"],  #should be student_data.first_name
+                last_name=student_data["last_name"],  #should be student_data.last_name
+                email=student_data["email"]  #should be student_data.email
+            ))
+    
+    # Get matches for this game session
+    # TODO: Replace with database join query
+    match_ids = db.query(Match).join(MatchForGame, Match.match_id == MatchForGame.match_id).filter(MatchForGame.game_id == game_id).all()
+    matches = []
+
     joined_records = db.query(Student).join(StudentJoinGame, Student.student_id == StudentJoinGame.student_id).filter(StudentJoinGame.game_id == game_id).all()
     students = [
         StudentResponse(
@@ -216,8 +272,6 @@ async def start_game_session(
             detail=f"Game session with id {game_id} not found"
         )
     
-
-    
     # Check if session is already active
     if game_session.is_active:
         raise HTTPException(
@@ -234,6 +288,7 @@ async def start_game_session(
         )
     
     # Get matches for this game session
+
     match_ids = db.query(MatchesForGame).filter(MatchesForGame.game_id == game_id).all()
     if not match_ids:
         raise HTTPException(
@@ -243,6 +298,7 @@ async def start_game_session(
     
     # Get student IDs
     student_ids = [record.student_id for record in joined_records]
+
     match_ids = [match.match_id for match in match_ids]
     
     # Distribute students to matches fairly
@@ -250,12 +306,16 @@ async def start_game_session(
 
     # Update game session to active    
     game_session.is_active = True
+
     for assignment in raw_assignments:
         for record in joined_records:
             if record.student_id == assignment["student_id"]:
                 record.assigned_match_id = assignment["assigned_match_id"]
                 break
+
+    db.commit()
     
+    # Build response with full assignment details    
     # Fetch student and match details for response
     student_data = db.query(Student).filter(Student.student_id.in_(student_ids)).all()
     match_data = db.query(Match).filter(Match.match_id.in_(match_ids)).all()
@@ -285,7 +345,6 @@ async def start_game_session(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to start game session due to a database error: {str(e)}"
         )
-
     
     return GameSessionStartResponse(
         game_id=game_id,
@@ -294,4 +353,3 @@ async def start_game_session(
         total_students_assigned=len(assignments),
         assignments=assignments
     )
-

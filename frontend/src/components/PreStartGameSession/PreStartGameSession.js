@@ -10,17 +10,18 @@ const { Title, Text } = Typography;
 
 const PreStartGameSession = () => {
     const navigate = useNavigate();
-    const { session, loading, error, gameId, elapsedTime } = usePreStartGameSession();
+    const { session, loading, error, gameId, elapsedTime, startSession } = usePreStartGameSession();
 
 
     if (error) {
         return <Alert message="Error" description={error} type="error" showIcon />;
     }
    
-    if (!session) { console.log("indefiniito"); return null; }
+    if (!session) { return null; }
 
     const handleStartSession = () => {
-        navigate(`/start-game-session`);
+        if (startSession())
+            navigate(`/start-game-session/${gameId}`);
     };
     
     return (
