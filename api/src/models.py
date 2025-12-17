@@ -147,7 +147,6 @@ class GameSession(Base):
 # Pydantic Models for Game Session Management API (User Story 3)
 # ============================================================================
 
-
 class StudentResponse(BaseModel):
     """
     Response model for individual student information.
@@ -211,7 +210,6 @@ class GameSessionStartResponse(BaseModel):
     is_active: bool = Field(..., description="New status of the session (should be True)")
     total_students_assigned: int = Field(..., description="Number of students assigned to matches")
     assignments: List[StudentMatchAssignment] = Field(..., description="List of student-to-match assignments")
-
 
 class MatchJoinGameResponse(BaseModel):
     """

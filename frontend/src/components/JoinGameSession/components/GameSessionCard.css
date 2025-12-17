@@ -1,0 +1,54 @@
+.game-session-card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 16px;
+  }
+  
+.card-header {
+    margin-bottom: 16px;
+}
+
+.card-content {
+    margin-bottom: 16px;
+}
+
+.card-footer {
+    text-align: right;
+}
+
+.card-status-tag {
+    margin-top: 8px;
+    border-radius: 999px;
+}
+
+.card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+  
+.card-header-left {
+    display: flex;
+    flex-direction: column;
+}
+  
+.card-title-large {
+    font-size: 20px;     
+    line-height: 1.2;
+}
+  
+.card-status-tag {
+    border-radius: 999px;
+    font-size: 12px;
+    padding: 3px 10px;
+}
+  
+.next-game-header {
+    font-size: 12px;
+    color: #8c8c8c;
+    margin-bottom: 16px;
+}
+  
+  
