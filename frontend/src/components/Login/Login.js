@@ -7,55 +7,51 @@ import "./Login.css";
 
 const { Title, Paragraph } = Typography;
 
+// ==========================================================
+// 1. CONFIG
+// ==========================================================
+// Environment variables are loaded from process.env 
+// and must start with REACT_APP_ in a Create React App project
 
-// ==========================================================
-// 1. CONFIGURAZIONE
-// ==========================================================
-// In un progetto Create React App, le variabili d'ambiente
-// si caricano da process.env e devono iniziare con REACT_APP_
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 // ==========================================================
-// 2. COMPONENTE DI LOGIN BASATO SU CLASSE
+// 2. CLASS-BASED LOGIN COMPONENT
 // ==========================================================
-
-// Definizione del componente di login come Classe
+// Definition of the login component as a class
 class Login extends Component {
 
-  // Gestione del successo del Login con Google
   handleSuccess = (credentialResponse) => {
-    // Il token è un JWT
+    // It's a JWT
     const token = credentialResponse.credential;
 
-    // Decodifichiamo il token per estrarre i dati utente
+    // Decode the token for the User Data
     const decodedUser = jwtDecode(token);
 
     console.log("Login riuscito. Dati decodificati:", decodedUser);
 
-    // Passiamo i dati al componente genitore (se la prop è stata fornita)
+    // We pass the data to the parent component (if the prop was provided)
     if (this.props.onLoginSuccess) {
       this.props.onLoginSuccess(decodedUser);
     }
 
-    // 
   };
 
-  // Gestione dell'errore di Login
   handleError = () => {
     console.error("Login fallito.");
     alert("Login con Google non riuscito. Riprova più tardi.");
   };
 
   render() {
-    // Accesso alla prop onLoginSuccess passata dal wrapper
+    // Access the onLoginSuccess prop passed from the wrapper
     const { onLoginSuccess } = this.props;
 
-    // Verifichiamo se il Client ID è disponibile
+    // Check if the Client ID is available (We have to change the text at the end of the app for sec reason)
     if (!GOOGLE_CLIENT_ID) {
       return (
         <div style={{ padding: '50px', textAlign: 'center', color: 'red' }}>
           <h1>ERRORE DI CONFIGURAZIONE</h1>
-          <p>Manca la variabile d'ambiente REACT_APP_GOOGLE_CLIENT_ID nel tuo file .env.</p>
+          <p>Manca la variabile d'ambiente REACT_APP_GOOGLE_CLIENT_ID nel tuo file .env.</p>  
           <p>Impossibile mostrare il pulsante di Login con Google.</p>
         </div>
       );
@@ -65,9 +61,7 @@ class Login extends Component {
       <div className="login-container">
         <Card className="login-card">
           <Title level={2}>Accedi all'Applicazione</Title>
-
-
-          {/* Visualizza il pulsante di Google Login */}
+          {/*Button Google Login */}
           <GoogleLogin
             onSuccess={this.handleSuccess}
             onError={this.handleError}
@@ -82,25 +76,23 @@ class Login extends Component {
 }
 
 // ==========================================================
-// 3. COMPONENTE WRAPPER PER L'ESPORTAZIONE (Include il Provider)
+// 3. WRAPPER COMPONENT FOR EXPORT (Includes the Provider)
 // ==========================================================
-// Questo componente espone la logica del Provider e lo stato
-// per l'autenticazione a tutti i suoi figli.
+// This component exposes the Provider logic and authentication
+// state to all of its child components.
 
 export function LoginWrapper(props) {
 
-  // Utilizziamo un nome di variabile alternativo 'dummy' per il clientId 
-  // se non è configurato, per evitare crash del GoogleOAuthProvider.
+  // We use an alternative 'dummy' variable for the clientId
+  // if it is not configured, to prevent the GoogleOAuthProvider from crashing.
   const safeClientId = GOOGLE_CLIENT_ID || 'dummy-client-id-for-safety';
 
   return (
     <GoogleOAuthProvider clientId={safeClientId}>
-      {/* Passiamo tutte le props ricevute (inclusa onLoginSuccess) al 
-            componente basato su classe.
-            */}
+    {/* Pass all received props (including onLoginSuccess) 
+      to the class-based component. */}
       <Login {...props} />
     </GoogleOAuthProvider>
   );
 }
-// Esportiamo il componente wrapper come default
 export default LoginWrapper;
