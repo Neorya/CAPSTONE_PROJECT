@@ -2,6 +2,39 @@
 
 CREATE SCHEMA capstone_app;
 
+
+
+
+
+CREATE TYPE user_role AS ENUM ('student', 'teacher', 'admin');
+
+-- The creation of students table: (User Story 5)
+
+DROP TABLE IF EXISTS capstone_app.user CASCADE;
+
+CREATE TABLE capstone_app.user (
+  user_id  SERIAL PRIMARY KEY,
+  email       VARCHAR(150) UNIQUE NOT NULL,
+  first_name  VARCHAR(100) NOT NULL,
+  last_name   VARCHAR(100) NOT NULL,
+  score       INTEGER NOT NULL DEFAULT 0,
+  role        user_role NOT NULL
+  CONSTRAINT check_max_score CHECK (score <= 2000000)
+);
+
+
+--- The creation of login table: (User Story 5)
+
+DROP TABLE IF EXISTS capstone_app.login;
+
+CREATE TABLE capstone_app.login (
+  login_id SERIAL PRIMARY KEY,
+  google_sub  VARCHAR(255) UNIQUE NOT NULL,    
+  created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(), 
+  user_id INTEGER NOT NULL REFERENCES capstone_app.user(user_id) ON DELETE CASCADE
+);
+
+
 -- Creation of Teacher Table :  (User story 1)
 
 DROP TABLE IF EXISTS capstone_app.teacher;
@@ -9,8 +42,9 @@ DROP TABLE IF EXISTS capstone_app.teacher;
 CREATE TABLE capstone_app.teacher (
     teacher_id SERIAL PRIMARY KEY,
     first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,	
-    email VARCHAR(150) UNIQUE NOT NULL 
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL
+    -- login_fk    INTEGER REFERENCES capstone_app.login(login_id) NOT NULL
 --    login_id   INTEGER REFERENCES capstone_app.login(login_id) NOT NULL  --- user story 5 for modification
 );
 
@@ -85,26 +119,14 @@ CREATE TABLE capstone_app.matches_for_game (
 DROP TABLE IF EXISTS capstone_app.student;
 
 CREATE TABLE capstone_app.student (
-  student_id SERIAL PRIMARY KEY,
-  email      VARCHAR(150) UNIQUE NOT NULL,
-  first_name VARCHAR(100) NOT NULL,
-  last_name  VARCHAR(100) NOT NULL,
-  score      INTEGER NOT NULL DEFAULT 0
+  student_id  SERIAL PRIMARY KEY,
+  email       VARCHAR(150) UNIQUE NOT NULL,
+  first_name  VARCHAR(100) NOT NULL,
+  last_name   VARCHAR(100) NOT NULL,
+  score       INTEGER NOT NULL DEFAULT 0,
+  -- login_fk    INTEGER REFERENCES capstone_app.login(login_id) NOT NULL,
   CONSTRAINT check_max_score CHECK (score <= 2000000)
---  login_id   INTEGER REFERENCES capstone_app.login(login_id) NOT NULL
-);
-
-
-
---- The creation of login table: (User Story 5)
-
-DROP TABLE IF EXISTS capstone_app.login;
-
-CREATE TABLE capstone_app.login (
-  login_id SERIAL PRIMARY KEY,
-  sub VARCHAR(255) NOT NULL, 
-  auth_provider VARCHAR(50) NOT NULL,
-  CONSTRAINT uc_sub_auth UNIQUE (sub, auth_provider)
+-- login_id INTEGER REFERENCES capstone_app.login(login_id)
 );
 
 
@@ -142,6 +164,89 @@ TO api_user;
 
 
 -- Creation of some DB population script for populate the Teacher Table and the Match Settings Table (User story 1)
+
+
+
+-- ######################################
+-- INSERT DATA INTO LOGIN TABLE (18 RECORDS)
+-- ######################################
+
+INSERT INTO capstone_app.user (email, first_name, last_name, role, score)
+VALUES 
+('student1@test.com', 'Alice', 'Anderson', 'student', 100),
+('student2@test.com', 'Bob', 'Brown', 'student', 200),
+('student3@test.com', 'Charlie', 'Clark', 'student', 300),
+('student4@test.com', 'David', 'Davis', 'student', 400),
+('student5@test.com', 'Eve', 'Evans', 'student', 500),
+('teacher1@test.com', 'Frank', 'Foster', 'teacher', 0),
+('teacher2@test.com', 'Grace', 'Green', 'teacher', 0),
+('admin1@test.com', 'Hank', 'Harris', 'admin', 0),
+('student6@test.com', 'Ivy', 'Irwin', 'student', 150),
+('student7@test.com', 'Jack', 'Jones', 'student', 250),
+('student8@test.com', 'Kevin', 'King', 'student', 350),
+('student9@test.com', 'Laura', 'Lee', 'student', 450),
+('student10@test.com', 'Mike', 'Miller', 'student', 550),
+('teacher3@test.com', 'Nina', 'Nelson', 'teacher', 0),
+('teacher4@test.com', 'Oscar', 'Owens', 'teacher', 0),
+('admin2@test.com', 'Paul', 'Parker', 'admin', 0),
+('student11@test.com', 'Quinn', 'Quick', 'student', 120),
+('student12@test.com', 'Rachel', 'Ross', 'student', 220);
+
+INSERT INTO capstone_app.login (google_sub, user_id)
+VALUES 
+-- Login 1 -> User 1
+('100123456789012345678', 1),
+
+-- Login 2 -> User 2
+('100987654321098765433', 2),
+
+-- Login 3 -> User 3
+('100987654321098765432', 3),
+
+-- Login 4 -> User 4
+('100987654321098765434', 4),
+
+-- Login 5 -> User 5
+('100555444333222111000', 5),
+
+-- Login 6 -> User 6
+('100111222333444555666', 6),
+
+-- Login 7 -> User 7
+('100111222333444666666', 7),
+
+-- Login 8 -> User 8
+('100777888999000111222', 8),
+
+-- Login 9 -> User 9
+('100777888999000155555', 9),
+
+-- Login 10 -> User 10
+('100333222111000999888', 10),
+
+-- Login 11 -> User 11
+('144443222111888899888', 11),
+
+-- Login 12 -> User 12
+('144443266661000999899', 12),
+
+-- Login 13 -> User 13
+('100666777888999000111', 13),
+
+-- Login 14 -> User 14
+('133333222111000999888', 14),
+
+-- Login 15 -> User 15
+('100222333444555666777', 15),
+
+-- Login 16 -> User 16
+('100888999000111222333', 16),
+
+-- Login 17 -> User 17
+('100444555666777888999', 17),
+
+-- Login 18 -> User 18
+('100101202303404505606', 18);
 
 -- ######################################
 -- INSERT DATA INTO TEACHER TABLE (5 RECORDS)
@@ -284,6 +389,7 @@ VALUES
 
 
 -- student 1: Mario Rossi
+
 INSERT INTO capstone_app.student (email, first_name, last_name, score)
 VALUES ('mario.rossi@studenti.it', 'Mario', 'Rossi', 95);
 
