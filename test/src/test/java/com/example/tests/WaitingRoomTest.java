@@ -1,6 +1,7 @@
 package com.example.tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
@@ -32,7 +33,7 @@ public class WaitingRoomTest extends BaseTest {
     @BeforeEach
     public void navigateToPage() {
         // Navigate to the settings listing page before each test
-        navigateTo("/pre-start-game-session");
+        navigateTo("/pre-start-game-session/1");
         
         // Give extra time for page to load in CI environments
         if (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) {
@@ -56,12 +57,14 @@ public class WaitingRoomTest extends BaseTest {
     @Test
     @Order(2)
     @DisplayName("Check If The Page Is Correct") 
-    public void checkTest() {
+    public void checkTest() throws InterruptedException {
         assertTrue(waitingRoomPO.getGameObjName().getText().equals("Game Session"), "Game Session");
         assertTrue(waitingRoomPO.getGameTimer().getText().equals("00:00"));
+        Thread.sleep(1000);
+        assertFalse(waitingRoomPO.getGameTimer().getText().equals("00:00"));
         assertTrue(waitingRoomPO.getStudentListTitle().getText().equals("5 students joined"), "Student List");
         assertEquals(waitingRoomPO.getUnorderedList().findElements(By.tagName("li")).size(), 5);
-        assertEquals(waitingRoomPO.getMatchList().findElements(By.className("match-item")).size(), 3);
+        assertEquals(waitingRoomPO.getMatchList().findElements(By.className("match-item")).size(), 2);
     }
 
     
