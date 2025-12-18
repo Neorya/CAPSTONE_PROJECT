@@ -73,8 +73,6 @@ class Match(Base):
     creator_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.teacher.teacher_id"))
     difficulty_level = Column(Integer, nullable=False)
     review_number = Column(Integer, nullable=False)
-    duration_phase1 = Column(Integer, nullable=False)
-    duration_phase2 = Column(Integer, nullable=False)
     
     # Relationships
     creator = relationship("Teacher", back_populates="matches")
@@ -142,6 +140,8 @@ class GameSession(Base):
     creator_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.teacher.teacher_id"))
     creator = relationship("Teacher", back_populates="game_sessions")
     is_active = Column(Boolean, default=False, nullable=False)
+    duration_phase1 = Column(Integer, nullable=False)
+    duration_phase2 = Column(Integer, nullable=False)
 
 # ============================================================================
 # Pydantic Models for Game Session Management API (User Story 3)
@@ -173,8 +173,6 @@ class MatchInfoResponse(BaseModel):
     match_id: int = Field(..., description="Unique identifier of the match")
     title: str = Field(..., description="Title of the match")
     difficulty_level: int = Field(..., description="Difficulty level of the match")
-    duration_phase1: int = Field(..., description="Duration of phase 1 in minutes")
-    duration_phase2: int = Field(..., description="Duration of phase 2 in minutes")
 
 
 class GameSessionFullDetailResponse(BaseModel):
@@ -189,7 +187,9 @@ class GameSessionFullDetailResponse(BaseModel):
     total_students: int = Field(..., description="Total number of students joined")
     students: List[StudentResponse] = Field(..., description="List of joined students")
     matches: List[MatchInfoResponse] = Field(..., description="List of matches in the session")
-
+    duration_phase1: int = Field(..., description="First Phase Duration")
+    duration_phase2: int = Field(..., description="Second Phase Duration")
+   
 
 class StudentMatchAssignment(BaseModel):
     """
@@ -210,7 +210,9 @@ class GameSessionStartResponse(BaseModel):
     is_active: bool = Field(..., description="New status of the session (should be True)")
     total_students_assigned: int = Field(..., description="Number of students assigned to matches")
     assignments: List[StudentMatchAssignment] = Field(..., description="List of student-to-match assignments")
-
+    duration_phase1: int = Field(..., description="First Phase Duration")
+    duration_phase2: int = Field(..., description="Second Phase Duration")
+    
 class MatchJoinGameResponse(BaseModel):
     """
     Response model for matches joined to a game session.

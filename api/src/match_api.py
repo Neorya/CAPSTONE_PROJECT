@@ -30,13 +30,6 @@ class MatchCreate(BaseModel):
     creator_id: int = Field(..., description="ID of the teacher creating this match")
     difficulty_level: int = Field(..., description="Difficulty level", ge=0, le=10)
     review_number: int = Field(..., description="Number of reviews", ge=1, le=100)
-    duration_phase1: int = Field(
-        ..., description="Duration of phase 1 in minutes", ge=1, le=120
-    )
-    duration_phase2: int = Field(
-        ..., description="Duration of phase 2 in minutes", ge=1, le=120
-    )
-
 
 class MatchResponse(BaseModel):
     """
@@ -49,8 +42,6 @@ class MatchResponse(BaseModel):
     creator_id: int = Field(..., description="ID of the teacher")
     difficulty_level: int = Field(..., description="Difficulty level")
     review_number: int = Field(..., description="Number of reviews")
-    duration_phase1: int = Field(..., description="Duration of phase 1 in minutes")
-    duration_phase2: int = Field(..., description="Duration of phase 2 in minutes")
 
 
 # Router

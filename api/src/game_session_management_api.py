@@ -37,39 +37,6 @@ from models import (
     GameSessionStartResponse   #response model for starting a game session.
 )
 
-class Student(BaseModel):
-    student_id: int = Field(..., description="Unique identifier for the student")
-    email: str = Field(..., description="Email address of the student")
-    first_name: str = Field(..., description="First name of the student")
-    last_name: str = Field(..., description="Last name of the student")
-    score: int = Field(..., description="Score of the student")
-
-
-class GameSession(BaseModel):
-    game_id: int = Field(..., description="Unique identifier for the game session")
-    name: str = Field(..., description="Name of the game session")
-    start_date: datetime = Field(..., description="Start date and time of the game session")
-    creator_id: int = Field(..., description="ID of the teacher who created the session")
-    is_active: bool = Field(..., description="Indicates if the session is active")
-
-class Match(BaseModel):
-    match_id: int = Field(..., description="Unique identifier for the match")
-    title: str = Field(..., description="Title of the match")
-    match_set_id: int = Field(..., description="ID of the parent Match Setting")
-    creator_id: int = Field(..., description="ID of the teacher")
-    difficulty_level: int = Field(..., description="Difficulty level")
-    review_number: int = Field(..., description="Number of reviews")
-    duration_phase1: int = Field(..., description="Duration of phase 1 in minutes")
-    duration_phase2: int = Field(..., description="Duration of phase 2 in minutes")
-
-class StudentJoinGame(BaseModel):
-    student_id: int = Field(..., description="ID of the student")
-    assigned_match_id: int | None = Field(None, description="ID of the assigned match")
-
-class MatchForGame(BaseModel):
-    game_id: int = Field(..., description="ID of the game session")
-    match_id: int = Field(..., description="ID of the match")
-
 
 # ============================================================================
 # Helper Functions
@@ -165,7 +132,7 @@ async def get_game_session_full_details(
     
     # Get matches for this game session
     # TODO: Replace with database join query
-    match_ids = db.query(Match).join(MatchForGame, Match.match_id == MatchForGame.match_id).filter(MatchForGame.game_id == game_id).all()
+    match_ids = db.query(Match).join(MatchesForGame, Match.match_id == MatchesForGame.match_id).filter(MatchesForGame.game_id == game_id).all()
     matches = []
 
     joined_records = db.query(Student).join(StudentJoinGame, Student.student_id == StudentJoinGame.student_id).filter(StudentJoinGame.game_id == game_id).all()
@@ -185,9 +152,7 @@ async def get_game_session_full_details(
         MatchInfoResponse(
             match_id=m.match_id,
             title=m.title,
-            difficulty_level=m.difficulty_level,
-            duration_phase1=m.duration_phase1,
-            duration_phase2=m.duration_phase2
+            difficulty_level=m.difficulty_level
         ) for m in match_ids
     ]
     
@@ -199,7 +164,9 @@ async def get_game_session_full_details(
         is_active=game_session.is_active,
         total_students=len(students),   
         students=students,
-        matches=matches
+        matches=matches,
+        duration_phase1=game_session.duration_phase1,
+        duration_phase2=game_session.duration_phase2
     )
 
 
@@ -351,5 +318,7 @@ async def start_game_session(
         message="The game session has started.",
         is_active=True,
         total_students_assigned=len(assignments),
-        assignments=assignments
+        assignments=assignments,
+        duration_phase1=game_session.duration_phase1,
+        duration_phase2=game_session.duration_phase2
     )
