@@ -137,12 +137,11 @@ DROP TABLE IF EXISTS capstone_app.student_join_game;
 
 CREATE TABLE capstone_app.student_join_game (
   student_join_game_id SERIAL PRIMARY KEY, 
-  student_id INTEGER REFERENCES capstone_app.student(student_id) NOT NULL,
-  game_id    INTEGER REFERENCES capstone_app.game_session(game_id) NOT NULL,
+  student_id INTEGER REFERENCES capstone_app.student(student_id) ON DELETE CASCADE NOT NULL,
+  game_id    INTEGER REFERENCES capstone_app.game_session(game_id) ON DELETE CASCADE NOT NULL,
   assigned_match_id INTEGER REFERENCES capstone_app.match(match_id),
   CONSTRAINT uc_student_game UNIQUE (student_id, game_id)
 );
-
 --Create a user for that schema: (User story 1)
 
 -- 2. Create the API user (Replace 'changeme' with a strong password)
@@ -339,7 +338,7 @@ VALUES
 
 INSERT INTO capstone_app.game_session (name, start_date, duration_phase1, duration_phase2, creator_id, is_active)
 VALUES
-('Spring Semester Game Session', '2025-12-18 19:00:00.000', 45, 30, 1, TRUE),
+('Spring Semester Game Session', '2025-12-19 19:00:00.000', 45, 30, 1, TRUE),
 ('Summer Workshop Session', '2028-01-16 10:30:00', 60, 60, 2, FALSE),
 ('Fall Competition Session', '2028-01-17 14:00:00', 20, 15, 3, TRUE),
 ('Winter Training Session', '2028-01-18 11:00:00', 30, 30, 4, FALSE),
