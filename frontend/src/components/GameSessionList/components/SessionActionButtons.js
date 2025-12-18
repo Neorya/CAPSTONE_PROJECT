@@ -1,7 +1,12 @@
 import React from 'react';
 import { Button, Space, Tooltip, Popconfirm } from 'antd';
 import { EyeOutlined, EditOutlined, CopyOutlined, DeleteOutlined } from '@ant-design/icons';
+import { 
+  // ... altre icone che già usi
+  PlayCircleOutlined 
+} from '@ant-design/icons';
 
+import { useNavigate } from 'react-router-dom'; // Necessario per il reindirizzamento
 /**
  * SessionActionButtons - Action buttons for each session row
  * Provides view, clone, edit, and delete actions with confirmations
@@ -14,6 +19,7 @@ import { EyeOutlined, EditOutlined, CopyOutlined, DeleteOutlined } from '@ant-de
  * @param {Function} props.onDelete - Callback for delete action
  * @returns {JSX.Element} Action buttons group
  */
+
 const SessionActionButtons = ({
   session,
   onView,
@@ -21,8 +27,20 @@ const SessionActionButtons = ({
   onEdit,
   onDelete,
 }) => {
+  const navigate = useNavigate();
   return (
+    
     <Space size="small">
+      {session.is_active && (
+        <Tooltip title="Go to Active Game">
+          <Button
+            type="primary"
+            icon={<PlayCircleOutlined />} // Assicurati di importarlo da @ant-design/icons
+            onClick={() => navigate(`/pre-start-game-session/${session.game_id}`)} // Cambia il path secondo le tue rotte
+            style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }} // Colore verde per indicare "attivo"
+          />
+        </Tooltip>
+      )}
       <Tooltip title="View Details">
         <Button
           icon={<EyeOutlined />}
