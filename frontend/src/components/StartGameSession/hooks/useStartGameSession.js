@@ -14,6 +14,7 @@ export const useStartGameSession = () => {
       if (!session) setLoading(true);
       
       const data = await getGameSessionDetails(id);
+      console.log("data: ", data);
       setSession(data);
     } catch (err) {
       setError(err.message);
@@ -35,7 +36,7 @@ export const useStartGameSession = () => {
         const now = new Date().getTime();
         const startDate = new Date(session.start_date).getTime();
 
-        const durationFirstPhase = session.matches[0].duration_phase1;
+        const durationFirstPhase = session.duration_phase1;
    
         const diff = Math.max(0, ((startDate + ( durationFirstPhase * 60 * 1000)) - now ));
         const minutes = Math.floor(diff / 60000);

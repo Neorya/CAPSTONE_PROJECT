@@ -201,6 +201,28 @@ const SessionDetailModal = ({
             style={{ width: '100%' }}
           />
         </Form.Item>
+        <Form.Item
+          name="duration_phase1"
+          label="First Phase Duration"
+          rules={[]}
+        >
+          <Input
+            placeholder="First Phase Duration"
+            showCount={!isViewMode}
+            maxLength={100}
+          />
+        </Form.Item>
+        <Form.Item
+          name="duration_phase2"
+          label="Second Phase Duration"
+          rules={[]}
+        >
+          <Input
+            placeholder="Second Phase Duration"
+            showCount={!isViewMode}
+            maxLength={100}
+          />
+        </Form.Item>
       </Form>
 
       {/* Render appropriate matches section based on mode */}

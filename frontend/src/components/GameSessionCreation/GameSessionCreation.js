@@ -21,7 +21,9 @@ const GameSessionCreation = () => {
   const [creating, setCreating] = useState(false);      // state for creation of game session
   const [sessionName, setSessionName] = useState("");
   const [startDate, setStartDate] = useState(null);
-
+  const [firstPhase,setFirstPhase ] = useState(null);
+  const [secondPhase,setSecondPhase ] = useState(null);
+  
   // Validation error states
   const [sessionNameError, setSessionNameError] = useState("");
   const [startDateError, setStartDateError] = useState("");
@@ -80,9 +82,17 @@ const GameSessionCreation = () => {
 
   // Handle session name change with validation
   const handleSessionNameChange = (e) => {
-    const value = e.target.value;
-    setSessionName(value);
-    setSessionNameError(validateSessionName(value));
+    setSessionName(e.target.value);
+    setSessionNameError(validateSessionName(e.target.value));
+  };
+
+  const handleFirstPhaseChange = (e) => {
+    setFirstPhase(e.target.value);
+  };
+
+
+  const handleSecondPhaseChange = (e) => {
+    setSecondPhase(e.target.value);
   };
 
   // Handle start date change with validation
@@ -122,7 +132,7 @@ const GameSessionCreation = () => {
     try {
       setCreating(true);
       const creatorId = 1;         // TODO: replace with actual user ID when authentication is implemented
-      await createGameSession(selectedRows, creatorId, sessionName.trim(), startDate.toDate().toISOString());
+      await createGameSession(selectedRows, creatorId, sessionName.trim(), startDate.toDate().toISOString(), firstPhase, secondPhase);
       message.success("The game session has been created successfully!");
       // Reset form after successful creation
       setSessionName("");
@@ -226,6 +236,35 @@ const GameSessionCreation = () => {
               {startDateError && (
                 <span className="field-error">{startDateError}</span>
               )}
+              
+            </div>
+            <div className="form-field">
+              <label htmlFor="duration_firstphase" className="field-label">
+                Duration First Phase in minutes <span className="required">*</span>
+              </label>
+              <Input
+                id="duration_phas1"
+                placeholder="Enter the first duration phase"
+                value={firstPhase}
+                onChange={handleFirstPhaseChange}
+                size="large"
+                type = "number"
+                status={sessionNameError ? "error" : ""}  
+              />
+            </div>
+            <div className="form-field">
+              <label htmlFor="duration_secondphase" className="field-label">
+                Duration Second Phase in minutes <span className="required">*</span>
+              </label>
+              <Input
+                id="duration_phas2"
+                placeholder="Enter the second duration phase"
+                value={secondPhase}
+                onChange={handleSecondPhaseChange}
+                size="large"
+                status={sessionNameError ? "error" : ""}
+                type = "number"
+              />
             </div>
           </div>
         </div>
@@ -241,7 +280,7 @@ const GameSessionCreation = () => {
             dataSource={items}
             columns={columns}
             loading={loading}
-            pagination={{ pageSize: 7, showSizeChanger: false }}
+            pagination={{ pageSize: 5, showSizeChanger: false }}
             rowKey="match_id"
             className="match-settings-table"
             locale={{ emptyText: "No matches found." }}

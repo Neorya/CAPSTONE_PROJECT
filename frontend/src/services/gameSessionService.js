@@ -10,7 +10,7 @@ import { apiFetch } from "./api";
  * @param {string} startDate - The start date and time of the session (ISO format).
  * @returns {Promise<Object>} A promise that resolves to the created game session object.
  */
-export async function createGameSession(matchIds, creatorId, name, startDate) {
+export async function createGameSession(matchIds, creatorId, name, startDate, duration_phase1, duration_phase2) {
   try {
     const url = new URL(API_ENDPOINTS.GAME_SESSIONS, API_BASE_URL);
     const res = await apiFetch(url.toString(), {
@@ -23,6 +23,8 @@ export async function createGameSession(matchIds, creatorId, name, startDate) {
         creator_id: creatorId,
         name: name,
         start_date: startDate,
+        duration_phase1: duration_phase1,
+        duration_phase2: duration_phase2
       }),
     });
     if (!res.ok) {

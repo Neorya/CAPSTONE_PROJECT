@@ -28,7 +28,9 @@ class GameSessionCreate(BaseModel):
     name: str = Field(..., description="Name of the Game Session")
     creator_id: int = Field(..., description="Id of the Teacher that creates the Game Session")
     start_date: datetime = Field(..., description="Start date of the Game Session")
-    
+    duration_phase1: int = Field(..., description="Duration of the first phase")
+    duration_phase2: int = Field(..., description="Duration of the second phase")
+
 class GameSessionResponse(BaseModel):
     """
     Response model for a newly created Game Session.
@@ -45,6 +47,9 @@ class GameSessionDetail(BaseModel):
     creator_id: int = Field(..., description="Id of the Teacher that created the Game Session")
     start_date: datetime = Field(..., description="Start date of the Game Session")
     match_id: List[int] = Field(..., description="List of Match Ids associated with the Game Session")
+    is_active: bool = Field(..., description="Used for check if the Game Session Is Active Or Not")
+    duration_phase1: int = Field(..., description="Duration of the first phase")
+    duration_phase2: int = Field(..., description="Duration of the sewcond phase")
 
 class GameSessionUpdate(BaseModel):
     """
@@ -60,6 +65,10 @@ class GameSessionUpdate(BaseModel):
     start_date: Optional[datetime] = Field(
         None, description="Start date of the Game Session"
     )
+    duration_phase1: int = Field(..., description="Duration of the first phase")
+    duration_phase2: int = Field(..., description="Duration of the sewcond phase")
+
+
 
 # ============================================================================
 # Helpers
@@ -175,8 +184,8 @@ async def create_game_session(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Request error"
         )
-        
-    new_game_session = GameSession(creator_id=game_session_data.creator_id, name=game_session_data.name, start_date=game_session_data.start_date) 
+    print("game session data duration phase1: ", game_session_data.duration_phase1)
+    new_game_session = GameSession(creator_id=game_session_data.creator_id, name=game_session_data.name, start_date=game_session_data.start_date, duration_phase1=game_session_data.duration_phase1, duration_phase2=game_session_data.duration_phase2) 
     db.add(new_game_session)
     
     db.flush() 
@@ -243,14 +252,19 @@ async def list_game_sessions_by_creator(
         
     # build the response list
     response: List[GameSessionDetail] = []
+
     for gs in game_sessions:
+        print(gs)
         response.append(
             GameSessionDetail(
                 game_id=gs.game_id,
                 name=gs.name,
                 creator_id=gs.creator_id,
                 start_date=gs.start_date,
-                match_id=match_map.get(gs.game_id, [])
+                match_id=match_map.get(gs.game_id, []),
+                is_active = gs.is_active,
+                duration_phase1 = gs.duration_phase1,
+                duration_phase2 = gs.duration_phase2
             )
         )
         
@@ -323,7 +337,7 @@ async def clone_game_session(
     
     # create cloned game session
     cloned_name = _generate_clone_name(original_game_session.name, original_game_session.creator_id, db)
-    new_game_session = GameSession(creator_id=original_game_session.creator_id, name=cloned_name, start_date=original_game_session.start_date)
+    new_game_session = GameSession(creator_id=original_game_session.creator_id, name=cloned_name, start_date=original_game_session.start_date, duration_phase1 = original_game_session.duration_phase1, duration_phase2=original_game_session.duration_phase2)
     db.add(new_game_session)
     db.flush()
     
@@ -420,7 +434,8 @@ async def update_game_session(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Server error while updating game session matches"
             )
-
+    game_session.duration_phase1 = game_session_data.duration_phase1
+    game_session.duration_phase2 = game_session_data.duration_phase2
     # commit everything 
     try:
         db.commit()
@@ -443,7 +458,10 @@ async def update_game_session(
         name=game_session.name,
         creator_id=game_session.creator_id,
         start_date=game_session.start_date,
-        match_id=match_ids
+        match_id=match_ids,
+        duration_phase1 = game_session.duration_phase1,
+        duration_phase2 = game_session.duration_phase2,
+        is_active = game_session.is_active
     )
    
 @router.get(
@@ -479,5 +497,8 @@ async def get_game_session_from_id(
         name=game_session.name,
         creator_id=game_session.creator_id,
         start_date=game_session.start_date,
-        match_id=match_ids
+        match_id=match_ids,
+        duration_phase1 = game_session.duration_phase1,
+        duration_phase2 = game_session.duration_phase2,
+        is_active = game_session.is_active
     )
