@@ -31,6 +31,8 @@ export const useSessionModal = () => {
     form.setFieldsValue({
       name: session.name,
       start_date: dayjs(session.start_date),
+      duration_phase1: session.duration_phase1,
+      duration_phase2: session.duration_phase2
     });
   }, [form]);
 
@@ -156,6 +158,8 @@ export const useSessionModal = () => {
       name: values.name,
       start_date: values.start_date.format('YYYY-MM-DD HH:mm:ss'),
       match_id: selectedMatchIds,
+      duration_phase1: values.duration_phase1,
+      duration_phase2: values.duration_phase2
     };
   }, [form, selectedMatchIds]);
 
