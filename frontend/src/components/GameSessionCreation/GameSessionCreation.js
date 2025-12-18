@@ -240,32 +240,30 @@ const GameSessionCreation = () => {
             </div>
             <div className="form-field">
               <label htmlFor="duration_firstphase" className="field-label">
-                Duration First Phase <span className="required">*</span>
+                Duration First Phase in minutes <span className="required">*</span>
               </label>
               <Input
-                id="session-name"
-                placeholder="Enter a descriptive name for this session"
+                id="duration_phas1"
+                placeholder="Enter the first duration phase"
                 value={firstPhase}
                 onChange={handleFirstPhaseChange}
                 size="large"
-                status={sessionNameError ? "error" : ""}
-                showCount
-                maxLength={MAX_SESSION_NAME_LENGTH}
+                type = "number"
+                status={sessionNameError ? "error" : ""}  
               />
             </div>
             <div className="form-field">
               <label htmlFor="duration_secondphase" className="field-label">
-                Duration Second Phase <span className="required">*</span>
+                Duration Second Phase in minutes <span className="required">*</span>
               </label>
               <Input
-                id="session-name"
-                placeholder="Enter a descriptive name for this session"
+                id="duration_phas2"
+                placeholder="Enter the second duration phase"
                 value={secondPhase}
                 onChange={handleSecondPhaseChange}
                 size="large"
                 status={sessionNameError ? "error" : ""}
-                showCount
-                maxLength={MAX_SESSION_NAME_LENGTH}
+                type = "number"
               />
             </div>
           </div>
