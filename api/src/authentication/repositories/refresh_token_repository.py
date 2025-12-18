@@ -33,7 +33,6 @@ class RefreshTokenRepository:
         Returns:
             RefreshToken object if found, None otherwise.
         """
-        # TODO: Implement database query to fetch token by ID
         token = db.query(RefreshToken).filter(RefreshToken.id == token_id).first()
         if token and token.is_valid():
             return token
@@ -51,7 +50,6 @@ class RefreshTokenRepository:
         Returns:
             RefreshToken object if found, None otherwise.
         """
-        # TODO: Implement database query to fetch token by hash
         token = db.query(RefreshToken).filter(RefreshToken.token_hash == token_hash).first()
         if token and token.is_valid():
             return token
@@ -71,9 +69,6 @@ class RefreshTokenRepository:
         Returns:
             Created RefreshToken object.
         """
-        # TODO: Implement refresh token creation
-        # - Create new RefreshToken record with provided data
-        # - Commit to database and return created token
         new_token = RefreshToken(
             user_id=user_id,
             token_hash=token_hash,
@@ -97,10 +92,6 @@ class RefreshTokenRepository:
         Returns:
             Updated RefreshToken object if found, None otherwise.
         """
-        # TODO: Implement token revocation
-        # - Fetch token by ID
-        # - Set revoked_at to current timestamp
-        # - Commit changes and return updated token
         token = db.query(RefreshToken).filter(RefreshToken.id == token_id).first()
         if token:
             token.revoked_at = datetime.utcnow()
@@ -121,11 +112,6 @@ class RefreshTokenRepository:
         Returns:
             Updated RefreshToken object if found, None otherwise.
         """
-        # TODO: Implement token revocation by hash
-        # - Fetch token by hash
-        # - Set revoked_at to current timestamp
-        # - Commit changes and return updated token
-
         token = db.query(RefreshToken).filter(RefreshToken.token_hash == token_hash).first()
         if token:
             token.revoked_at = datetime.utcnow()
@@ -146,10 +132,6 @@ class RefreshTokenRepository:
         Returns:
             Number of tokens revoked.
         """
-        # TODO: Implement bulk token revocation
-        # - Find all non-revoked tokens for the user
-        # - Set revoked_at to current timestamp for all
-        # - Commit changes and return count of revoked tokens
         count = 0
 
         tokens = db.query(RefreshToken).filter(RefreshToken.user_id == user_id).all()
@@ -173,11 +155,6 @@ class RefreshTokenRepository:
         Returns:
             True if token is valid, False otherwise.
         """
-        # TODO: Implement token validation check
-        # - Fetch token by hash
-        # - Check if revoked_at is null
-        # - Check if expires_at > now
-        # - Return True if both conditions met, False otherwise
         token = db.query(RefreshToken).filter(RefreshToken.token_hash == token_hash).first()
         if token:
             return token.revoked_at is None and token.expires_at > datetime.utcnow()
@@ -196,8 +173,6 @@ class RefreshTokenRepository:
         Returns:
             List of valid RefreshToken objects.
         """
-        # TODO: Implement query for valid tokens
-        # - Query all tokens for user where revoked_at is null and expires_at > now
         Alltokens = db.query(RefreshToken).filter(RefreshToken.user_id == user_id).all()
         valid_tokens = []
         for token in Alltokens:
@@ -218,11 +193,6 @@ class RefreshTokenRepository:
         Returns:
             Number of expired tokens cleaned up.
         """
-        # TODO: Implement cleanup of expired tokens
-        # - Delete or update tokens where expires_at <= now
-        # - Can be called by a background job
-        # - Return count of affected tokens
-
         expired_tokens = db.query(RefreshToken).filter(RefreshToken.expires_at <= datetime.utcnow()).all()
         count = len(expired_tokens)
         for token in expired_tokens:
@@ -242,5 +212,4 @@ class RefreshTokenRepository:
         Returns:
             List of all RefreshToken objects for the user.
         """
-        # TODO: Implement query to fetch all tokens for a user
         return db.query(RefreshToken).filter(RefreshToken.user_id == user_id).all()

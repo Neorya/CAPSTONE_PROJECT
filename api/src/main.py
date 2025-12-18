@@ -6,8 +6,16 @@ from match_api          import router   as match_router
 from game_session_api   import router   as game_session_router
 from join_game_session  import router   as student_join_router
 from game_session_management_api import router as game_session_management_router
+from authentication.routes.auth_routes import router as auth_router
+from authentication.config import validate_required_env_vars
 
 app = FastAPI()
+
+# Validate required environment variables at startup
+@app.on_event("startup")
+def validate_config():
+    """Validate that all required authentication environment variables are set."""
+    validate_required_env_vars()
 
 # Configure CORS
 app.add_middleware(
@@ -23,6 +31,7 @@ app.include_router(match_router)
 app.include_router(game_session_router)
 app.include_router(student_join_router)
 app.include_router(game_session_management_router)
+app.include_router(auth_router)
 
 
 @app.get("/")

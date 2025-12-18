@@ -11,20 +11,21 @@ from pydantic import BaseModel, Field
 
 class TokenResponse(BaseModel):
     """
-    Schema for token response containing both access and refresh tokens.
+    Schema for token response containing access token.
+    Refresh token is sent via httpOnly cookie for security.
     
     Attributes:
         access_token: Short-lived JWT access token (15 minutes).
-        refresh_token: Long-lived refresh token (7 days, configurable) for obtaining new access tokens.
+        refresh_token: Optional - only included for backward compatibility (prefer cookie).
         token_type: Token type (always "Bearer").
         expires_in: Access token expiration time in seconds.
     
     Token durations:
         - access_token: 15 minutes (900 seconds)
-        - refresh_token: 7 days (configurable in authentication/config.py)
+        - refresh_token: 7 days (configurable in authentication/config.py, sent via cookie)
     """
     access_token: str = Field(..., description="Short-lived access token (JWT, 15 minutes)")
-    refresh_token: str = Field(..., description="Long-lived refresh token (7 days, configurable)")
+    refresh_token: Optional[str] = Field(None, description="Long-lived refresh token (deprecated - use cookie)")
     token_type: str = Field(default="Bearer", description="Token type")
     expires_in: int = Field(..., description="Access token expiration in seconds (900)")
 
@@ -43,18 +44,26 @@ class AccessTokenPayload(BaseModel):
     """
     Schema for access token JWT payload (claims).
     
+    Uses 'sub' claim (standard JWT claim) for user ID.
+    
     Attributes:
-        user_id: The user's ID.
+        sub: The user's ID (standard JWT subject claim).
         email: The user's email.
         role: The user's role (student/teacher/admin).
         exp: Token expiration time (Unix timestamp).
         iat: Token issued-at time (Unix timestamp).
     """
-    user_id: int = Field(..., description="User ID")
+    sub: str = Field(..., description="User ID (subject claim)")
     email: str = Field(..., description="User email")
     role: str = Field(..., description="User role")
     exp: int = Field(..., description="Expiration time (Unix timestamp)")
-    iat: int = Field(..., description="Issued-at time (Unix timestamp)")
+    iat: Optional[int] = Field(None, description="Issued-at time (Unix timestamp)")
+    
+    # Alias for backward compatibility if needed
+    @property
+    def user_id(self) -> int:
+        """Get user_id from sub claim."""
+        return int(self.sub)
 
 
 class RefreshTokenPayload(BaseModel):

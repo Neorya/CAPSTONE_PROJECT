@@ -5,15 +5,13 @@ Request/Response schemas for user-related API endpoints.
 """
 
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Literal
 from pydantic import BaseModel, Field
 
 
-class UserRoleEnum(str):
-    """Valid user role values."""
-    student = "student"
-    teacher = "teacher"
-    admin = "admin"
+# Use Literal type for role validation (Pydantic v2 compatible)
+# Alternatively, could use: from enum import Enum; class UserRoleEnum(str, Enum): ...
+UserRole = Literal["student", "teacher", "admin"]
 
 
 class UserRead(BaseModel):

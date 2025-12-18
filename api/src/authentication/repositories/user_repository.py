@@ -31,7 +31,6 @@ class UserRepository:
         Returns:
             User object if found, None otherwise.
         """
-        # TODO: Implement database query to fetch user by ID
         User_instance = db.query(User).filter(User.id == user_id).first()
         if User_instance:
             return User_instance
@@ -49,7 +48,6 @@ class UserRepository:
         Returns:
             User object if found, None otherwise.
         """
-        # TODO: Implement database query to fetch user by google_sub
         User_instance = db.query(User).filter(User.google_sub == google_sub).first()
         if User_instance:
             return User_instance
@@ -67,7 +65,6 @@ class UserRepository:
         Returns:
             User object if found, None otherwise.
         """
-        # TODO: Implement database query to fetch user by email
         User_instance = db.query(User).filter(User.email == email).first()
         if User_instance:
             return User_instance
@@ -92,10 +89,6 @@ class UserRepository:
         Returns:
             Created User object.
         """
-        # TODO: Implement user creation with validation
-        # - Validate all required fields are present
-        # - Set default role to 'student' if not provided
-        # - Commit to database and return created user
         if not user_data.get('google_sub') or not user_data.get('email') or not user_data.get('first_name') or not user_data.get('last_name'):
             raise ValueError("Missing required user fields")
         if db.query(User).filter(User.email == user_data['email']).first():
@@ -126,10 +119,6 @@ class UserRepository:
         Returns:
             Updated User object if found, None otherwise.
         """
-        # TODO: Implement role update
-        # - Fetch user by ID
-        # - Update role field
-        # - Commit changes and return updated user
         User_instance = db.query(User).filter(User.id == user_id).first()
         if User_instance:
             User_instance.role = new_role
@@ -151,10 +140,6 @@ class UserRepository:
         Returns:
             Updated User object if found, None otherwise.
         """
-        # TODO: Implement score update
-        # - Fetch user by ID
-        # - Update score field (ensure it doesn't exceed 2,000,000)
-        # - Commit changes and return updated user
         User_instance = db.query(User).filter(User.id == user_id).first()
         if User_instance:
             new_score = User_instance.score + score_delta
@@ -186,10 +171,6 @@ class UserRepository:
         Returns:
             Updated User object if found, None otherwise.
         """
-        # TODO: Implement profile update
-        # - Fetch user by ID
-        # - Update provided fields
-        # - Commit changes and return updated user
         User_instance = db.query(User).filter(User.id == user_id).first()
         if User_instance:
             if 'email' in profile_data:
@@ -219,6 +200,5 @@ class UserRepository:
         Returns:
             List of User objects with the specified role.
         """
-        # TODO: Implement query to fetch all users by role
         return db.query(User).filter(User.role == role).all()
         
