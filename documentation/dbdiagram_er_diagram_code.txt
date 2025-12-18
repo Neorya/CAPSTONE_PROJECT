@@ -1,12 +1,45 @@
+Enum user_role {
+  student
+  teacher
+  admin
+}
+
+Table users {
+  id integer [primary key, increment] // SERIAL
+  google_sub varchar(255) [unique, not null]
+  email varchar(150) [unique, not null]
+  first_name varchar(100) [not null]
+  last_name varchar(100) [not null]
+  role user_role [not null, default: 'student']
+  score integer [not null, default: 0, note: 'CHECK (score <= 2000000)']
+  profile_url text
+  created_at timestamptz [not null, default: `now()`]
+  updated_at timestamptz [not null, default: `now()`]
+}
+
+Table refresh_tokens {
+  id integer [primary key, increment] // SERIAL
+  user_id integer [not null] // FK -> users.id (ON DELETE CASCADE)
+  token_hash text [unique, not null]
+  expires_at timestamptz [not null]
+  revoked_at timestamptz
+  created_at timestamptz [not null, default: `now()`]
+
+  Indexes {
+    user_id
+    expires_at
+  }
+}
+
 Table teacher {
-  teacher_id integer [primary key]
+  teacher_id integer [primary key, increment] // SERIAL
   first_name varchar(100) [not null]
   last_name varchar(100) [not null]
   email varchar(150) [unique, not null]
 }
 
 Table match_setting {
-  match_set_id integer [primary key]
+  match_set_id integer [primary key, increment] // SERIAL
   title varchar(150) [not null, unique]
   description text [not null]
   is_ready boolean [not null, default: false]
@@ -17,7 +50,7 @@ Table match_setting {
 }
 
 Table match {
-  match_id integer [primary key]
+  match_id integer [primary key, increment] // SERIAL
   title varchar(150) [not null]
   match_set_id integer // FK -> match_setting.match_set_id
   creator_id integer // FK -> teacher.teacher_id
@@ -28,7 +61,7 @@ Table match {
 }
 
 Table game_session {
-  game_id integer [primary key]
+  game_id integer [primary key, increment] // SERIAL
   name varchar(150) [not null]
   start_date timestamp [not null]
   creator_id integer [not null] // FK -> teacher.teacher_id
@@ -36,33 +69,36 @@ Table game_session {
 }
 
 Table matches_for_game {
-  match_for_game_id integer [primary key]
+  match_for_game_id integer [primary key, increment] // SERIAL
   match_id integer [not null] // FK -> match.match_id
   game_id integer [not null] // FK -> game_session.game_id
+
+  Indexes {
+    (match_id, game_id) [unique] // uc_matches_for_game
+  }
 }
 
 Table student {
-  student_id integer [primary key]
+  student_id integer [primary key, increment] // SERIAL
   email varchar(150) [unique, not null]
   first_name varchar(100) [not null]
   last_name varchar(100) [not null]
-  score integer [not null, default: 0]
-}
-
-Table login {
-  login_id integer [primary key]
-  sub varchar(255) [not null]
-  auth_provider varchar(50) [not null]
+  score integer [not null, default: 0, note: 'CHECK (score <= 2000000)']
 }
 
 Table student_join_game {
-  student_join_game_id integer [primary key]
+  student_join_game_id integer [primary key, increment] // SERIAL
   student_id integer [not null] // FK -> student.student_id
   game_id integer [not null] // FK -> game_session.game_id
-  assigned_match_id integer // FK -> match.match_id (nullable, set when session starts)
+  assigned_match_id integer // FK -> match.match_id (nullable)
+
+  Indexes {
+    (student_id, game_id) [unique] // uc_student_game
+  }
 }
 
-// Relationships
+// Relationships (per postgres/configs/init.sql)
+Ref: refresh_tokens.user_id > users.id [delete: cascade]
 Ref: match_setting.creator_id > teacher.teacher_id
 Ref: match.creator_id > teacher.teacher_id
 Ref: match.match_set_id > match_setting.match_set_id

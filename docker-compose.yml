@@ -36,6 +36,11 @@ services:
       - "8000:8000" 
     environment:
       - DATABASE_URL=postgresql://changeme:changeme@db/changeme
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - SECRET_KEY=${SECRET_KEY}
+      - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
+      - GOOGLE_OAUTH_CLIENT_SECRET=${GOOGLE_OAUTH_CLIENT_SECRET}
+      - GOOGLE_OAUTH_REDIRECT_URI=${GOOGLE_OAUTH_REDIRECT_URI}
     depends_on:
       db: 
         condition: service_healthy

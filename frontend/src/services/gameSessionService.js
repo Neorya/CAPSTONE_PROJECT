@@ -1,4 +1,5 @@
 import { API_BASE_URL, API_ENDPOINTS } from "./config";
+import { apiFetch } from "./api";
 
 /**
  * Creates a new game session with the specified match IDs, creator ID, name, and start date.
@@ -12,7 +13,7 @@ import { API_BASE_URL, API_ENDPOINTS } from "./config";
 export async function createGameSession(matchIds, creatorId, name, startDate) {
   try {
     const url = new URL(API_ENDPOINTS.GAME_SESSIONS, API_BASE_URL);
-    const res = await fetch(url.toString(), {
+    const res = await apiFetch(url.toString(), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -45,7 +46,7 @@ export async function createGameSession(matchIds, creatorId, name, startDate) {
 export async function getGameSessionsByCreator(creatorId) {
   try {
     const url = new URL(`${API_ENDPOINTS.GAME_SESSIONS}/by_creator/${creatorId}`, API_BASE_URL);
-    const res = await fetch(url.toString());
+    const res = await apiFetch(url.toString());
     if (!res.ok) {
       let errorMessage = `Failed to fetch game sessions: ${res.statusText}`;
       try {
@@ -73,7 +74,7 @@ export async function getGameSessionsByCreator(creatorId) {
 export async function deleteGameSession(gameId) {
   try {
     const url = new URL(`${API_ENDPOINTS.GAME_SESSIONS}/${gameId}`, API_BASE_URL);
-    const res = await fetch(url.toString(), {
+    const res = await apiFetch(url.toString(), {
       method: "DELETE",
     });
     if (!res.ok) {
@@ -97,7 +98,7 @@ export async function deleteGameSession(gameId) {
 export async function cloneGameSession(gameId) {
   try {
     const url = new URL(`${API_ENDPOINTS.GAME_SESSIONS}/${gameId}/clone`, API_BASE_URL);
-    const res = await fetch(url.toString(), {
+    const res = await apiFetch(url.toString(), {
       method: "POST",
     });
     if (!res.ok) {
@@ -128,7 +129,7 @@ export async function cloneGameSession(gameId) {
 export async function updateGameSession(gameId, updates) {
   try {
     const url = new URL(`${API_ENDPOINTS.GAME_SESSIONS}/${gameId}`, API_BASE_URL);
-    const res = await fetch(url.toString(), {
+    const res = await apiFetch(url.toString(), {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -162,7 +163,7 @@ export async function updateGameSession(gameId, updates) {
 export async function getGameSessionById(gameId) {
   try {
     const url = new URL(`${API_ENDPOINTS.GAME_SESSIONS}/${gameId}`, API_BASE_URL);
-    const res = await fetch(url.toString());
+    const res = await apiFetch(url.toString());
     if (!res.ok) {
       let errorMessage = `Failed to fetch game session: ${res.statusText}`;
       try {
@@ -190,7 +191,7 @@ export async function getGameSessionById(gameId) {
 export async function getGameSessionDetails(gameId) {
   try {
     const url = new URL(`${API_ENDPOINTS.GAME_SESSIONS}/${gameId}/details`, API_BASE_URL);
-    const res = await fetch(url.toString());
+    const res = await apiFetch(url.toString());
     if (!res.ok) {
       let errorMessage = `Failed to fetch game session details: ${res.statusText}`;
       try {
@@ -212,7 +213,7 @@ export async function getGameSessionDetails(gameId) {
 export async function startGameSession(gameId) {
   try {
     const url = new URL(`${API_ENDPOINTS.GAME_SESSIONS}/${gameId}/start`, API_BASE_URL);
-    const res = await fetch(url.toString(), {
+    const res = await apiFetch(url.toString(), {
       method: "POST",
     });
     if (!res.ok) {
