@@ -36,7 +36,7 @@ const SessionActionButtons = ({
           <Button
             type="primary"
             icon={<PlayCircleOutlined />} // Assicurati di importarlo da @ant-design/icons
-            onClick={() => navigate(`/game-session/${session.game_id}/play`)} // Cambia il path secondo le tue rotte
+            onClick={() => navigate(`/pre-start-game-session/${session.game_id}`)} // Cambia il path secondo le tue rotte
             style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }} // Colore verde per indicare "attivo"
           />
         </Tooltip>
