@@ -35,120 +35,109 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
 
+# Initialize Authlib
+from authlib.integrations.starlette_client import OAuth
+from authentication.config import (
+    GOOGLE_OAUTH_CLIENT_ID, 
+    GOOGLE_OAUTH_CLIENT_SECRET, 
+    GOOGLE_OAUTH_REDIRECT_URI,
+    GOOGLE_OAUTH_DISCOVERY_URL
+)
+
+oauth = OAuth()
+oauth.register(
+    name='google',
+    client_id=GOOGLE_OAUTH_CLIENT_ID,
+    client_secret=GOOGLE_OAUTH_CLIENT_SECRET,
+    server_metadata_url=GOOGLE_OAUTH_DISCOVERY_URL,
+    client_kwargs={
+        'scope': 'openid email profile'
+    }
+)
+
+
 @router.get(
     "/initiate",
     status_code=status.HTTP_200_OK,
     summary="Initiate Google OAuth flow",
-    description="Generates OAuth state token and PKCE challenge, returns Google authorization URL"
+    description="Redirects user to Google for authentication"
 )
-async def initiate_oauth():
+async def initiate_oauth(request: Request):
     """
-    Generate OAuth state token and PKCE challenge, return Google authorization URL.
-    Frontend should redirect user to the returned URL.
-    Uses PKCE (Proof Key for Code Exchange) for enhanced security.
+    Initiate Google OAuth flow.
+    Redirects user to Google's authorization page.
     """
-    from authentication.config import GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_REDIRECT_URI
-    from urllib.parse import urlencode
-    
-    # Generate PKCE pair
-    code_verifier, code_challenge = AuthService.generate_pkce_pair()
-    
-    # Generate signed state token (stateless - embeds code_verifier hash)
-    state = AuthService.generate_signed_oauth_state(code_verifier=code_verifier)
-    
-    # Build Google OAuth authorization URL with PKCE
-    params = {
-        "client_id": GOOGLE_OAUTH_CLIENT_ID,
-        "redirect_uri": GOOGLE_OAUTH_REDIRECT_URI,
-        "response_type": "code",
-        "scope": "openid email profile",
-        "access_type": "offline",
-        "prompt": "consent",
-        "state": state,
-        "code_challenge": code_challenge,
-        "code_challenge_method": "S256"
-    }
-    
-    auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urlencode(params)}"
-    
-    return {
-        "authorization_url": auth_url,
-        "state": state
-    }
+    redirect_uri = GOOGLE_OAUTH_REDIRECT_URI
+    return await oauth.google.authorize_redirect(request, redirect_uri)
 
+
+from fastapi.responses import JSONResponse, RedirectResponse
+
+SERVER_URL = os.getenv("SERVER_URL", "http://localhost:3000")
 
 @router.get(
     "/callback",
-    response_model=TokenResponse,
     status_code=status.HTTP_200_OK,
     summary="Google OAuth callback",    
     description="Handles Google OAuth callback and issues tokens",
 )
 async def google_oauth_callback(
-    code: str,
-    state: str,
-    response: Response,
+    request: Request,
     db: Session = Depends(get_db)
-) -> TokenResponse:
+):
     """
-    Exchange the authorization `code` from Google for user information,
-    find or create the user and issue application access/refresh tokens.
-    Delegates the heavy lifting to `AuthService`.
-    
-    Validates the OAuth state parameter to prevent CSRF attacks.
+    Exchange the authorization code from Google for user information,
+    find or create the user, issue application access/refresh tokens,
+    and redirect to frontend.
     """
     try:
-        # Validate OAuth state parameter (CSRF protection) - stateless verification
-        # Extracts code_verifier from signed state token
-        _, code_verifier = AuthService.validate_and_extract_oauth_state(state)
+        # Authlib handles the exchange of code for token and user info parsing
+        token = await oauth.google.authorize_access_token(request)
+        user_info = token.get('userinfo')
         
-        # Exchange code for ID token (with PKCE code_verifier from signed state)
-        id_token = await AuthService.exchange_code_for_id_token(code, code_verifier=code_verifier)
-        
-        # Authenticate with Google using the ID token
-        user, access_token, refresh_token = await AuthService.authenticate_with_google(id_token, db)
+        if not user_info:
+             user_info = await oauth.google.userinfo(token=token)
+
+        # Authenticate with Google user info
+        user, access_token, refresh_token = await AuthService.authenticate_with_google(dict(user_info), db)
         
         logger.info(f"User authenticated successfully: {user.email}")
         
+        # Prepare redirect to frontend
+        # Pass access_token in URL fragment or query param so frontend can read it
+        # Fragment is safer as it's not sent to server on reload, but query param is standard for this flow
+        redirect_url = f"{SERVER_URL}/home?access_token={access_token}"
+        response = RedirectResponse(url=redirect_url)
+
         # Set refresh token in httpOnly cookie
         refresh_token_max_age = REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60  # Convert days to seconds
-        # Use secure=True only in production (HTTPS), allow False for local development
         is_production = os.getenv("ENVIRONMENT", "development") == "production"
+        
         response.set_cookie(
             key="refresh_token",
             value=refresh_token,
             max_age=refresh_token_max_age,
             httponly=True,
-            secure=is_production,  # HTTPS only in production
-            samesite="lax",  # CSRF protection
-            path="/auth"  # Only send cookie to auth endpoints
+            secure=is_production,
+            samesite="lax",
+            path="/auth"
         )
         
-        # Return access token in response body (refresh token in cookie)
-        return TokenResponse(
-            access_token=access_token,
-            refresh_token=None,  # Not in body, sent via cookie
-            token_type="Bearer",
-            expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60  # 15 minutes
-        )
-    except InvalidStateError as e:
-        logger.warning(f"Invalid state parameter: {e}")
-        raise HTTPException(status_code=400, detail="Invalid or expired OAuth state parameter")
-    except (InvalidTokenError, TokenExpiredError) as e:
-        logger.warning(f"Token error during OAuth callback: {e}")
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
+        return response
+
     except OAuthProviderError as e:
         logger.error(f"OAuth provider error: {e}", exc_info=True)
-        raise HTTPException(status_code=502, detail="OAuth provider error. Please try again.")
+        # Redirect to frontend login with error
+        return RedirectResponse(url=f"{SERVER_URL}/?error=oauth_error")
     except DatabaseError as e:
         logger.error(f"Database error during OAuth callback: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Internal server error")
+        return RedirectResponse(url=f"{SERVER_URL}/?error=server_error")
     except AuthenticationError as e:
         logger.warning(f"Authentication error: {e}")
-        raise HTTPException(status_code=400, detail="Authentication failed")
+        return RedirectResponse(url=f"{SERVER_URL}/?error=auth_failed")
     except Exception as e:
         logger.error(f"Unexpected error during OAuth callback: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Internal server error")
+        return RedirectResponse(url=f"{SERVER_URL}/?error=unexpected_error")
 
 @router.post(
     "/refresh",
@@ -253,6 +242,26 @@ async def logout(
     return {"message": "Successfully logged out"}
 
 
+from fastapi.security import OAuth2PasswordBearer
+from typing import Annotated
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
+
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    """
+    Dependency to validate access token and return user info.
+    """
+    try:
+        payload = AuthService.validate_access_token(token)
+        return payload
+    except (InvalidTokenError, TokenExpiredError) as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
 @router.get(
     "/validate",
     response_model=TokenValidationResponse,
@@ -260,79 +269,23 @@ async def logout(
     summary="Validate access token",
     description="Validates an access token and returns user information and role"
 )
-async def validate_token(request: Request) -> TokenValidationResponse:
+async def validate_token(
+    current_user: Annotated[dict, Depends(get_current_user)]
+) -> TokenValidationResponse:
     """
-    Validate an access token from the Authorization header.
-    Returns user information and role if token is valid.
-    Used by frontend to check if user is still authenticated.
+    Validate an access token.
+    Uses get_current_user dependency which handles token extraction and validation.
     """
-    # Extract Authorization header
-    authorization = request.headers.get("Authorization")
-    if not authorization:
-        return TokenValidationResponse(
-            is_valid=False,
-            user_id=None,
-            role=None,
-            message="Authorization header missing"
-        )
+    user_id = int(current_user["sub"])
+    role = current_user.get("role", "unknown")
+    email = current_user.get("email", "")
     
-    # Parse Bearer token
-    try:
-        scheme, token = authorization.split(" ", 1)
-        if scheme.lower() != "bearer":
-            return TokenValidationResponse(
-                is_valid=False,
-                user_id=None,
-                role=None,
-                message="Invalid authorization scheme. Expected 'Bearer'"
-            )
-    except ValueError:
-        return TokenValidationResponse(
-            is_valid=False,
-            user_id=None,
-            role=None,
-            message="Invalid authorization header format"
-        )
-    
-    # Validate token
-    try:
-        payload = AuthService.validate_access_token(token)
-        user_id = int(payload["sub"])
-        role = payload.get("role", "unknown")
-        email = payload.get("email", "")
-        
-        logger.debug(f"Token validated successfully for user {user_id}")
-        return TokenValidationResponse(
-            is_valid=True,
-            user_id=user_id,
-            role=role,
-            message=f"Token is valid for user {email}"
-        )
-    except TokenExpiredError:
-        logger.debug("Token validation failed: token expired")
-        return TokenValidationResponse(
-            is_valid=False,
-            user_id=None,
-            role=None,
-            message="Token has expired"
-        )
-    except InvalidTokenError as e:
-        logger.debug(f"Token validation failed: {e}")
-        return TokenValidationResponse(
-            is_valid=False,
-            user_id=None,
-            role=None,
-            message=f"Invalid token: {str(e)}"
-        )
-    except Exception as e:
-        logger.error(f"Unexpected error during token validation: {e}", exc_info=True)
-        return TokenValidationResponse(
-            is_valid=False,
-            user_id=None,
-            role=None,
-            message="Token validation failed"
-        )
-
+    return TokenValidationResponse(
+        is_valid=True,
+        user_id=user_id,
+        role=role,
+        message=f"Token is valid for user {email}"
+    )
 
 
 @router.post(
@@ -342,42 +295,20 @@ async def validate_token(request: Request) -> TokenValidationResponse:
     description="Checks if the user's role in the database differs from the role in their current access token"
 )
 async def check_role_change(
-    request: Request,
+    current_user: Annotated[dict, Depends(get_current_user)],
     db: Session = Depends(get_db)
 ):
     """
     Check if user's role has changed since the access token was issued.
-    Useful for propagating admin role changes within the access token lifetime (15 minutes).
-    
-    Returns:
-        - role_changed: Boolean indicating if role has changed
-        - current_role: Current role from database
-        - token_role: Role from access token
     """
-    # Extract Authorization header
-    authorization = request.headers.get("Authorization")
-    if not authorization:
-        raise HTTPException(status_code=401, detail="Authorization header missing")
+    user_id = int(current_user["sub"])
+    token_role = current_user.get("role", "unknown")
     
-    # Parse Bearer token
     try:
-        scheme, token = authorization.split(" ", 1)
-        if scheme.lower() != "bearer":
-            raise HTTPException(status_code=401, detail="Invalid authorization scheme")
-    except ValueError:
-        raise HTTPException(status_code=401, detail="Invalid authorization header format")
-    
-    # Validate token and extract role
-    try:
-        payload = AuthService.validate_access_token(token)
-        user_id = int(payload["sub"])
-        token_role = payload.get("role", "unknown")
-        
         # Check if role has changed in database
         role_changed = AuthService.check_role_change(user_id, token_role, db)
         
         if role_changed:
-            # Get current role from database
             from authentication.repositories.user_repository import UserRepository
             user = UserRepository.get_by_id(db, user_id)
             current_role = user.role.value if user else token_role
@@ -396,10 +327,6 @@ async def check_role_change(
                 "token_role": token_role,
                 "message": "Role has not changed"
             }
-    except TokenExpiredError:
-        raise HTTPException(status_code=401, detail="Token has expired")
-    except InvalidTokenError as e:
-        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
     except Exception as e:
         logger.error(f"Unexpected error during role change check: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")

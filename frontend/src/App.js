@@ -8,12 +8,25 @@ import { GameSessionCreation } from './components/GameSessionCreation';
 import { GameSessionList } from './components/GameSessionList';
 import { StartGameSession } from './components/StartGameSession';
 import { PreStartGameSession } from './components/PreStartGameSession';
-import { LoginWrapper } from './components/Login';
+import { Login } from './components/Login';
 import { JoinGameSession } from './components/JoinGameSession';
 import { Lobby } from './components/Lobby';
 import './App.css';
+import { useEffect } from 'react';
 
 function App() {
+
+  // Simple token extraction on app load if present in URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('access_token');
+    if (token) {
+      localStorage.setItem('token', token);
+      // Optional: Clear URL params
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
   return (
     <ConfigProvider
       theme={{
@@ -26,7 +39,7 @@ function App() {
       <Router>
         <div className="App">
           <Routes>
-            <Route path="/" element={<LoginWrapper />} />
+            <Route path="/" element={<Login />} />
             <Route path="/home" element={<HomePage />} />
             <Route path="/create-match" element={<CreateMatchForm />} />
             <Route path="/match-settings" element={<MatchSettingsList />} />

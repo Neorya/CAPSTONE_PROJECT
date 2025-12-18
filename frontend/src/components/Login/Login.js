@@ -1,98 +1,38 @@
 import React, { Component } from 'react';
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
-import { jwtDecode } from 'jwt-decode';
-import { Card, Typography, Space } from "antd";
+import { Card, Typography, Button } from "antd";
+import { GoogleOutlined } from '@ant-design/icons';
 import "./Login.css";
 
 
-const { Title, Paragraph } = Typography;
+const { Title } = Typography;
 
-// ==========================================================
-// 1. CONFIG
-// ==========================================================
-// Environment variables are loaded from process.env 
-// and must start with REACT_APP_ in a Create React App project
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 
-const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-
-// ==========================================================
-// 2. CLASS-BASED LOGIN COMPONENT
-// ==========================================================
-// Definition of the login component as a class
 class Login extends Component {
 
-  handleSuccess = (credentialResponse) => {
-    // It's a JWT
-    const token = credentialResponse.credential;
-
-    // Decode the token for the User Data
-    const decodedUser = jwtDecode(token);
-
-    console.log("Login riuscito. Dati decodificati:", decodedUser);
-
-    // We pass the data to the parent component (if the prop was provided)
-    if (this.props.onLoginSuccess) {
-      this.props.onLoginSuccess(decodedUser);
-    }
-
-  };
-
-  handleError = () => {
-    console.error("Login fallito.");
-    alert("Login con Google non riuscito. Riprova più tardi.");
+  handleLogin = () => {
+    window.location.href = `${API_BASE_URL}/auth/initiate`;
   };
 
   render() {
-    // Access the onLoginSuccess prop passed from the wrapper
-    const { onLoginSuccess } = this.props;
-
-    // Check if the Client ID is available (We have to change the text at the end of the app for sec reason)
-    if (!GOOGLE_CLIENT_ID) {
-      return (
-        <div style={{ padding: '50px', textAlign: 'center', color: 'red' }}>
-          <h1>ERRORE DI CONFIGURAZIONE</h1>
-          <p>Manca la variabile d'ambiente REACT_APP_GOOGLE_CLIENT_ID nel tuo file .env.</p>  
-          <p>Impossibile mostrare il pulsante di Login con Google.</p>
-        </div>
-      );
-    }
-
     return (
       <div className="login-container">
         <Card className="login-card">
-          <Title level={2}>Accedi all'Applicazione</Title>
-          {/*Button Google Login */}
-          <GoogleLogin
-            onSuccess={this.handleSuccess}
-            onError={this.handleError}
-            type="standard"
+          <Title level={2}>Login into the App</Title>
+          <Button
+            type="default"
+            icon={<GoogleOutlined />}
             size="large"
-            theme="outline"
-          />
+            onClick={this.handleLogin}
+            block
+            style={{ marginTop: 20 }}
+          >
+            Sign in with Google
+          </Button>
         </Card>
       </div>
     );
   }
 }
 
-// ==========================================================
-// 3. WRAPPER COMPONENT FOR EXPORT (Includes the Provider)
-// ==========================================================
-// This component exposes the Provider logic and authentication
-// state to all of its child components.
-
-export function LoginWrapper(props) {
-
-  // We use an alternative 'dummy' variable for the clientId
-  // if it is not configured, to prevent the GoogleOAuthProvider from crashing.
-  const safeClientId = GOOGLE_CLIENT_ID || 'dummy-client-id-for-safety';
-
-  return (
-    <GoogleOAuthProvider clientId={safeClientId}>
-    {/* Pass all received props (including onLoginSuccess) 
-      to the class-based component. */}
-      <Login {...props} />
-    </GoogleOAuthProvider>
-  );
-}
-export default LoginWrapper;
+export default Login;

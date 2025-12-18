@@ -1,4 +1,5 @@
 import { API_BASE_URL, API_ENDPOINTS } from './config';
+import { apiFetch } from './api';
 
 /**
  * Create a new match
@@ -15,7 +16,7 @@ import { API_BASE_URL, API_ENDPOINTS } from './config';
 export const createMatch = async (matchData) => {
   try {
     const url = `${API_BASE_URL}${API_ENDPOINTS.MATCHES}`;
-    const response = await fetch(url, {
+    const response = await apiFetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -78,7 +79,7 @@ export const createMatch = async (matchData) => {
  */
 export const getMatches = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.MATCHES}`, {
+    const response = await apiFetch(`${API_BASE_URL}${API_ENDPOINTS.MATCHES}`, {
       method: 'GET',
     });
 

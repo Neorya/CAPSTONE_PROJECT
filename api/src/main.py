@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 import os
 from match_settings_api import router   as match_settings_router
 from match_api          import router   as match_router
@@ -25,6 +26,10 @@ app.add_middleware(
     allow_methods=["*"],  # Allow all HTTP methods
     allow_headers=["*"],  # Allow all headers
 )
+
+# Add SessionMiddleware for Authlib
+# In production, use a secure secret key from environment variables
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "your-secret-key"))
 
 app.include_router(match_settings_router)
 app.include_router(match_router)

@@ -2,4 +2,8 @@ fastapi
 uvicorn[standard]
 psycopg2-binary
 sqlalchemy
-
+Authlib
+itsdangerous
+requests
+httpx
+pyjwt

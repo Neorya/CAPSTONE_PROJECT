@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "./config";
+import { apiFetch } from "./api";
 
 /**
  * Fetch match settings with optional filtering
@@ -12,7 +13,7 @@ export async function fetchMatchSettings(filter) {
   else if (filter === "Draft") isReady = false;
   const url = new URL("/api/match-settings", API_BASE_URL);
   if (isReady !== undefined) url.searchParams.set("is_ready", String(isReady));
-  const res = await fetch(url.toString(), { method: "GET" });
+  const res = await apiFetch(url.toString(), { method: "GET" });
   if (!res.ok) throw new Error(`Failed to fetch match settings: ${res.statusText}`);
   return res.json();
 }

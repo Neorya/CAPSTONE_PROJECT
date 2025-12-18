@@ -1,5 +1,6 @@
 
 import { API_BASE_URL, API_ENDPOINTS } from "./config";
+import { apiFetch } from "./api";
 
 /**
  * Allows a student to join an available game session.
@@ -12,7 +13,7 @@ import { API_BASE_URL, API_ENDPOINTS } from "./config";
 export async function joinGameSession(studentId, gameId) {
   try {
     const url = new URL(API_ENDPOINTS.JOIN_GAME, API_BASE_URL);
-    const res = await fetch(url.toString(), {
+    const res = await apiFetch(url.toString(), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -26,7 +27,7 @@ export async function joinGameSession(studentId, gameId) {
       let errorMessage = "Failed to join game session.";
       try {
         const errorData = await res.json();
-        
+
         // if the error response has a 'detail' field, use it
         if (errorData?.detail) {
           errorMessage = errorData.detail;
@@ -52,13 +53,13 @@ export async function getAvailableGame() {
   try {
     const url = new URL(API_ENDPOINTS.GET_LAST_GAME, API_BASE_URL);
 
-    const response = await fetch(url.toString());
+    const response = await apiFetch(url.toString());
 
     if (!response.ok) {
       let errorMessage = "Failed to fetch game session.";
       try {
         const errorData = await response.json();
-        
+
         // if the error response has a 'detail' field, use it
         if (errorData?.detail) {
           errorMessage = errorData.detail;
@@ -88,7 +89,7 @@ export async function hasStudentAlreadyJoinedSession(studentId, gameId) {
   try {
     const url = new URL(`${API_ENDPOINTS.HAS_STUDENT_JOINED}/${studentId}/${gameId}`, API_BASE_URL);
 
-    const response = await fetch(url.toString());
+    const response = await apiFetch(url.toString());
 
     if (!response.ok) {
       let errorMessage = 'Failed to check student session.';
