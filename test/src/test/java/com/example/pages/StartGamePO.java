@@ -58,7 +58,7 @@ public class StartGamePO {
     public boolean isPageLoaded() {
         try {
             return getLessonName().isDisplayed() && 
-                   getLessonName().getText().equals("Lesson 1");
+                   getLessonName().getText().equals("Spring Semester Game Session");
         } catch (Exception e) {
             return false;
         }
