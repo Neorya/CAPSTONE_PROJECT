@@ -339,7 +339,7 @@ VALUES
 
 INSERT INTO capstone_app.game_session (name, start_date, duration_phase1, duration_phase2, creator_id, is_active)
 VALUES
-('Spring Semester Game Session', '2028-01-15 09:00:00', 45, 30, 1, FALSE),
+('Spring Semester Game Session', '2025-12-18 19:00:00.000', 45, 30, 1, TRUE),
 ('Summer Workshop Session', '2028-01-16 10:30:00', 60, 60, 2, FALSE),
 ('Fall Competition Session', '2028-01-17 14:00:00', 20, 15, 3, TRUE),
 ('Winter Training Session', '2028-01-18 11:00:00', 30, 30, 4, FALSE),
@@ -476,3 +476,4 @@ VALUES
 (8, 5, NULL),
 (9, 5, NULL),
 (10, 5, NULL);
+
