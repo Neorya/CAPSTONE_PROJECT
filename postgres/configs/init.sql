@@ -78,9 +78,7 @@ CREATE TABLE capstone_app.match (
     match_set_id INTEGER REFERENCES capstone_app.match_setting(match_set_id),
     creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id),
     difficulty_level INTEGER NOT NULL,
-    review_number INTEGER NOT NULL,
-    duration_phase1 INTEGER NOT NULL,-- in minutes
-    duration_phase2 INTEGER NOT NULL -- in minutes
+    review_number INTEGER NOT NULL
     
 );
 
@@ -94,6 +92,8 @@ CREATE TABLE capstone_app.game_session (
     game_id SERIAL PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
     start_date TIMESTAMP NOT NULL,
+    duration_phase1 INTEGER NOT NULL,-- in minutes
+    duration_phase2 INTEGER NOT NULL, -- in minutes
     creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id) NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT FALSE
 );
@@ -316,24 +316,18 @@ VALUES
 -- INSERT DATA INTO MATCH TABLE (10 RECORDS)
 -- ######################################
 
-INSERT INTO capstone_app.match 
-    (title, match_set_id, creator_id, difficulty_level, review_number, duration_phase1, duration_phase2)
+INSERT INTO capstone_app.match (title, match_set_id, creator_id, difficulty_level, review_number)
 VALUES
--- Matches created by Teacher 1 (ID 1)
-('Standard Match - Class 5A', 1, 1, 1, 5, 7, 10),
-('Standard Match - Class 5B', 1, 1, 1, 5, 7, 10),
--- Matches created by Teacher 2 (ID 2)
-('Functions Lab - Group 1', 4, 2, 4, 3, 10, 5),
-('Functions Lab - Group 2', 4, 2, 4, 3, 10, 5),
--- Matches created by Teacher 3 (ID 3)
-('Variable Declarations - Section A', 5, 3, 3, 4, 15, 10),
-('Variable Declarations - Section B', 5, 3, 3, 4, 15, 10),
--- Matches created by Teacher 4 (ID 4)
-('If Statement - Group 1', 8, 4, 5, 3, 10, 5),
-('If Statement - Group 2', 8, 4, 5, 3, 10, 5),
--- Matches created by Teacher 5 (ID 5)
-('Pointers Basics - Section A', 9, 5, 8, 3, 15, 10),
-('Pointers Basics - Section B', 9, 5, 8, 3, 15, 10);
+('Standard Match - Class 5A', 1, 1, 1, 5),
+('Standard Match - Class 5B', 1, 1, 1, 5),
+('Functions Lab - Group 1', 4, 2, 4, 3),
+('Functions Lab - Group 2', 4, 2, 4, 3),
+('Variable Declarations - Section A', 5, 3, 3, 4),
+('Variable Declarations - Section B', 5, 3, 3, 4),
+('If Statement - Group 1', 8, 4, 5, 3),
+('If Statement - Group 2', 8, 4, 5, 3),
+('Pointers Basics - Section A', 9, 5, 8, 3),
+('Pointers Basics - Section B', 9, 5, 8, 3);
 
 
 
@@ -343,14 +337,13 @@ VALUES
 -- INSERT DATA INTO GAME_SESSION TABLE (5 RECORDS)
 -- ######################################
 
-INSERT INTO capstone_app.game_session (name, start_date, creator_id, is_active)
+INSERT INTO capstone_app.game_session (name, start_date, duration_phase1, duration_phase2, creator_id, is_active)
 VALUES
-('Spring Semester Game Session', '2028-01-15 09:00:00', 1, FALSE),
-('Summer Workshop Session', '2028-01-16 10:30:00', 2, FALSE),
-('Fall Competition Session', '2028-01-17 14:00:00', 3, TRUE),
-('Winter Training Session', '2028-01-18 11:00:00', 4, FALSE),
-('Annual Championship Session', '2028-01-19 15:30:00', 5, FALSE);
-
+('Spring Semester Game Session', '2028-01-15 09:00:00', 45, 30, 1, FALSE),
+('Summer Workshop Session', '2028-01-16 10:30:00', 60, 60, 2, FALSE),
+('Fall Competition Session', '2028-01-17 14:00:00', 20, 15, 3, TRUE),
+('Winter Training Session', '2028-01-18 11:00:00', 30, 30, 4, FALSE),
+('Annual Championship Session', '2028-01-19 15:30:00', 90, 45, 5, FALSE);
 
 
 -- ######################################
