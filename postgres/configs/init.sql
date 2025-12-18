@@ -8,40 +8,31 @@ CREATE SCHEMA capstone_app;
 
 CREATE TYPE user_role AS ENUM ('student', 'teacher', 'admin');
 
--- The creation of combined users table with OAuth support: (User Story 5 / Authentication)
+-- The creation of students table: (User Story 5)
 
-DROP TABLE IF EXISTS capstone_app.users CASCADE;
+DROP TABLE IF EXISTS capstone_app.user CASCADE;
 
-CREATE TABLE capstone_app.users (
-  id SERIAL PRIMARY KEY,
-  google_sub VARCHAR(255) UNIQUE NOT NULL,
-  email VARCHAR(150) UNIQUE NOT NULL,
-  first_name VARCHAR(100) NOT NULL,
-  last_name VARCHAR(100) NOT NULL,
-  role user_role NOT NULL DEFAULT 'student',
-  score INTEGER NOT NULL DEFAULT 0,
-  profile_url TEXT,
-  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+CREATE TABLE capstone_app.user (
+  user_id  SERIAL PRIMARY KEY,
+  email       VARCHAR(150) UNIQUE NOT NULL,
+  first_name  VARCHAR(100) NOT NULL,
+  last_name   VARCHAR(100) NOT NULL,
+  score       INTEGER NOT NULL DEFAULT 0,
+  role        user_role NOT NULL
   CONSTRAINT check_max_score CHECK (score <= 2000000)
 );
 
--- The creation of refresh tokens table: (Authentication)
 
-DROP TABLE IF EXISTS capstone_app.refresh_tokens CASCADE;
+--- The creation of login table: (User Story 5)
 
-CREATE TABLE capstone_app.refresh_tokens (
-  id SERIAL PRIMARY KEY,
-  user_id INTEGER NOT NULL REFERENCES capstone_app.users(id) ON DELETE CASCADE,
-  token_hash TEXT UNIQUE NOT NULL,
-  expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-  revoked_at TIMESTAMP WITH TIME ZONE,
-  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+DROP TABLE IF EXISTS capstone_app.login;
+
+CREATE TABLE capstone_app.login (
+  login_id SERIAL PRIMARY KEY,
+  google_sub  VARCHAR(255) UNIQUE NOT NULL,    
+  created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(), 
+  user_id INTEGER NOT NULL REFERENCES capstone_app.user(user_id) ON DELETE CASCADE
 );
-
--- Create indexes for refresh_tokens for efficient lookups
-CREATE INDEX idx_refresh_tokens_user_id ON capstone_app.refresh_tokens(user_id);
-CREATE INDEX idx_refresh_tokens_expires_at ON capstone_app.refresh_tokens(expires_at);
 
 
 -- Creation of Teacher Table :  (User story 1)
@@ -87,9 +78,7 @@ CREATE TABLE capstone_app.match (
     match_set_id INTEGER REFERENCES capstone_app.match_setting(match_set_id),
     creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id),
     difficulty_level INTEGER NOT NULL,
-    review_number INTEGER NOT NULL,
-    duration_phase1 INTEGER NOT NULL,-- in minutes
-    duration_phase2 INTEGER NOT NULL -- in minutes
+    review_number INTEGER NOT NULL
     
 );
 
@@ -103,6 +92,8 @@ CREATE TABLE capstone_app.game_session (
     game_id SERIAL PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
     start_date TIMESTAMP NOT NULL,
+    duration_phase1 INTEGER NOT NULL,-- in minutes
+    duration_phase2 INTEGER NOT NULL, -- in minutes
     creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id) NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT FALSE
 );
@@ -146,12 +137,11 @@ DROP TABLE IF EXISTS capstone_app.student_join_game;
 
 CREATE TABLE capstone_app.student_join_game (
   student_join_game_id SERIAL PRIMARY KEY, 
-  student_id INTEGER REFERENCES capstone_app.student(student_id) NOT NULL,
-  game_id    INTEGER REFERENCES capstone_app.game_session(game_id) NOT NULL,
+  student_id INTEGER REFERENCES capstone_app.student(student_id) ON DELETE CASCADE NOT NULL,
+  game_id    INTEGER REFERENCES capstone_app.game_session(game_id) ON DELETE CASCADE NOT NULL,
   assigned_match_id INTEGER REFERENCES capstone_app.match(match_id),
   CONSTRAINT uc_student_game UNIQUE (student_id, game_id)
 );
-
 --Create a user for that schema: (User story 1)
 
 -- 2. Create the API user (Replace 'changeme' with a strong password)
@@ -161,10 +151,8 @@ CREATE USER api_user WITH PASSWORD 'changeme';
 GRANT CONNECT ON DATABASE changeme TO api_user;
 GRANT USAGE ON SCHEMA capstone_app TO api_user;
 
--- 4. Grant SELECT, INSERT, UPDATE, DELETE permissions on tables for API user
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE  
-capstone_app.users,
-capstone_app.refresh_tokens,
+-- 4. Grant SELECT, INSERT permissions on ALL FUTURE tables created in this schema
+GRANT SELECT, INSERT ON TABLE  
 capstone_app.teacher,
 capstone_app.match_setting,
 capstone_app.match,
@@ -179,29 +167,85 @@ TO api_user;
 
 
 -- ######################################
--- INSERT DATA INTO USERS TABLE (18 RECORDS)
+-- INSERT DATA INTO LOGIN TABLE (18 RECORDS)
 -- ######################################
 
-INSERT INTO capstone_app.users (google_sub, email, first_name, last_name, role, score)
+INSERT INTO capstone_app.user (email, first_name, last_name, role, score)
 VALUES 
-('100123456789012345678', 'student1@test.com', 'Alice', 'Anderson', 'student', 100),
-('100987654321098765433', 'student2@test.com', 'Bob', 'Brown', 'student', 200),
-('100987654321098765432', 'student3@test.com', 'Charlie', 'Clark', 'student', 300),
-('100987654321098765434', 'student4@test.com', 'David', 'Davis', 'student', 400),
-('100555444333222111000', 'student5@test.com', 'Eve', 'Evans', 'student', 500),
-('100111222333444555666', 'teacher1@test.com', 'Frank', 'Foster', 'teacher', 0),
-('100111222333444666666', 'teacher2@test.com', 'Grace', 'Green', 'teacher', 0),
-('100777888999000111222', 'admin1@test.com', 'Hank', 'Harris', 'admin', 0),
-('100777888999000155555', 'student6@test.com', 'Ivy', 'Irwin', 'student', 150),
-('100333222111000999888', 'student7@test.com', 'Jack', 'Jones', 'student', 250),
-('144443222111888899888', 'student8@test.com', 'Kevin', 'King', 'student', 350),
-('144443266661000999899', 'student9@test.com', 'Laura', 'Lee', 'student', 450),
-('100666777888999000111', 'student10@test.com', 'Mike', 'Miller', 'student', 550),
-('133333222111000999888', 'teacher3@test.com', 'Nina', 'Nelson', 'teacher', 0),
-('100222333444555666777', 'teacher4@test.com', 'Oscar', 'Owens', 'teacher', 0),
-('100888999000111222333', 'admin2@test.com', 'Paul', 'Parker', 'admin', 0),
-('100444555666777888999', 'student11@test.com', 'Quinn', 'Quick', 'student', 120),
-('100101202303404505606', 'student12@test.com', 'Rachel', 'Ross', 'student', 220);
+('student1@test.com', 'Alice', 'Anderson', 'student', 100),
+('student2@test.com', 'Bob', 'Brown', 'student', 200),
+('student3@test.com', 'Charlie', 'Clark', 'student', 300),
+('student4@test.com', 'David', 'Davis', 'student', 400),
+('student5@test.com', 'Eve', 'Evans', 'student', 500),
+('teacher1@test.com', 'Frank', 'Foster', 'teacher', 0),
+('teacher2@test.com', 'Grace', 'Green', 'teacher', 0),
+('admin1@test.com', 'Hank', 'Harris', 'admin', 0),
+('student6@test.com', 'Ivy', 'Irwin', 'student', 150),
+('student7@test.com', 'Jack', 'Jones', 'student', 250),
+('student8@test.com', 'Kevin', 'King', 'student', 350),
+('student9@test.com', 'Laura', 'Lee', 'student', 450),
+('student10@test.com', 'Mike', 'Miller', 'student', 550),
+('teacher3@test.com', 'Nina', 'Nelson', 'teacher', 0),
+('teacher4@test.com', 'Oscar', 'Owens', 'teacher', 0),
+('admin2@test.com', 'Paul', 'Parker', 'admin', 0),
+('student11@test.com', 'Quinn', 'Quick', 'student', 120),
+('student12@test.com', 'Rachel', 'Ross', 'student', 220);
+
+INSERT INTO capstone_app.login (google_sub, user_id)
+VALUES 
+-- Login 1 -> User 1
+('100123456789012345678', 1),
+
+-- Login 2 -> User 2
+('100987654321098765433', 2),
+
+-- Login 3 -> User 3
+('100987654321098765432', 3),
+
+-- Login 4 -> User 4
+('100987654321098765434', 4),
+
+-- Login 5 -> User 5
+('100555444333222111000', 5),
+
+-- Login 6 -> User 6
+('100111222333444555666', 6),
+
+-- Login 7 -> User 7
+('100111222333444666666', 7),
+
+-- Login 8 -> User 8
+('100777888999000111222', 8),
+
+-- Login 9 -> User 9
+('100777888999000155555', 9),
+
+-- Login 10 -> User 10
+('100333222111000999888', 10),
+
+-- Login 11 -> User 11
+('144443222111888899888', 11),
+
+-- Login 12 -> User 12
+('144443266661000999899', 12),
+
+-- Login 13 -> User 13
+('100666777888999000111', 13),
+
+-- Login 14 -> User 14
+('133333222111000999888', 14),
+
+-- Login 15 -> User 15
+('100222333444555666777', 15),
+
+-- Login 16 -> User 16
+('100888999000111222333', 16),
+
+-- Login 17 -> User 17
+('100444555666777888999', 17),
+
+-- Login 18 -> User 18
+('100101202303404505606', 18);
 
 -- ######################################
 -- INSERT DATA INTO TEACHER TABLE (5 RECORDS)
@@ -271,24 +315,18 @@ VALUES
 -- INSERT DATA INTO MATCH TABLE (10 RECORDS)
 -- ######################################
 
-INSERT INTO capstone_app.match 
-    (title, match_set_id, creator_id, difficulty_level, review_number, duration_phase1, duration_phase2)
+INSERT INTO capstone_app.match (title, match_set_id, creator_id, difficulty_level, review_number)
 VALUES
--- Matches created by Teacher 1 (ID 1)
-('Standard Match - Class 5A', 1, 1, 1, 5, 7, 10),
-('Standard Match - Class 5B', 1, 1, 1, 5, 7, 10),
--- Matches created by Teacher 2 (ID 2)
-('Functions Lab - Group 1', 4, 2, 4, 3, 10, 5),
-('Functions Lab - Group 2', 4, 2, 4, 3, 10, 5),
--- Matches created by Teacher 3 (ID 3)
-('Variable Declarations - Section A', 5, 3, 3, 4, 15, 10),
-('Variable Declarations - Section B', 5, 3, 3, 4, 15, 10),
--- Matches created by Teacher 4 (ID 4)
-('If Statement - Group 1', 8, 4, 5, 3, 10, 5),
-('If Statement - Group 2', 8, 4, 5, 3, 10, 5),
--- Matches created by Teacher 5 (ID 5)
-('Pointers Basics - Section A', 9, 5, 8, 3, 15, 10),
-('Pointers Basics - Section B', 9, 5, 8, 3, 15, 10);
+('Standard Match - Class 5A', 1, 1, 1, 5),
+('Standard Match - Class 5B', 1, 1, 1, 5),
+('Functions Lab - Group 1', 4, 2, 4, 3),
+('Functions Lab - Group 2', 4, 2, 4, 3),
+('Variable Declarations - Section A', 5, 3, 3, 4),
+('Variable Declarations - Section B', 5, 3, 3, 4),
+('If Statement - Group 1', 8, 4, 5, 3),
+('If Statement - Group 2', 8, 4, 5, 3),
+('Pointers Basics - Section A', 9, 5, 8, 3),
+('Pointers Basics - Section B', 9, 5, 8, 3);
 
 
 
@@ -298,14 +336,13 @@ VALUES
 -- INSERT DATA INTO GAME_SESSION TABLE (5 RECORDS)
 -- ######################################
 
-INSERT INTO capstone_app.game_session (name, start_date, creator_id, is_active)
+INSERT INTO capstone_app.game_session (name, start_date, duration_phase1, duration_phase2, creator_id, is_active)
 VALUES
-('Spring Semester Game Session', '2028-01-15 09:00:00', 1, FALSE),
-('Summer Workshop Session', '2028-01-16 10:30:00', 2, FALSE),
-('Fall Competition Session', '2028-01-17 14:00:00', 3, TRUE),
-('Winter Training Session', '2028-01-18 11:00:00', 4, FALSE),
-('Annual Championship Session', '2028-01-19 15:30:00', 5, FALSE);
-
+('Spring Semester Game Session', '2025-12-19 19:00:00.000', 45, 30, 1, TRUE),
+('Summer Workshop Session', '2028-01-16 10:30:00', 60, 60, 2, FALSE),
+('Fall Competition Session', '2028-01-17 14:00:00', 20, 15, 3, TRUE),
+('Winter Training Session', '2028-01-18 11:00:00', 30, 30, 4, FALSE),
+('Annual Championship Session', '2028-01-19 15:30:00', 90, 45, 5, FALSE);
 
 
 -- ######################################
@@ -438,3 +475,4 @@ VALUES
 (8, 5, NULL),
 (9, 5, NULL),
 (10, 5, NULL);
+
