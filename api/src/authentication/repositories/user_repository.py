@@ -32,7 +32,10 @@ class UserRepository:
             User object if found, None otherwise.
         """
         # TODO: Implement database query to fetch user by ID
-        pass
+        User_instance = db.query(User).filter(User.id == user_id).first()
+        if User_instance:
+            return User_instance
+        return None
 
     @staticmethod
     def get_by_google_sub(db: Session, google_sub: str) -> Optional[User]:
@@ -47,7 +50,10 @@ class UserRepository:
             User object if found, None otherwise.
         """
         # TODO: Implement database query to fetch user by google_sub
-        pass
+        User_instance = db.query(User).filter(User.google_sub == google_sub).first()
+        if User_instance:
+            return User_instance
+        return None
 
     @staticmethod
     def get_by_email(db: Session, email: str) -> Optional[User]:
@@ -62,7 +68,11 @@ class UserRepository:
             User object if found, None otherwise.
         """
         # TODO: Implement database query to fetch user by email
-        pass
+        User_instance = db.query(User).filter(User.email == email).first()
+        if User_instance:
+            return User_instance
+        return None
+    
 
     @staticmethod
     def create(db: Session, user_data: dict) -> User:
@@ -86,7 +96,22 @@ class UserRepository:
         # - Validate all required fields are present
         # - Set default role to 'student' if not provided
         # - Commit to database and return created user
-        pass
+        if not user_data.get('google_sub') or not user_data.get('email') or not user_data.get('first_name') or not user_data.get('last_name'):
+            raise ValueError("Missing required user fields")
+        if db.query(User).filter(User.email == user_data['email']).first():
+            raise ValueError("Email already in use")
+        new_user = User(
+            google_sub=user_data['google_sub'],
+            email=user_data['email'],
+            first_name=user_data['first_name'],
+            last_name=user_data['last_name'],
+            profile_url=user_data.get('profile_url'),
+            role=user_data.get('role', 'student')
+        )
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        return new_user
 
     @staticmethod
     def update_role(db: Session, user_id: int, new_role: UserRoleEnum) -> Optional[User]:
@@ -105,7 +130,13 @@ class UserRepository:
         # - Fetch user by ID
         # - Update role field
         # - Commit changes and return updated user
-        pass
+        User_instance = db.query(User).filter(User.id == user_id).first()
+        if User_instance:
+            User_instance.role = new_role
+            db.commit()
+            db.refresh(User_instance)
+            return User_instance
+        return None
 
     @staticmethod
     def update_score(db: Session, user_id: int, score_delta: int) -> Optional[User]:
@@ -124,7 +155,19 @@ class UserRepository:
         # - Fetch user by ID
         # - Update score field (ensure it doesn't exceed 2,000,000)
         # - Commit changes and return updated user
-        pass
+        User_instance = db.query(User).filter(User.id == user_id).first()
+        if User_instance:
+            new_score = User_instance.score + score_delta
+            if new_score < 0:
+                new_score = 0
+            elif new_score > 2000000:
+                new_score = 2000000
+            User_instance.score = new_score
+            db.commit()
+            db.refresh(User_instance)
+            return User_instance
+        return None
+    
 
     @staticmethod
     def update_profile(db: Session, user_id: int, profile_data: dict) -> Optional[User]:
@@ -147,7 +190,22 @@ class UserRepository:
         # - Fetch user by ID
         # - Update provided fields
         # - Commit changes and return updated user
-        pass
+        User_instance = db.query(User).filter(User.id == user_id).first()
+        if User_instance:
+            if 'email' in profile_data:
+                User_instance.email = profile_data['email']
+            if 'first_name' in profile_data:
+                User_instance.first_name = profile_data['first_name']
+            if 'last_name' in profile_data:
+                User_instance.last_name = profile_data['last_name']
+            if 'profile_url' in profile_data:
+                User_instance.profile_url = profile_data['profile_url']
+            if 'role' in profile_data:
+                User_instance.role = profile_data['role']
+            db.commit()
+            db.refresh(User_instance)
+            return User_instance
+        return None
 
     @staticmethod
     def get_all_by_role(db: Session, role: UserRoleEnum) -> list[User]:
@@ -162,4 +220,5 @@ class UserRepository:
             List of User objects with the specified role.
         """
         # TODO: Implement query to fetch all users by role
-        pass
+        return db.query(User).filter(User.role == role).all()
+        

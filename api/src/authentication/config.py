@@ -5,6 +5,7 @@ This module contains all configurable values for authentication behavior,
 making it easy to adjust settings without modifying business logic.
 """
 
+import os
 from datetime import timedelta
 
 # ============================================================================
@@ -26,8 +27,9 @@ REFRESH_TOKEN_EXPIRE_TIMEDELTA = timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
 # ============================================================================
 
 # Google OAuth Settings (to be filled in from environment variables)
-GOOGLE_OAUTH_CLIENT_ID = None  # TODO: Load from environment variable
-GOOGLE_OAUTH_CLIENT_SECRET = None  # TODO: Load from environment variable
+GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID")  # TODO: Load from environment variable
+GOOGLE_OAUTH_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")  # TODO: Load from environment variable
+GOOGLE_OAUTH_REDIRECT_URI = os.getenv("GOOGLE_OAUTH_REDIRECT_URI")  # TODO: Load from environment variable
 GOOGLE_OAUTH_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
 
 # ============================================================================
@@ -35,7 +37,7 @@ GOOGLE_OAUTH_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-con
 # ============================================================================
 
 # JWT Secret Key (should be loaded from environment in production)
-JWT_SECRET_KEY = None  # TODO: Load from environment variable
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")  # TODO: Load from environment variable
 JWT_ALGORITHM = "HS256"
 
 # Password/Token Hashing

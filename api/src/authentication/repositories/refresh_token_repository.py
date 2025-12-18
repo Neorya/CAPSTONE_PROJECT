@@ -34,7 +34,10 @@ class RefreshTokenRepository:
             RefreshToken object if found, None otherwise.
         """
         # TODO: Implement database query to fetch token by ID
-        pass
+        token = db.query(RefreshToken).filter(RefreshToken.id == token_id).first()
+        if token and token.is_valid():
+            return token
+        return None
 
     @staticmethod
     def get_by_token_hash(db: Session, token_hash: str) -> Optional[RefreshToken]:
@@ -49,7 +52,10 @@ class RefreshTokenRepository:
             RefreshToken object if found, None otherwise.
         """
         # TODO: Implement database query to fetch token by hash
-        pass
+        token = db.query(RefreshToken).filter(RefreshToken.token_hash == token_hash).first()
+        if token and token.is_valid():
+            return token
+        return None
 
     @staticmethod
     def create(db: Session, user_id: int, token_hash: str, expires_at: datetime) -> RefreshToken:
@@ -68,7 +74,16 @@ class RefreshTokenRepository:
         # TODO: Implement refresh token creation
         # - Create new RefreshToken record with provided data
         # - Commit to database and return created token
-        pass
+        new_token = RefreshToken(
+            user_id=user_id,
+            token_hash=token_hash,
+            expires_at=expires_at,
+            created_at=datetime.utcnow()
+        )
+        db.add(new_token)
+        db.commit()
+        db.refresh(new_token)
+        return new_token
 
     @staticmethod
     def revoke(db: Session, token_id: int) -> Optional[RefreshToken]:
@@ -86,7 +101,13 @@ class RefreshTokenRepository:
         # - Fetch token by ID
         # - Set revoked_at to current timestamp
         # - Commit changes and return updated token
-        pass
+        token = db.query(RefreshToken).filter(RefreshToken.id == token_id).first()
+        if token:
+            token.revoked_at = datetime.utcnow()
+            db.commit()
+            db.refresh(token)
+            return token
+        return None
 
     @staticmethod
     def revoke_by_hash(db: Session, token_hash: str) -> Optional[RefreshToken]:
@@ -104,7 +125,14 @@ class RefreshTokenRepository:
         # - Fetch token by hash
         # - Set revoked_at to current timestamp
         # - Commit changes and return updated token
-        pass
+
+        token = db.query(RefreshToken).filter(RefreshToken.token_hash == token_hash).first()
+        if token:
+            token.revoked_at = datetime.utcnow()
+            db.commit()
+            db.refresh(token)
+            return token
+        return None
 
     @staticmethod
     def revoke_all_for_user(db: Session, user_id: int) -> int:
@@ -122,7 +150,16 @@ class RefreshTokenRepository:
         # - Find all non-revoked tokens for the user
         # - Set revoked_at to current timestamp for all
         # - Commit changes and return count of revoked tokens
-        pass
+        count = 0
+
+        tokens = db.query(RefreshToken).filter(RefreshToken.user_id == user_id).all()
+        for token in tokens:
+            if token.revoked_at is None: #token.is_valid() could be used as well
+                token.revoked_at = datetime.utcnow()
+                count += 1
+        db.commit()
+        
+        return count
 
     @staticmethod
     def is_valid(db: Session, token_hash: str) -> bool:
@@ -141,7 +178,11 @@ class RefreshTokenRepository:
         # - Check if revoked_at is null
         # - Check if expires_at > now
         # - Return True if both conditions met, False otherwise
-        pass
+        token = db.query(RefreshToken).filter(RefreshToken.token_hash == token_hash).first()
+        if token:
+            return token.revoked_at is None and token.expires_at > datetime.utcnow()
+        return False
+    
 
     @staticmethod
     def get_valid_for_user(db: Session, user_id: int) -> list[RefreshToken]:
@@ -157,7 +198,12 @@ class RefreshTokenRepository:
         """
         # TODO: Implement query for valid tokens
         # - Query all tokens for user where revoked_at is null and expires_at > now
-        pass
+        Alltokens = db.query(RefreshToken).filter(RefreshToken.user_id == user_id).all()
+        valid_tokens = []
+        for token in Alltokens:
+            if token.is_valid():
+                valid_tokens.append(token)
+        return valid_tokens
 
     @staticmethod
     def cleanup_expired(db: Session) -> int:
@@ -176,7 +222,13 @@ class RefreshTokenRepository:
         # - Delete or update tokens where expires_at <= now
         # - Can be called by a background job
         # - Return count of affected tokens
-        pass
+
+        expired_tokens = db.query(RefreshToken).filter(RefreshToken.expires_at <= datetime.utcnow()).all()
+        count = len(expired_tokens)
+        for token in expired_tokens:
+            db.delete(token)
+        db.commit()
+        return count
 
     @staticmethod
     def get_by_user_id(db: Session, user_id: int) -> list[RefreshToken]:
@@ -191,4 +243,4 @@ class RefreshTokenRepository:
             List of all RefreshToken objects for the user.
         """
         # TODO: Implement query to fetch all tokens for a user
-        pass
+        return db.query(RefreshToken).filter(RefreshToken.user_id == user_id).all()
