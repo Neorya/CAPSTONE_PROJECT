@@ -174,17 +174,6 @@ const GameSessionList = () => {
             pagination={PAGINATION_CONFIG}
             className="session-table"
             loading={loading && sessions.length > 0}
-            onRow={(record) => ({
-              onClick: () => {
-                if (record.is_active) {
-                  navigate(`/pre-start-game-session/${record.game_id}`);
-                } else {
-                  message.info('This session is inactive ');
-                }
-              },
-              style: { cursor: record.is_active ? 'pointer' : 'not-allowed' },
-              className: record.is_active ? 'clickable-row' : 'disabled-row',
-            })}
           />
         )}
 
