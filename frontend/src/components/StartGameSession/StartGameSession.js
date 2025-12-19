@@ -30,7 +30,7 @@ const StartGameSession = () => {
                             <Button 
                                 id="back-to-home-button"
                                 icon={<ArrowLeftOutlined />} 
-                                onClick={() => navigate('/')}
+                                onClick={() => navigate('/home')}
                                 shape="circle"
                                 size="large"
                                 className="back-button"
