@@ -12,7 +12,7 @@ const HomePage = () => {
   return (
     <div className="home-container">
       <Card className="home-card">
-        <Title level={2}>Welcome to Match Management System</Title>
+        <Title level={2}>Welcome to Codify</Title>
         <Paragraph>
           Select an option below to get started with creating and managing your
           matches.

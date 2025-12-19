@@ -1,38 +1,82 @@
-import React, { Component } from 'react';
-import { Card, Typography, Button } from "antd";
-import { GoogleOutlined } from '@ant-design/icons';
+import React, { useState } from 'react';
+import { Card, Typography, Button, Alert, Divider, Space } from "antd";
+import { GoogleOutlined, WarningOutlined, FireOutlined } from '@ant-design/icons';
+import { API_BASE_URL } from '../../services/config';
+import { enableDevMode } from '../../services/authService';
 import "./Login.css";
 
+const { Title, Paragraph } = Typography;
 
-const { Title } = Typography;
+const Login = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const showDevButton = process.env.NODE_ENV === 'development';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
-
-class Login extends Component {
-
-  handleLogin = () => {
+  const handleLogin = () => {
+    setIsLoading(true);
     window.location.href = `${API_BASE_URL}/auth/initiate`;
   };
 
-  render() {
-    return (
-      <div className="login-container">
-        <Card className="login-card">
-          <Title level={2}>Login into the App</Title>
+  const handleSkipLogin = () => {
+    setIsLoading(true);
+    enableDevMode();
+    window.location.href = '/';
+  };
+
+  return (
+    <div className="login-container">
+      <Card className="login-card">
+        <div className="login-header">
+          <div className="login-logo">
+            <FireOutlined className="logo-icon" />
+          </div>
+          <Title level={2} className="login-title">
+            Codify
+          </Title>
+          <Paragraph className="login-subtitle">
+            Gamified coding platform
+          </Paragraph>
+        </div>
+
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
           <Button
             type="default"
             icon={<GoogleOutlined />}
             size="large"
-            onClick={this.handleLogin}
+            onClick={handleLogin}
             block
-            style={{ marginTop: 20 }}
+            loading={isLoading}
+            className="google-signin-button"
           >
-            Sign in with Google
+            {isLoading ? 'Signing in...' : 'Sign in with Google'}
           </Button>
-        </Card>
-      </div>
-    );
-  }
-}
+
+          {showDevButton && (
+            <div className="dev-mode-section">
+              <Divider>Development Mode</Divider>
+              <Alert
+                message="Development Mode Active"
+                description="Skip login is only available during development"
+                type="warning"
+                icon={<WarningOutlined />}
+                showIcon
+                style={{ marginBottom: 12 }}
+              />
+              <Button
+                type="ghost"
+                size="large"
+                onClick={handleSkipLogin}
+                block
+                loading={isLoading}
+                danger
+              >
+                Skip Login (Dev Only)
+              </Button>
+            </div>
+          )}
+        </Space>
+      </Card>
+    </div>
+  );
+};
 
 export default Login;
