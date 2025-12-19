@@ -104,7 +104,7 @@ CREATE TABLE capstone_app.game_session (
     duration_phase1 INTEGER NOT NULL,-- in minutes
     duration_phase2 INTEGER NOT NULL, -- in minutes
     creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id) NOT NULL,
-    is_active BOOLEAN NOT NULL DEFAULT FALSE
+    is_active BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 
@@ -430,4 +430,5 @@ VALUES
 (8, 5, NULL),
 (9, 5, NULL),
 (10, 5, NULL);
+
 
