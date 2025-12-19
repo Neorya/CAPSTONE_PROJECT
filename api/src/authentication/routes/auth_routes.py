@@ -11,6 +11,7 @@ Handles:
 import logging
 import os
 from datetime import timedelta
+import httpx
 from authentication.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from fastapi.responses import JSONResponse
@@ -26,7 +27,8 @@ from authentication.exceptions import (
     UserNotFoundError,
     OAuthProviderError,
     DatabaseError,
-    AuthenticationError
+    AuthenticationError,
+    ConfigurationError
 )
 from database import get_db
 
@@ -45,15 +47,21 @@ from authentication.config import (
 )
 
 oauth = OAuth()
-oauth.register(
-    name='google',
-    client_id=GOOGLE_OAUTH_CLIENT_ID,
-    client_secret=GOOGLE_OAUTH_CLIENT_SECRET,
-    server_metadata_url=GOOGLE_OAUTH_DISCOVERY_URL,
-    client_kwargs={
-        'scope': 'openid email profile'
-    }
-)
+
+# Register OAuth client only if configuration is available
+# This prevents errors during module import if env vars are not set
+if GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET and GOOGLE_OAUTH_REDIRECT_URI:
+    oauth.register(
+        name='google',
+        client_id=GOOGLE_OAUTH_CLIENT_ID,
+        client_secret=GOOGLE_OAUTH_CLIENT_SECRET,
+        server_metadata_url=GOOGLE_OAUTH_DISCOVERY_URL,
+        client_kwargs={
+            'scope': 'openid email profile'
+        }
+    )
+else:
+    logger.warning("Google OAuth client not registered - missing configuration")
 
 
 @router.get(
@@ -67,8 +75,53 @@ async def initiate_oauth(request: Request):
     Initiate Google OAuth flow.
     Redirects user to Google's authorization page.
     """
-    redirect_uri = GOOGLE_OAUTH_REDIRECT_URI
-    return await oauth.google.authorize_redirect(request, redirect_uri)
+    try:
+        # Validate OAuth configuration before proceeding
+        if not GOOGLE_OAUTH_CLIENT_ID:
+            logger.error("GOOGLE_OAUTH_CLIENT_ID is not set")
+            raise ConfigurationError("Google OAuth client ID is not configured")
+        if not GOOGLE_OAUTH_CLIENT_SECRET:
+            logger.error("GOOGLE_OAUTH_CLIENT_SECRET is not set")
+            raise ConfigurationError("Google OAuth client secret is not configured")
+        if not GOOGLE_OAUTH_REDIRECT_URI:
+            logger.error("GOOGLE_OAUTH_REDIRECT_URI is not set")
+            raise ConfigurationError("Google OAuth redirect URI is not configured")
+        
+        redirect_uri = GOOGLE_OAUTH_REDIRECT_URI
+        
+        # Try to access the OAuth client (will raise AttributeError if not registered)
+        try:
+            google_client = oauth.google
+        except AttributeError:
+            logger.error("Google OAuth client is not registered")
+            raise ConfigurationError("Google OAuth client is not properly configured")
+        
+        return await google_client.authorize_redirect(request, redirect_uri)
+    
+    except ConfigurationError as e:
+        logger.error(f"Configuration error during OAuth initiation: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="OAuth configuration error. Please contact the administrator."
+        )
+    except (httpx.ConnectError, httpx.TimeoutException, httpx.NetworkError) as e:
+        logger.error(f"Network error connecting to OAuth provider: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Unable to connect to authentication service. Please check your network connection and try again."
+        )
+    except OAuthProviderError as e:
+        logger.error(f"OAuth provider error during initiation: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Authentication service error. Please try again later."
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error during OAuth initiation: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to initiate OAuth flow. Please try again later."
+        )
 
 
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -106,7 +159,7 @@ async def google_oauth_callback(
         # Prepare redirect to frontend
         # Pass access_token in URL fragment or query param so frontend can read it
         # Fragment is safer as it's not sent to server on reload, but query param is standard for this flow
-        redirect_url = f"{SERVER_URL}/home?access_token={access_token}"
+        redirect_url = f"{SERVER_URL}/?access_token={access_token}"
         response = RedirectResponse(url=redirect_url)
 
         # Set refresh token in httpOnly cookie

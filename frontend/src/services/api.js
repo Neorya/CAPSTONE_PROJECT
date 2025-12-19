@@ -80,7 +80,7 @@ export const apiFetch = async (url, options = {}) => {
             } catch (error) {
                 processQueue(error, null);
                 localStorage.removeItem("token");
-                window.location.href = "/";
+                window.location.href = "/login";
                 return Promise.reject(error);
             } finally {
                 isRefreshing = false;
