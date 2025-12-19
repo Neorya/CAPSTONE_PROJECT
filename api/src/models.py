@@ -139,7 +139,7 @@ class GameSession(Base):
     start_date = Column(DateTime, nullable=False)
     creator_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.teacher.teacher_id"))
     creator = relationship("Teacher", back_populates="game_sessions")
-    is_active = Column(Boolean, default=False, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
     duration_phase1 = Column(Integer, nullable=False)
     duration_phase2 = Column(Integer, nullable=False)
 
