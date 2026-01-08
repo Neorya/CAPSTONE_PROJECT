@@ -11,6 +11,7 @@ import { PreStartGameSession } from './components/PreStartGameSession';
 import { Login } from './components/Login';
 import { JoinGameSession } from './components/JoinGameSession';
 import { Lobby } from './components/Lobby';
+import AlgorithmMatchPhaseOne from './components/PhaseOne/AlgorithmMatchPhaseOne';
 import './App.css';
 import { useEffect } from 'react';
 
@@ -49,6 +50,7 @@ function App() {
             <Route path="/pre-start-game-session/:id" element={<PreStartGameSession />} />
             <Route path="/join-game-session" element={<JoinGameSession />} />
             <Route path="/lobby" element={<Lobby />} />
+            <Route path="/phase1" element={<AlgorithmMatchPhaseOne />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
