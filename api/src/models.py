@@ -69,12 +69,12 @@ class Test(Base):
     __table_args__ = {'schema': SCHEMA_NAME}
 
     test_id = Column(Integer, primary_key=True)
-    test = Column(String(500), nullable=True) # Corresponds to VARCHAR(500)
+    test_in = Column(String(500), nullable=True)
+    test_out = Column(String(500), nullable=True)
     scope = Column(Enum(TestScope), nullable=False)
     match_set_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.match_setting.match_set_id"), nullable=False)
 
     match_setting = relationship("MatchSetting", back_populates="tests")
-
 
 class Match(Base):
     """
@@ -136,14 +136,7 @@ class StudentJoinGame(Base):
     assigned_match_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.match.match_id"), nullable=True)
 
 
-class MatchJoinGame(Base):
-    __tablename__ = "match_for_game"
-    __table_args__ = {'schema': SCHEMA_NAME}
 
-    match_for_game_id = Column(Integer, primary_key=True)
-    match_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.match.match_id"))
-    game_id  = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.game_session.game_id"))
-    
 
 class GameStatusEnum(enum.Enum):
     active = "active"
