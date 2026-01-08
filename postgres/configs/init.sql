@@ -68,11 +68,23 @@ CREATE TABLE capstone_app.match_setting (
     title VARCHAR(150) NOT NULL UNIQUE,
     description TEXT NOT NULL,
     is_ready BOOLEAN NOT NULL DEFAULT FALSE,
-    public_test VARCHAR(500),
-    private_test VARCHAR(500),
     reference_solution VARCHAR(1000), -- this is the code solution
     
     creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id)
+);
+
+
+
+CREATE TYPE test_scope AS ENUM ('private', 'public');
+
+DROP TABLE IF EXISTS capstone_app.tests;
+
+CREATE TABLE capstone_app.tests (
+    test_id SERIAL PRIMARY KEY,
+    test VARCHAR(500),
+    scope test_scope NOT NULL,
+  
+    match_set_id INTEGER REFERENCES capstone_app.match_setting(match_set_id) NOT NULL
 );
 
 
@@ -122,7 +134,6 @@ CREATE TABLE capstone_app.matches_for_game (
 );
 
 
-
 -- The creation of students table: (User Story 5)
 
 DROP TABLE IF EXISTS capstone_app.student;
@@ -136,6 +147,29 @@ CREATE TABLE capstone_app.student (
   -- login_fk    INTEGER REFERENCES capstone_app.login(login_id) NOT NULL,
   CONSTRAINT check_max_score CHECK (score <= 2000000)
 -- login_id INTEGER REFERENCES capstone_app.login(login_id)
+);
+
+DROP TABLE IF EXISTS capstone_app.student_tests;
+
+CREATE TABLE capstone_app.student_tests (
+    test_id SERIAL PRIMARY KEY,
+    test VARCHAR(500),
+
+    match_for_game_id INTEGER REFERENCES capstone_app.matches_for_game(match_for_game_id) NOT NULL,
+    student_id INTEGER REFERENCES capstone_app.student(student_id) NOT NULL
+
+);
+
+DROP TABLE IF EXISTS capstone_app.student_solutions;
+
+CREATE TABLE capstone_app.student_solutions (
+    solution_id SERIAL PRIMARY KEY,
+    code TEXT NOT NULL,
+    has_passed BOOLEAN NOT NULL DEFAULT FALSE,
+
+    match_for_game_id INTEGER REFERENCES capstone_app.matches_for_game(match_for_game_id) NOT NULL,
+    student_id INTEGER REFERENCES capstone_app.student(student_id) NOT NULL
+
 );
 
 
@@ -233,35 +267,88 @@ VALUES ('Paolo', 'Gialli', 'p.gialli@capstone.it');
 -- ######################################
 
 -- Match Settings created by Teacher 1 (ID 1)
-INSERT INTO capstone_app.match_setting (title, description, is_ready, public_test, private_test, reference_solution, creator_id)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('Standard Mode 1', 'Quick match, 5 rounds.', TRUE, 'Input: 5, Output: 25', 'Input: 10, Output: 100', 'def square(n): return n * n', 1),
-('Advanced Algebra', '15-round math challenge.', TRUE, 'Input: x=3 y=4, Output: 7', 'Input: x=7 y=9, Output: 16', 'def add(x, y): return x + y', 1);
+('Standard Mode 1', 'Quick match, 5 rounds.', TRUE, 'def square(n): return n * n', 1),
+('Advanced Algebra', '15-round math challenge.', TRUE, 'def add(x, y): return x + y', 1);
 
 -- Match Settings created by Teacher 2 (ID 2)
-INSERT INTO capstone_app.match_setting (title, description, is_ready, public_test, private_test, reference_solution, creator_id)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('History Facts', 'Review of Roman Empire history.', FALSE, 'Input: Julius Caesar, Output: 44 BC', 'Input: Augustus, Output: 27 BC', 'history = {"Julius Caesar": "44 BC", "Augustus": "27 BC"}', 2),
-('Geography Quiz', 'Quiz on European capitals.', TRUE, 'Input: France, Output: Paris', 'Input: Germany, Output: Berlin', 'capitals = {"France": "Paris", "Germany": "Berlin"}', 2);
+('History Facts', 'Review of Roman Empire history.', FALSE, 'history = {"Julius Caesar": "44 BC", "Augustus": "27 BC"}', 2),
+('Geography Quiz', 'Quiz on European capitals.', TRUE, 'capitals = {"France": "Paris", "Germany": "Berlin"}', 2);
 
 -- Match Settings created by Teacher 3 (ID 3)
-INSERT INTO capstone_app.match_setting (title, description, is_ready, public_test, private_test, reference_solution, creator_id)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('Science Fundamentals', 'Basics of Physics.', TRUE, 'Input: mass=10kg acceleration=2m/s², Output: Force=20N', 'Input: mass=5kg acceleration=9.8m/s², Output: Force=49N', 'def calculate_force(mass, acceleration): return mass * acceleration', 3),
-('Chemistry Equations', 'Balancing basic equations.', FALSE, 'Input: H2+O2, Output: 2H2O', 'Input: C+O2, Output: CO2', 'def balance_equation(reactants): return "2H2O" if "H2+O2" in reactants else "CO2"', 3);
+('Science Fundamentals', 'Basics of Physics.', TRUE, 'def calculate_force(mass, acceleration): return mass * acceleration', 3),
+('Chemistry Equations', 'Balancing basic equations.', FALSE, 'def balance_equation(reactants): return "2H2O" if "H2+O2" in reactants else "CO2"', 3);
 
 -- Match Settings created by Teacher 4 (ID 4)
-INSERT INTO capstone_app.match_setting (title, description, is_ready, public_test, private_test, reference_solution, creator_id)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('Literature Review 1', '19th Century English novels.', TRUE, 'Input: Pride and Prejudice, Output: Jane Austen', 'Input: Wuthering Heights, Output: Emily Brontë', 'authors = {"Pride and Prejudice": "Jane Austen", "Wuthering Heights": "Emily Brontë"}', 4),
-('Grammar Practice', 'Advanced Italian grammar.', TRUE, 'Input: io mangio, Output: presente indicativo', 'Input: io ho mangiato, Output: passato prossimo', 'def get_tense(verb): return "presente indicativo" if "mangio" in verb else "passato prossimo"', 4);
+('Literature Review 1', '19th Century English novels.', TRUE, 'authors = {"Pride and Prejudice": "Jane Austen", "Wuthering Heights": "Emily Brontë"}', 4),
+('Grammar Practice', 'Advanced Italian grammar.', TRUE, 'def get_tense(verb): return "presente indicativo" if "mangio" in verb else "passato prossimo"', 4);
 
 -- Match Settings created by Teacher 5 (ID 5)
-INSERT INTO capstone_app.match_setting (title, description, is_ready, public_test, private_test, reference_solution, creator_id)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('Coding Basics', 'Introduction to Python syntax.', TRUE, 'Input: 1 2 3, Output: 6', 'Input: 5 10 15, Output: 30', 'def sum_numbers(*args): return sum(args)', 5),
-('Data Structures Review', 'Review of linked lists and trees.', FALSE, 'Input: 1 2 3, Output: Linked List', 'Input: 4 5 6, Output: Binary Tree', 'class Node: def __init__(self, data): self.data = data; self.next = None', 5);
+('Coding Basics', 'Introduction to Python syntax.', TRUE, 'def sum_numbers(*args): return sum(args)', 5),
+('Data Structures Review', 'Review of linked lists and trees.', FALSE, 'class Node: def __init__(self, data): self.data = data; self.next = None', 5);
 
+-- ######################################
+-- INSERT DATA INTO TESTS TABLE (Derived from old match_setting fields)
+-- ######################################
+
+-- Match Setting 1
+INSERT INTO capstone_app.tests (test, scope, match_set_id) VALUES
+('Input: 5, Output: 25', 'public', 1),
+('Input: 10, Output: 100', 'private', 1);
+
+-- Match Setting 2
+INSERT INTO capstone_app.tests (test, scope, match_set_id) VALUES
+('Input: x=3 y=4, Output: 7', 'public', 2),
+('Input: x=7 y=9, Output: 16', 'private', 2);
+
+-- Match Setting 3
+INSERT INTO capstone_app.tests (test, scope, match_set_id) VALUES
+('Input: Julius Caesar, Output: 44 BC', 'public', 3),
+('Input: Augustus, Output: 27 BC', 'private', 3);
+
+-- Match Setting 4
+INSERT INTO capstone_app.tests (test, scope, match_set_id) VALUES
+('Input: France, Output: Paris', 'public', 4),
+('Input: Germany, Output: Berlin', 'private', 4);
+
+-- Match Setting 5
+INSERT INTO capstone_app.tests (test, scope, match_set_id) VALUES
+('Input: mass=10kg acceleration=2m/s², Output: Force=20N', 'public', 5),
+('Input: mass=5kg acceleration=9.8m/s², Output: Force=49N', 'private', 5);
+
+-- Match Setting 6
+INSERT INTO capstone_app.tests (test, scope, match_set_id) VALUES
+('Input: H2+O2, Output: 2H2O', 'public', 6),
+('Input: C+O2, Output: CO2', 'private', 6);
+
+-- Match Setting 7
+INSERT INTO capstone_app.tests (test, scope, match_set_id) VALUES
+('Input: Pride and Prejudice, Output: Jane Austen', 'public', 7),
+('Input: Wuthering Heights, Output: Emily Brontë', 'private', 7);
+
+-- Match Setting 8
+INSERT INTO capstone_app.tests (test, scope, match_set_id) VALUES
+('Input: io mangio, Output: presente indicativo', 'public', 8),
+('Input: io ho mangiato, Output: passato prossimo', 'private', 8);
+
+-- Match Setting 9
+INSERT INTO capstone_app.tests (test, scope, match_set_id) VALUES
+('Input: 1 2 3, Output: 6', 'public', 9),
+('Input: 5 10 15, Output: 30', 'private', 9);
+
+-- Match Setting 10
+INSERT INTO capstone_app.tests (test, scope, match_set_id) VALUES
+('Input: 1 2 3, Output: Linked List', 'public', 10),
+('Input: 4 5 6, Output: Binary Tree', 'private', 10);
 
 
 -- The Creation of Populate script for the Match table (User story 2)
@@ -430,5 +517,40 @@ VALUES
 (8, 5, NULL),
 (9, 5, NULL),
 (10, 5, NULL);
+
+
+-- ######################################
+-- INSERT DATA INTO STUDENT_TESTS TABLE (Example Data)
+-- ######################################
+
+-- Student 1 (Alice) tests for Match_For_Game 1 (Match 1 in Game 1)
+INSERT INTO capstone_app.student_tests (test, match_for_game_id, student_id) VALUES
+('assert square(2) == 4', 1, 1),
+('assert square(3) == 9', 1, 1);
+
+-- Student 2 (Bob) tests for Match_For_Game 1
+INSERT INTO capstone_app.student_tests (test, match_for_game_id, student_id) VALUES
+('assert square(-1) == 1', 1, 2);
+
+-- Student 3 (Charlie) tests for Match_For_Game 5 (Match 5 in Game 3)
+INSERT INTO capstone_app.student_tests (test, match_for_game_id, student_id) VALUES
+('Input: mass=1, acc=1, Output: 1', 5, 3);
+
+
+-- ######################################
+-- INSERT DATA INTO STUDENT_SOLUTIONS TABLE (Example Data)
+-- ######################################
+
+-- Student 1 (Alice) submits a correct solution for Match_For_Game 1
+INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
+('def square(n): return n * n', TRUE, 1, 1);
+
+-- Student 2 (Bob) submits an incorrect solution for Match_For_Game 1
+INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
+('def square(n): return n + n', FALSE, 1, 2);
+
+-- Student 3 (Charlie) submits a correct solution for Match_For_Game 5
+INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
+('def calculate_force(m, a): return m * a', TRUE, 5, 3);
 
 

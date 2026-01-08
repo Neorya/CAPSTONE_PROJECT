@@ -7,6 +7,10 @@ const { Title } = Typography;
 const MatchSettingDetailsPopup = ({ visible, onClose, matchSetting }) => {
   if (!matchSetting) return null;
 
+  // Filter tests by scope
+  const publicTests = matchSetting.tests?.filter(t => t.scope === 'public') || [];
+  const privateTests = matchSetting.tests?.filter(t => t.scope === 'private') || [];
+
   const parseTestString = (testString) => {
     if (!testString) return null;
     // Try to match "Input: ..., Output: ..." pattern
@@ -14,16 +18,13 @@ const MatchSettingDetailsPopup = ({ visible, onClose, matchSetting }) => {
     if (match) {
       return { input: match[1], output: match[2] };
     }
-    return null;
+    return { input: testString, output: "N/A" }; // Fallback
   };
-
-  const publicTest = parseTestString(matchSetting.public_test);
-  const privateTest = parseTestString(matchSetting.private_test);
 
   return (
     <Modal
       id="match-details-modal"
-      title={<Title level={3} id="popup-header-title"style={{ margin: 0 }}>{matchSetting.name}</Title>}
+      title={<Title level={3} id="popup-header-title" style={{ margin: 0 }}>{matchSetting.name}</Title>}
       open={visible}
       onCancel={onClose}
       footer={null}
@@ -32,7 +33,7 @@ const MatchSettingDetailsPopup = ({ visible, onClose, matchSetting }) => {
     >
       <div className="popup-content">
         <div className="status-section">
-          <Tag 
+          <Tag
             id="popup-status-tag"
             color={matchSetting.status === 'Ready' ? 'success' : 'default'}
           >
@@ -50,26 +51,29 @@ const MatchSettingDetailsPopup = ({ visible, onClose, matchSetting }) => {
 
         <Descriptions title="Reference Solution" bordered column={1} id="popup-reference-solution-table" style={{ marginTop: '20px' }}>
           <Descriptions.Item label="Code">
-             <pre id="popup-reference-solution-text" style={{ maxHeight: '200px', overflow: 'auto', margin: 0 }}>
-               {matchSetting.reference_solution || <span style={{ color: '#999' }}>No reference solution provided</span>}
-             </pre>
+            <pre id="popup-reference-solution-text" style={{ maxHeight: '200px', overflow: 'auto', margin: 0 }}>
+              {matchSetting.reference_solution || <span style={{ color: '#999' }}>No reference solution provided</span>}
+            </pre>
           </Descriptions.Item>
         </Descriptions>
 
         <div className="tests-section">
           <Title level={4}>Public Tests</Title>
-          {publicTest ? (
+          {publicTests.length > 0 ? (
             <List
               grid={{ gutter: 16, column: 1 }}
-              dataSource={[publicTest]}
-              renderItem={(item, index) => (
-                <List.Item>
-                  <Card size="small" title={`Test Case ${index + 1}`} id={`public-test-card-${index}`}>
-                    <p><strong>Input:</strong> <span id={`public-test-${index}-input`}>{item.input}</span></p>
-                    <p><strong>Output:</strong> <span id={`public-test-${index}-output`}>{item.output}</span></p>
-                  </Card>
-                </List.Item>
-              )}
+              dataSource={publicTests}
+              renderItem={(item, index) => {
+                const parsed = parseTestString(item.test);
+                return (
+                  <List.Item>
+                    <Card size="small" title={`Test Case ${index + 1}`} id={`public-test-card-${index}`}>
+                      <p><strong>Input:</strong> <span id={`public-test-${index}-input`}>{parsed?.input}</span></p>
+                      <p><strong>Output:</strong> <span id={`public-test-${index}-output`}>{parsed?.output}</span></p>
+                    </Card>
+                  </List.Item>
+                );
+              }}
             />
           ) : (
             <Empty description="No public tests available" />
@@ -78,18 +82,21 @@ const MatchSettingDetailsPopup = ({ visible, onClose, matchSetting }) => {
 
         <div className="tests-section">
           <Title level={4}>Private Tests</Title>
-          {privateTest ? (
+          {privateTests.length > 0 ? (
             <List
               grid={{ gutter: 16, column: 1 }}
-              dataSource={[privateTest]}
-              renderItem={(item, index) => (
-                <List.Item>
-                  <Card size="small" title={`Test Case ${index + 1}`}>
-                    <p><strong>Input:</strong> {item.input}</p>
-                    <p><strong>Output:</strong> {item.output}</p>
-                  </Card>
-                </List.Item>
-              )}
+              dataSource={privateTests}
+              renderItem={(item, index) => {
+                const parsed = parseTestString(item.test);
+                return (
+                  <List.Item>
+                    <Card size="small" title={`Test Case ${index + 1}`}>
+                      <p><strong>Input:</strong> {parsed?.input}</p>
+                      <p><strong>Output:</strong> {parsed?.output}</p>
+                    </Card>
+                  </List.Item>
+                );
+              }}
             />
           ) : (
             <Empty description="No private tests available" />

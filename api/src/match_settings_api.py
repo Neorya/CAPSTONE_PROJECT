@@ -10,10 +10,19 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from database import get_db
-from models import MatchSetting
+from models import MatchSetting, TestScope
 
 
 # Pydantic Models
+
+
+class TestItemSchema(BaseModel):
+    test_id: int
+    test: str
+    scope: TestScope
+
+    class Config:
+        from_attributes = True
 
 
 class MatchSettingResponse(BaseModel):
@@ -25,10 +34,9 @@ class MatchSettingResponse(BaseModel):
         title: Name/title of the match setting
         description: Detailed description of the match setting
         is_ready: Readiness status (True = ready, False = draft)
-        public_test: The public tests (input and expected output)
-        private_test: The private tests (input and expected output)
         reference_solution: The reference solution code
         creator_id: ID of the teacher who created this setting
+        tests: List of tests associated with the match setting
     """
 
     match_set_id: int = Field(
@@ -37,12 +45,11 @@ class MatchSettingResponse(BaseModel):
     title: str = Field(..., description="Title of the match setting")
     description: str = Field(..., description="Detailed description")
     is_ready: bool = Field(..., description="Readiness status: true=ready, false=draft")
-    public_test: str = Field(..., description="Public tests (input and expected output)")
-    private_test: str = Field(..., description="Private tests (input and expected output)")
     reference_solution: str = Field(..., description="Reference solution code")
     creator_id: int = Field(
         ..., description="ID of the teacher who created this setting"
     )
+    tests: List[TestItemSchema] = Field(..., description="List of tests")
 
 
 # Router

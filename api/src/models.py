@@ -9,12 +9,17 @@ from typing import List
 
 from pydantic import BaseModel, Field
 from sqlalchemy import Boolean, Column, Integer, String, Text, ForeignKey, Enum, DateTime
+from sqlalchemy.dialects.postgresql import ENUM as PG_ENUM
 from sqlalchemy.orm import relationship
 
 from database import Base
 
 # Note: The 'capstone_app' schema is specified here
 SCHEMA_NAME = "capstone_app"
+
+class TestScope(enum.Enum):
+    private = "private"
+    public = "public"
 
 class Teacher(Base):
     """
@@ -47,14 +52,28 @@ class MatchSetting(Base):
     title = Column(String(150), nullable=False, unique=True)
     description = Column(Text, nullable=False)
     is_ready = Column(Boolean, nullable=False, default=False)
-    public_test = Column(Text, nullable=False)
-    private_test = Column(Text, nullable=False)
     reference_solution = Column(Text, nullable=False)
     creator_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.teacher.teacher_id"))
     
     # Relationship: This setting belongs to one teacher
     creator = relationship("Teacher", back_populates="match_settings")
     matches = relationship("Match", back_populates="match_setting")
+    tests = relationship("Test", back_populates="match_setting", cascade="all, delete-orphan")
+
+
+class Test(Base):
+    """
+    SQLAlchemy model for the 'tests' table.
+    """
+    __tablename__ = "tests"
+    __table_args__ = {'schema': SCHEMA_NAME}
+
+    test_id = Column(Integer, primary_key=True)
+    test = Column(String(500), nullable=True) # Corresponds to VARCHAR(500)
+    scope = Column(Enum(TestScope), nullable=False)
+    match_set_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.match_setting.match_set_id"), nullable=False)
+
+    match_setting = relationship("MatchSetting", back_populates="tests")
 
 
 class Match(Base):
