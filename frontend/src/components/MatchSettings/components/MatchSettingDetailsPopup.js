@@ -64,12 +64,11 @@ const MatchSettingDetailsPopup = ({ visible, onClose, matchSetting }) => {
               grid={{ gutter: 16, column: 1 }}
               dataSource={publicTests}
               renderItem={(item, index) => {
-                const parsed = parseTestString(item.test);
                 return (
                   <List.Item>
                     <Card size="small" title={`Test Case ${index + 1}`} id={`public-test-card-${index}`}>
-                      <p><strong>Input:</strong> <span id={`public-test-${index}-input`}>{parsed?.input}</span></p>
-                      <p><strong>Output:</strong> <span id={`public-test-${index}-output`}>{parsed?.output}</span></p>
+                      <p><strong>Input:</strong> <span id={`public-test-${index}-input`}>{item.test_in}</span></p>
+                      <p><strong>Output:</strong> <span id={`public-test-${index}-output`}>{item.test_out}</span></p>
                     </Card>
                   </List.Item>
                 );
@@ -87,12 +86,11 @@ const MatchSettingDetailsPopup = ({ visible, onClose, matchSetting }) => {
               grid={{ gutter: 16, column: 1 }}
               dataSource={privateTests}
               renderItem={(item, index) => {
-                const parsed = parseTestString(item.test);
                 return (
                   <List.Item>
                     <Card size="small" title={`Test Case ${index + 1}`}>
-                      <p><strong>Input:</strong> {parsed?.input}</p>
-                      <p><strong>Output:</strong> {parsed?.output}</p>
+                      <p><strong>Input:</strong> {item.test_in}</p>
+                      <p><strong>Output:</strong> {item.test_out}</p>
                     </Card>
                   </List.Item>
                 );
