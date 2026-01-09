@@ -168,7 +168,7 @@ CREATE TABLE capstone_app.student_solutions (
     solution_id SERIAL PRIMARY KEY,
     code TEXT NOT NULL,
     has_passed BOOLEAN NOT NULL DEFAULT FALSE,
-
+    passed_test INTEGER DEFAULT 0,
     match_for_game_id INTEGER REFERENCES capstone_app.matches_for_game(match_for_game_id) NOT NULL,
     student_id INTEGER REFERENCES capstone_app.student(student_id) NOT NULL
 
