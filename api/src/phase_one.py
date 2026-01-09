@@ -15,6 +15,7 @@ from models import (
     StudentSolution,
 )
 from authentication.routes.auth_routes import get_current_user
+from code_runner import compile_cpp, run_cpp_executable
 
 router = APIRouter(prefix="/api/phase-one", tags=["phase-one"])
 
@@ -60,6 +61,28 @@ class SubmitSolutionRequest(BaseModel):
 class SubmitSolutionResponse(BaseModel):
     solution_id: int
     message: str
+
+class TestResultDetail(BaseModel):
+    test_id: int
+    status: str # "pass", "fail", "timeout", "runtime_error"
+    message: str
+    actual_output: Optional[str] = None
+
+class SubmitSolutionResponse(BaseModel):
+    solution_id: Optional[int] = None
+    message: str
+    compiled: bool
+    test_results: List[TestResultDetail] = []
+
+class CustomTestRequest(BaseModel):
+    student_id: int
+    game_id: int
+    code: str = Field(..., description="The source code to test")
+
+class CustomTestResponse(BaseModel):
+    message: str
+    compiled: bool
+    test_results: List[TestResultDetail] = []
 
 
 
@@ -212,7 +235,7 @@ def submit_solution(
     """
 
     if request.student_id != int(current_user["sub"]):
-        raise HTTPException(status_code=403, detail="Not authorized to add test for another student")
+        raise HTTPException(status_code=403, detail="Not authorized to submit code for another student")
 
     join_entry = (
         db.query(StudentJoinGame)
@@ -238,18 +261,229 @@ def submit_solution(
     if not match_for_game:
         raise HTTPException(status_code=404, detail="Match not linked to this game session")
 
-    new_solution = StudentSolution(
-        code=request.code,
-        has_passed=False,
-        match_for_game_id=match_for_game.match_for_game_id,
-        student_id=request.student_id
+    # Match Entry to get settings
+    match_entry = (
+        db.query(Match)
+        .filter(Match.match_id == join_entry.assigned_match_id)
+        .first()
     )
     
-    db.add(new_solution)
-    db.commit()
-    db.refresh(new_solution)
+    if not match_entry or not match_entry.match_set_id:
+         raise HTTPException(status_code=404, detail="Match configuration error")
+
+    # Compile the code
+    exe_path, compile_error = compile_cpp(request.code)
     
-    return SubmitSolutionResponse(solution_id=new_solution.solution_id, message="Solution submitted successfully")
+    if exe_path is None:
+        return SubmitSolutionResponse(
+            message=f"Compilation failed: {compile_error}",
+            compiled=False,
+            solution_id=None
+        )
+
+    # Run against tests
+    tests = (
+        db.query(Test)
+        .filter(Test.match_set_id == match_entry.match_set_id)
+        .all()
+    )
+
+    all_passed = True
+    test_results = []
+    
+    passed_test_count = 0
+    encountered_error = False
+    
+    passed_public_tests = 0
+    total_public_tests = 0
+    
+    try:
+        for test in tests:
+            result = run_cpp_executable(exe_path, test.test_in or "")
+            
+            is_public = (test.scope == TestScope.public)
+            if is_public:
+                total_public_tests += 1
+            
+            status = "fail"
+            message = ""
+            actual_out = ""
+            
+            if result["status"] == "success":
+                actual_out = (result["stdout"] or "").strip()
+                expected_out = (test.test_out or "").strip()
+                if actual_out == expected_out:
+                    status = "pass"
+                    passed_test_count += 1
+                    if is_public:
+                        passed_public_tests += 1
+                else:
+                    message = f"Output mismatch"
+            else:
+                status = result["status"]
+                message = result["stderr"]
+                encountered_error = True
+
+            if status != "pass":
+                all_passed = False
+            
+            if is_public:
+                test_results.append(TestResultDetail(
+                    test_id=test.test_id,
+                    status=status,
+                    message=message,
+                    actual_output=actual_out if status != "timeout" and status != "runtime_error" else None
+                ))
+            
+    finally:
+        if os.path.exists(exe_path):
+            try:
+                os.remove(exe_path)
+            except:
+                pass
+
+    solution_id = None
+    final_message = "Solution ran successfully."
+
+    if not encountered_error:
+        # Check if a solution already exists
+        existing_solution = (
+            db.query(StudentSolution)
+            .filter(
+                StudentSolution.student_id == request.student_id,
+                StudentSolution.match_for_game_id == match_for_game.match_for_game_id
+            )
+            .first()
+        )
+        
+        # If a solution has passed all the public test is marked as has_passed = true
+        if total_public_tests > 0 and passed_public_tests == total_public_tests:
+            solution_has_passed = True
+        else:
+            solution_has_passed = False
+            
+        should_save = False
+        
+        if existing_solution:
+            # If exists, check if It is improved or equaled
+            current_best = existing_solution.passed_test or 0
+            if passed_test_count >= current_best:
+                should_save = True
+                existing_solution.code = request.code
+                existing_solution.has_passed = solution_has_passed
+                existing_solution.passed_test = passed_test_count
+                db.commit()
+                db.refresh(existing_solution)
+                solution_id = existing_solution.solution_id
+                final_message = "Solution updated (score improved or matched)."
+            else:
+                final_message = f"Solution not saved: Score ({passed_test_count}) is lower than best ({current_best})."
+                solution_id = existing_solution.solution_id 
+        else:
+            should_save = True
+            new_solution = StudentSolution(
+                code=request.code,
+                has_passed=solution_has_passed,
+                passed_test=passed_test_count,
+                match_for_game_id=match_for_game.match_for_game_id,
+                student_id=request.student_id
+            )
+            db.add(new_solution)
+            db.commit()
+            db.refresh(new_solution)
+            solution_id = new_solution.solution_id
+            final_message = "Solution submitted successfully."
+            
+    else:
+        final_message = "Solution not saved due to runtime errors."
+    
+    return SubmitSolutionResponse(
+        solution_id=solution_id,
+        message=final_message,
+        compiled=True,
+        test_results=test_results
+    )
+
+
+@router.post("/custom_test", response_model=CustomTestResponse)
+def run_custom_tests(
+    current_user: Annotated[dict, Depends(get_current_user)],
+    request: CustomTestRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Run the student's code against their own custom tests.
+    Does NOT store the solution.
+    """
+    if request.student_id != int(current_user["sub"]):
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    # Fetch Student Tests
+    student_tests = (
+        db.query(StudentTest)
+        .join(MatchesForGame, StudentTest.match_for_game_id == MatchesForGame.match_for_game_id)
+        .filter(
+            StudentTest.student_id == request.student_id,
+            MatchesForGame.game_id == request.game_id
+        )
+        .all()
+    )
+
+    if not student_tests:
+        return CustomTestResponse(
+            message="No custom tests found. Create a test case first.",
+            compiled=False
+        )
+
+    exe_path, compile_error = compile_cpp(request.code)
+    
+    if exe_path is None:
+        return CustomTestResponse(
+            message=f"Compilation failed: {compile_error}",
+            compiled=False
+        )
+
+    test_results = []
+    
+    try:
+        for test in student_tests:
+            result = run_cpp_executable(exe_path, test.test_in or "")
+            
+            status = "fail"
+            message = ""
+            actual_out = ""
+
+            if result["status"] == "success":
+                actual_out = (result["stdout"] or "").strip()
+                expected_out = (test.test_out or "").strip()
+                
+                if actual_out == expected_out:
+                    status = "pass"
+                else:
+                    message = "Output mismatch"
+            else:
+                status = result["status"]
+                message = result["stderr"]
+
+            test_results.append(TestResultDetail(
+                test_id=test.test_id,
+                status=status,
+                message=message,
+                actual_output=actual_out if status != "timeout" and status != "runtime_error" else None
+            ))
+            
+    finally:
+        if os.path.exists(exe_path):
+            try:
+                os.remove(exe_path)
+            except:
+                pass
+
+    return CustomTestResponse(
+        message="Custom tests executed.",
+        compiled=True,
+        test_results=test_results
+    )
 
 
 @router.get("/match_details", response_model=MatchDetailsResponse)

@@ -96,6 +96,7 @@ class StudentSolution(Base):
     solution_id = Column(Integer, primary_key=True)
     code = Column(Text, nullable=False)
     has_passed = Column(Boolean, nullable=False, default=False)
+    passed_test = Column(Integer, default=0)
 
     match_for_game_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.matches_for_game.match_for_game_id"), nullable=False)
     student_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student.student_id"), nullable=False)
