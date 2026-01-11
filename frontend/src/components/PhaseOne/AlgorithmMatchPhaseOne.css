@@ -181,3 +181,16 @@
 .modal-input {
   margin-top: 8px;
 }
+
+.section-title {
+  margin-top: 10px !important;
+  margin-bottom: 16px !important;
+  color: #262626;
+  font-size: large;
+}
+
+.section-subtitle {
+  margin-bottom: 16px !important;
+  color: #595959;
+}
+
