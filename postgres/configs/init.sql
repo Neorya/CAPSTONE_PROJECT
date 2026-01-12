@@ -168,13 +168,20 @@ CREATE TABLE capstone_app.student_solutions (
     solution_id SERIAL PRIMARY KEY,
     code TEXT NOT NULL,
     has_passed BOOLEAN NOT NULL DEFAULT FALSE,
-    passed_test INTEGER DEFAULT 0,
     match_for_game_id INTEGER REFERENCES capstone_app.matches_for_game(match_for_game_id) NOT NULL,
     student_id INTEGER REFERENCES capstone_app.student(student_id) NOT NULL
-
 );
 
+DROP TABLE IF EXISTS capstone_app.student_solution_tests;
 
+CREATE TABLE capstone_app.student_solution_tests (
+  teacher_test_id INTEGER REFERENCES capstone_app.tests(test_id) NOT NULL,
+  student_test_id INTEGER REFERENCES capstone_app.student_tests(test_id) NOT NULL,
+  solution_id INTEGER REFERENCES capstone_app.student_solutions(solution_id) NOT NULL,
+  test_output TEXT NOT NULL,
+  PRIMARY KEY (teacher_test_id, student_test_id, solution_id),
+  CONSTRAINT uc_solution_id_test_id UNIQUE (solution_id, student_test_id, teacher_test_id)
+);
 
 --- The creation of table for relationship between students and game session: (User Story 5)
 
@@ -202,12 +209,15 @@ capstone_app.users,
 capstone_app.refresh_tokens,
 capstone_app.teacher,
 capstone_app.match_setting,
+capstone_app.tests,
 capstone_app.match,
 capstone_app.game_session, 
 capstone_app.matches_for_game,
+capstone_app.student,
 capstone_app.student_tests,
 capstone_app.student_join_game,
-capstone_app.student_solutions
+capstone_app.student_solutions,
+capstone_app.student_solution_tests
 TO api_user;
 
 
@@ -557,3 +567,37 @@ INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id,
 -- Student 3 (Charlie) submits a correct solution for Match_For_Game 5
 INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
 ('def calculate_force(m, a): return m * a', TRUE, 5, 3);
+
+
+-- ######################################
+-- INSERT DATA INTO STUDENT_SOLUTION_TESTS TABLE (Sample Data)
+-- ######################################
+
+-- For Alice's correct solution (solution_id = 1, student_id = 1, match_for_game_id = 1)
+-- Alice ran her correct solution (def square(n): return n * n) against teacher tests
+-- Teacher test 1: input='5', expected='25' -> Alice's code: square(5) = 25 ✓
+-- Teacher test 2: input='10', expected='100' -> Alice's code: square(10) = 100 ✓
+-- Student tests 1 & 2 are her own tests (student_test_id 1, 2)
+INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
+(1, 1, 1, '25'),  -- Teacher test 1 (input=5): Alice's solution outputs 25 (correct)
+(2, 2, 1, '100'); -- Teacher test 2 (input=10): Alice's solution outputs 100 (correct)
+
+-- For Bob's incorrect solution (solution_id = 2, student_id = 2, match_for_game_id = 1)
+-- Bob's incorrect solution (def square(n): return n + n) against teacher tests
+-- Teacher test 1: input='5', expected='25' -> Bob's code: 5 + 5 = 10 ✗
+-- Teacher test 2: input='10', expected='100' -> Bob's code: 10 + 10 = 20 ✗
+-- Student test 3 is his own test (student_test_id 3)
+INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
+(1, 3, 2, '10'),  -- Teacher test 1 (input=5): Bob's solution outputs 10 (incorrect, expected 25)
+(2, 3, 2, '20');  -- Teacher test 2 (input=10): Bob's solution outputs 20 (incorrect, expected 100)
+
+-- For Charlie's correct solution (solution_id = 3, student_id = 3, match_for_game_id = 5)
+-- Charlie's correct solution (def calculate_force(m, a): return m * a) for match_set_id = 5
+-- Teacher test 9: input='mass=10kg acceleration=2m/s²', expected='Force=20N'
+-- Teacher test 10: input='mass=5kg acceleration=9.8m/s²', expected='Force=49N'
+-- Student test 4 is his own test (student_test_id 4)
+INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
+(9, 4, 3, 'Force=20N'),   -- Teacher test 9: Charlie's solution outputs Force=20N (correct)
+(10, 4, 3, 'Force=49N');  -- Teacher test 10: Charlie's solution outputs Force=49N (correct)
+
+
