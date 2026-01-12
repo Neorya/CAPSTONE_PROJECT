@@ -28,7 +28,7 @@ class Login extends Component {
     // Decode the token for the User Data
     const decodedUser = jwtDecode(token);
 
-    console.log("Login riuscito. Dati decodificati:", decodedUser);
+    console.log("Successfull Login, Decoded data:", decodedUser);
 
     // We pass the data to the parent component (if the prop was provided)
     if (this.props.onLoginSuccess) {
@@ -38,8 +38,8 @@ class Login extends Component {
   };
 
   handleError = () => {
-    console.error("Login fallito.");
-    alert("Login con Google non riuscito. Riprova più tardi.");
+    console.error("Failed Login.");
+    alert("Login with Google failed. Please, try again later.");
   };
 
   render() {
@@ -50,9 +50,9 @@ class Login extends Component {
     if (!GOOGLE_CLIENT_ID) {
       return (
         <div style={{ padding: '50px', textAlign: 'center', color: 'red' }}>
-          <h1>ERRORE DI CONFIGURAZIONE</h1>
-          <p>Manca la variabile d'ambiente REACT_APP_GOOGLE_CLIENT_ID nel tuo file .env.</p>  
-          <p>Impossibile mostrare il pulsante di Login con Google.</p>
+          <h1>CONFIGURATION ERROR</h1>
+          <p>enviroment variable REACT_APP_GOOGLE_CLIENT_ID missing inside your file .env.</p>  
+          <p>Cannot show button to Google Login.</p>
         </div>
       );
     }
@@ -60,7 +60,7 @@ class Login extends Component {
     return (
       <div className="login-container">
         <Card className="login-card">
-          <Title level={2}>Accedi all'Applicazione</Title>
+          <Title level={2}>Login to the Application</Title>
           {/*Button Google Login */}
           <GoogleLogin
             onSuccess={this.handleSuccess}
