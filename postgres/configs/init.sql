@@ -187,6 +187,25 @@ CREATE TABLE capstone_app.student_join_game (
   assigned_match_id INTEGER REFERENCES capstone_app.match(match_id),
   CONSTRAINT uc_student_game UNIQUE (student_id, game_id)
 );
+
+CREATE TYPE vote AS ENUM ('correct', 'incorrect', 'skip');
+
+
+DROP TABLE IF EXISTS capstone_app.student_review_vote;
+
+CREATE TABLE capstone_app.student_review_vote (
+    review_vote_id SERIAL PRIMARY KEY,
+    student_id INTEGER REFERENCES capstone_app.student(student_id) NOT NULL,
+    assigned_solution_id INTEGER REFERENCES capstone_app.student_solutions(solution_id) NOT NULL,
+    vote vote NOT NULL,
+    proof_test_in VARCHAR(500) DEFAULT NULL,
+    proof_test_out VARCHAR(500) DEFAULT NULL,
+    valid BOOLEAN DEFAULT NULL,
+    note VARCHAR(500) DEFAULT NULL
+);
+
+
+
 --Create a user for that schema: (User story 1)
 
 -- 2. Create the API user (Replace 'changeme' with a strong password)
@@ -207,7 +226,8 @@ capstone_app.game_session,
 capstone_app.matches_for_game,
 capstone_app.student_tests,
 capstone_app.student_join_game,
-capstone_app.student_solutions
+capstone_app.student_solutions,
+capstone_app.student_review_vote
 TO api_user;
 
 
@@ -557,3 +577,48 @@ INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id,
 -- Student 3 (Charlie) submits a correct solution for Match_For_Game 5
 INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
 ('def calculate_force(m, a): return m * a', TRUE, 5, 3);
+
+
+-- ######################################
+-- INSERT DATA INTO STUDENT_REVIEW_VOTE TABLE (Example Data)
+-- ######################################
+
+-- Student 2 reviews Student 1's solution (solution_id 1) - marks it as correct
+INSERT INTO capstone_app.student_review_vote (student_id, assigned_solution_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(2, 1, 'correct', NULL, NULL, TRUE, 'Clean and efficient implementation');
+
+-- Student 3 reviews Student 1's solution (solution_id 1) - marks it as correct with proof
+INSERT INTO capstone_app.student_review_vote (student_id, assigned_solution_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(3, 1, 'correct', 'square(4)', '16', TRUE, 'Tested with additional input, works perfectly');
+
+-- Student 4 reviews Student 1's solution (solution_id 1) - marks it as correct
+INSERT INTO capstone_app.student_review_vote (student_id, assigned_solution_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(4, 1, 'correct', NULL, NULL, TRUE, NULL);
+
+-- Student 1 reviews Student 2's solution (solution_id 2) - marks it as incorrect with proof
+INSERT INTO capstone_app.student_review_vote (student_id, assigned_solution_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(1, 2, 'incorrect', 'square(3)', '6', TRUE, 'The function adds instead of multiplying');
+
+-- Student 3 reviews Student 2's solution (solution_id 2) - marks it as incorrect with proof
+INSERT INTO capstone_app.student_review_vote (student_id, assigned_solution_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(3, 2, 'incorrect', 'square(5)', '10', TRUE, 'Wrong operator used, should return 25 not 10');
+
+-- Student 4 reviews Student 2's solution (solution_id 2) - skips the review
+INSERT INTO capstone_app.student_review_vote (student_id, assigned_solution_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(4, 2, 'skip', NULL, NULL, NULL, 'Not sure about this one');
+
+-- Student 5 reviews Student 2's solution (solution_id 2) - marks it as incorrect but invalid proof
+INSERT INTO capstone_app.student_review_vote (student_id, assigned_solution_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(5, 2, 'incorrect', 'square(2)', '4', FALSE, 'Found an issue but my test case was wrong');
+
+-- Student 1 reviews Student 3's solution (solution_id 3) - marks it as correct
+INSERT INTO capstone_app.student_review_vote (student_id, assigned_solution_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(1, 3, 'correct', NULL, NULL, TRUE, 'Good solution for force calculation');
+
+-- Student 2 reviews Student 3's solution (solution_id 3) - marks it as correct with proof
+INSERT INTO capstone_app.student_review_vote (student_id, assigned_solution_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(2, 3, 'correct', 'calculate_force(10, 5)', '50', TRUE, 'Verified with F=ma formula');
+
+-- Student 4 reviews Student 3's solution (solution_id 3) - skips the review
+INSERT INTO capstone_app.student_review_vote (student_id, assigned_solution_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(4, 3, 'skip', NULL, NULL, NULL, NULL);
