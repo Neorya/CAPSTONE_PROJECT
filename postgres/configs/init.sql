@@ -304,32 +304,32 @@ VALUES ('Paolo', 'Gialli', 'p.gialli@capstone.it');
 -- Match Settings created by Teacher 1 (ID 1)
 INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('Standard Mode 1', 'Quick match, 5 rounds.', TRUE, 'def square(n): return n * n', 1),
-('Advanced Algebra', '15-round math challenge.', TRUE, 'def add(x, y): return x + y', 1);
+('Standard Mode 1', 'Quick match, 5 rounds.', TRUE, 'int square(int n) { return n * n; }', 1),
+('Advanced Algebra', '15-round math challenge.', TRUE, 'int add(int x, int y) { return x + y; }', 1);
 
 -- Match Settings created by Teacher 2 (ID 2)
 INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('History Facts', 'Review of Roman Empire history.', FALSE, 'history = {"Julius Caesar": "44 BC", "Augustus": "27 BC"}', 2),
-('Geography Quiz', 'Quiz on European capitals.', TRUE, 'capitals = {"France": "Paris", "Germany": "Berlin"}', 2);
+('History Facts', 'Review of Roman Empire history.', FALSE, '#include <map>\n#include <string>\n\nstd::map<std::string, std::string> history = { {"Julius Caesar", "44 BC"}, {"Augustus", "27 BC"} };', 2),
+('Geography Quiz', 'Quiz on European capitals.', TRUE, '#include <map>\n#include <string>\n\nstd::map<std::string, std::string> capitals = { {"France", "Paris"}, {"Germany", "Berlin"} };', 2);
 
 -- Match Settings created by Teacher 3 (ID 3)
 INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('Science Fundamentals', 'Basics of Physics.', TRUE, 'def calculate_force(mass, acceleration): return mass * acceleration', 3),
-('Chemistry Equations', 'Balancing basic equations.', FALSE, 'def balance_equation(reactants): return "2H2O" if "H2+O2" in reactants else "CO2"', 3);
+('Science Fundamentals', 'Basics of Physics.', TRUE, 'double calculate_force(double mass, double acceleration) { return mass * acceleration; }', 3),
+('Chemistry Equations', 'Balancing basic equations.', FALSE, '#include <string>\n\nstd::string balance_equation(std::string reactants) { return (reactants.find("H2+O2") != std::string::npos) ? "2H2O" : "CO2"; }', 3);
 
 -- Match Settings created by Teacher 4 (ID 4)
 INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('Literature Review 1', '19th Century English novels.', TRUE, 'authors = {"Pride and Prejudice": "Jane Austen", "Wuthering Heights": "Emily Brontë"}', 4),
-('Grammar Practice', 'Advanced Italian grammar.', TRUE, 'def get_tense(verb): return "presente indicativo" if "mangio" in verb else "passato prossimo"', 4);
+('Literature Review 1', '19th Century English novels.', TRUE, '#include <map>\n#include <string>\n\nstd::map<std::string, std::string> authors = { {"Pride and Prejudice", "Jane Austen"}, {"Wuthering Heights", "Emily Brontë"} };', 4),
+('Grammar Practice', 'Advanced Italian grammar.', TRUE, '#include <string>\n\nstd::string get_tense(std::string verb) { return (verb.find("mangio") != std::string::npos) ? "presente indicativo" : "passato prossimo"; }', 4);
 
 -- Match Settings created by Teacher 5 (ID 5)
 INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('Coding Basics', 'Introduction to Python syntax.', TRUE, 'def sum_numbers(*args): return sum(args)', 5),
-('Data Structures Review', 'Review of linked lists and trees.', FALSE, 'class Node: def __init__(self, data): self.data = data; self.next = None', 5);
+('Coding Basics', 'Introduction to Python syntax.', TRUE, '#include <vector>\n#include <numeric>\n\nint sum_numbers(std::vector<int> args) { return std::accumulate(args.begin(), args.end(), 0); }', 5),
+('Data Structures Review', 'Review of linked lists and trees.', FALSE, 'struct Node { int data; Node* next; Node(int d) : data(d), next(nullptr) {} };', 5);
 
 -- ######################################
 -- INSERT DATA INTO TESTS TABLE (Derived from old match_setting fields)
@@ -569,7 +569,7 @@ INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, st
 
 -- Student 3 (Charlie) tests for Match_For_Game 5 (Match 5 in Game 3)
 INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, student_id) VALUES
-('mass=1, acc=1', '1', 5, 3);
+('1.0, 1.0', '1', 5, 3);
 
 
 -- ######################################
@@ -578,15 +578,15 @@ INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, st
 
 -- Student 1 (Alice) submits a correct solution for Match_For_Game 1
 INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
-('def square(n): return n * n', TRUE, 1, 1);
+('int square(int n) { return n * n; }', TRUE, 1, 1);
 
 -- Student 2 (Bob) submits an incorrect solution for Match_For_Game 1
 INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
-('def square(n): return n + n', FALSE, 1, 2);
+('int square(int n) { return n + n; }', FALSE, 1, 2);
 
 -- Student 3 (Charlie) submits a correct solution for Match_For_Game 5
 INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
-('def calculate_force(m, a): return m * a', TRUE, 5, 3);
+('double calculate_force(double m, double a) { return m * a; }', TRUE, 5, 3);
 
 
 -- ######################################
