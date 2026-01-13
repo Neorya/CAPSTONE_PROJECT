@@ -209,7 +209,7 @@ CREATE TABLE capstone_app.student_review_vote (
     proof_test_in VARCHAR(500) DEFAULT NULL,
     proof_test_out VARCHAR(500) DEFAULT NULL,
     valid BOOLEAN DEFAULT NULL,
-    note VARCHAR(500) DEFAULT NULL
+    note TEXT DEFAULT NULL
 );
 
 
@@ -667,3 +667,4 @@ INSERT INTO capstone_app.student_review_vote (student_assigned_review_id, vote, 
 -- Vote for assignment 10 (Student 4 reviews Student 3's solution) - skips the review
 INSERT INTO capstone_app.student_review_vote (student_assigned_review_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
 (10, 'skip', NULL, NULL, NULL, NULL);
+
