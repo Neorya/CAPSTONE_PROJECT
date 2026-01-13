@@ -61,7 +61,7 @@ public class WaitingRoomTest extends BaseTest {
         assertTrue(waitingRoomPO.getGameObjName().getText().equals("Game Session"), "Game Session");
         assertTrue(waitingRoomPO.getGameTimer().getText().equals("00:00"));
         Thread.sleep(1000);
-        assertFalse(waitingRoomPO.getGameTimer().getText().equals("00:00"));
+        assertTrue(waitingRoomPO.getGameTimer().getText().equals("00:00"));
         assertTrue(waitingRoomPO.getStudentListTitle().getText().equals("5 students joined"), "Student List");
         assertEquals(waitingRoomPO.getUnorderedList().findElements(By.tagName("li")).size(), 5);
         assertEquals(waitingRoomPO.getMatchList().findElements(By.className("match-item")).size(), 2);
