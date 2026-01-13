@@ -568,64 +568,77 @@ VALUES
 -- INSERT DATA INTO STUDENT_TESTS TABLE (Example Data)
 -- ######################################
 
--- Student 1 (Alice) tests for Match_For_Game 1 (Match 1 in Game 1)
+-- Student 1 (Mario) tests
 INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, student_id) VALUES
 ('square(2)', '4', 1, 1),
-('square(3)', '9', 1, 1);
+('square(4)', '16', 2, 1);
 
--- Student 2 (Bob) tests for Match_For_Game 1
+-- Student 8 (Giulia) tests
 INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, student_id) VALUES
-('square(-1)', '1', 1, 2);
+('mass=10 acceleration=2', '20', 5, 8),
+('mass=5 acceleration=10', '50', 6, 8);
 
--- Student 3 (Charlie) tests for Match_For_Game 5 (Match 5 in Game 3)
+-- Student 4 (Chiara) tests
 INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, student_id) VALUES
-('1.0, 1.0', '1', 5, 3);
+('Pride and Prejudice', 'Jane Austen', 7, 4);
 
+-- Student 10 (Alessia) tests
+INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, student_id) VALUES
+('1 2 3', '6', 9, 10);
+
+-- Student 3 (Andrea) tests
+INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, student_id) VALUES
+('mass=2 acceleration=5', '10', 5, 3);
 
 -- ######################################
 -- INSERT DATA INTO STUDENT_SOLUTIONS TABLE (Example Data)
 -- ######################################
 
--- Student 1 (Alice) submits a correct solution for Match_For_Game 1
+-- Mario Rossi
 INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
-('int square(int n) { return n * n; }', TRUE, 1, 1);
+('int square(int n) { return n * n; }', TRUE, 1, 1),
+('int multiply(int a, int b) { return a * b; }', TRUE, 2, 1);
 
--- Student 2 (Bob) submits an incorrect solution for Match_For_Game 1
+-- Giulia Romano
 INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
-('int square(int n) { return n + n; }', FALSE, 1, 2);
+('def force(m, a): return m * a', TRUE, 5, 8),
+('def force_complex(m, a): return m * (a + 0)', TRUE, 6, 8);
 
--- Student 3 (Charlie) submits a correct solution for Match_For_Game 5
+-- Chiara Neri
 INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
-('def calculate_force(m, a): return m * a', TRUE, 5, 3);
+('Jane Austen is the author', TRUE, 7, 4);
 
+-- Alessia Costa
+INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
+('def sum_list(l): return sum(l)', TRUE, 9, 10);
+
+-- Andrea Verdi
+INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
+('def mass_accel(m, a): return m * a', TRUE, 5, 3);
 
 -- ######################################
 -- INSERT DATA INTO STUDENT_SOLUTION_TESTS TABLE (Sample Data)
 -- ######################################
 
--- For Alice's correct solution (solution_id = 1, student_id = 1, match_for_game_id = 1)
--- Alice ran her correct solution (def square(n): return n * n) against teacher tests
--- Teacher test 1: input='5', expected='25' -> Alice's code: square(5) = 25 ✓
--- Teacher test 2: input='10', expected='100' -> Alice's code: square(10) = 100 ✓
--- Student tests 1 & 2 are her own tests (student_test_id 1, 2)
+-- Mario Rossi: Match 1 (50.0) + Match 2 (50.0) = 100.0
 INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
-(1, 1, 1, '25'),  -- Teacher test 1 (input=5): Alice's solution outputs 25 (correct)
-(2, 2, 1, '100'); -- Teacher test 2 (input=10): Alice's solution outputs 100 (correct)
+(1, 1, 1, '25'),  (2, 1, 1, '100'), -- Match 1: 2/2 tests passed
+(1, 2, 2, '25'),  (2, 2, 2, '100'); -- Match 2: 2/2 tests passed
 
--- For Bob's incorrect solution (solution_id = 2, student_id = 2, match_for_game_id = 1)
--- Bob's incorrect solution (def square(n): return n + n) against teacher tests
--- Teacher test 1: input='5', expected='25' -> Bob's code: 5 + 5 = 10 ✗
--- Teacher test 2: input='10', expected='100' -> Bob's code: 10 + 10 = 20 ✗
--- Student test 3 is his own test (student_test_id 3)
+-- Giulia Romano: Match 5 (50.0) + Match 6 (25.0) = 75.0
 INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
-(1, 3, 2, '10'),  -- Teacher test 1 (input=5): Bob's solution outputs 10 (incorrect, expected 25)
-(2, 3, 2, '20');  -- Teacher test 2 (input=10): Bob's solution outputs 20 (incorrect, expected 100)
+(9, 3, 3, 'Force=20N'), (10, 3, 3, 'Force=49N'), -- Match 5: 2/2 tests passed
+(11, 4, 4, '2H2O'), (12, 4, 4, 'WRONG_DATA');    -- Match 6: 1/2 tests passed
 
--- For Charlie's correct solution (solution_id = 3, student_id = 3, match_for_game_id = 5)
--- Charlie's correct solution (def calculate_force(m, a): return m * a) for match_set_id = 5
--- Teacher test 9: input='mass=10kg acceleration=2m/s²', expected='Force=20N'
--- Teacher test 10: input='mass=5kg acceleration=9.8m/s²', expected='Force=49N'
--- Student test 4 is his own test (student_test_id 4)
+-- Chiara Neri: Match 7 (50.0) = 50.0
+INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
+(13, 5, 5, 'Jane Austen'), (14, 5, 5, 'Emily Brontë'); -- Match 7: 2/2 tests passed
+
+-- Alessia Costa: Match 9 (25.0) = 25.0
+INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
+(17, 6, 6, '6'), (18, 6, 6, 'WRONG_DATA'); -- Match 9: 1/2 tests passed
+
+-- Andrea Verdi: Match 5 (25.0) = 25.0 (Tie with Alessia)
 INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
 (9, 4, 3, 'Force=20N'),   -- Teacher test 9: Charlie's solution outputs Force=20N (correct)
 (10, 4, 3, 'Force=49N');  -- Teacher test 10: Charlie's solution outputs Force=49N (correct)
