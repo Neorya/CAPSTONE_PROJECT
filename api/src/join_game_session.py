@@ -79,11 +79,11 @@ async def student_join_game(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The game session passed is not the next upcoming one",
         )
-
-    if result.is_active:
+        
+    if result.actual_start_date is not None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="The game session has already started. It's not possible to join anymore",
+            detail="The game session has already started, it's not possible to join",
         )
     
     game_match_ids = db.query(MatchesForGame.match_id).filter(MatchesForGame.game_id == input_data.game_id)
@@ -140,7 +140,7 @@ async def get_next_upcoming_game(
     Allows a student to get the next upcoming game session
     The next upcoming game session is defined as: 
     - the one with the closest start to the current time (can be in the past or future)
-    - the game session hasn't been manually started by the teacher yet (the is_active field is false)
+    - the game session hasn't been manually started by the teacher yet 
     - the game starts in the current day
     If no game sessions are found, it raises a 404 Not Found
     On success, it returns the game ID of the next upcoming game session
@@ -150,7 +150,7 @@ async def get_next_upcoming_game(
     
     result = (
         db.query(GameSession)
-        # .filter(GameSession.is_active.is_(False))                          # not started yet
+        .filter(GameSession.actual_start_date.is_(None))                    # not started yet 
         .filter(func.date(GameSession.start_date) == func.current_date())  # same day (today)
         .order_by(time_difference.asc(), GameSession.start_date.asc())     # closest (can be past or future)
         .first()

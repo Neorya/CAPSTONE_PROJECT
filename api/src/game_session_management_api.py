@@ -14,6 +14,7 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field, field_validator
+from datetime import datetime, timezone
 
 # Import ORM models
 from models import (    
@@ -161,12 +162,12 @@ async def get_game_session_full_details(
         name=game_session.name,
         start_date=game_session.start_date,
         creator_id=game_session.creator_id,
-        is_active=game_session.is_active,
         total_students=len(students),   
         students=students,
         matches=matches,
         duration_phase1=game_session.duration_phase1,
-        duration_phase2=game_session.duration_phase2
+        duration_phase2=game_session.duration_phase2,
+        actual_start_date=game_session.actual_start_date
     )
 
 
@@ -239,12 +240,8 @@ async def start_game_session(
             detail=f"Game session with id {game_id} not found"
         )
     
-    # Check if session is already active
-    if game_session.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Game session is already active"
-        )
+    
+
     
     # Get joined students
     joined_records = db.query(StudentJoinGame).filter(StudentJoinGame.game_id == game_id).all()
@@ -271,8 +268,10 @@ async def start_game_session(
     # Distribute students to matches fairly
     raw_assignments = _distribute_students_to_matches(student_ids, match_ids)
 
-    # Update game session to active    
-    game_session.is_active = True
+    
+    
+    # Set actual start date (the time the teacher pressed the start button -> needed in order to calculate phase end times)
+    game_session.actual_start_date = datetime.now(timezone.utc)
 
     for assignment in raw_assignments:
         for record in joined_records:
@@ -316,9 +315,9 @@ async def start_game_session(
     return GameSessionStartResponse(
         game_id=game_id,
         message="The game session has started.",
-        is_active=True,
         total_students_assigned=len(assignments),
         assignments=assignments,
         duration_phase1=game_session.duration_phase1,
-        duration_phase2=game_session.duration_phase2
+        duration_phase2=game_session.duration_phase2,
+        actual_start_date=game_session.actual_start_date
     )

@@ -10,7 +10,7 @@ const { Title, Text } = Typography;
 
 const PreStartGameSession = () => {
     const navigate = useNavigate();
-    const { session, loading, error, gameId, elapsedTime, startSession } = usePreStartGameSession();
+    const { session, loading, error, gameId, remainingTime, startSession } = usePreStartGameSession();
 
 
     if (error) {
@@ -19,10 +19,16 @@ const PreStartGameSession = () => {
    
     if (!session) { return null; }
 
-    const handleStartSession = () => {
-        if (startSession())
-            navigate(`/start-game-session/${gameId}`);
-    };
+
+    const handleStartSession = async () => {
+        const ok = await startSession();   // WAIT for backend
+        if (!ok) return;
+      
+        navigate(`/start-game-session/${gameId}`);
+      };
+      
+      
+      
     
     return (
         <div className="pre-start-session-container">
@@ -44,7 +50,7 @@ const PreStartGameSession = () => {
                     </div>
                     <div className="timer-display">
                         <ClockCircleOutlined style={{ color: '#52c41a', marginRight: 8 }} />
-                        <Text strong style={{ fontSize: '18px' }}>{elapsedTime}</Text>
+                        <Text strong style={{ fontSize: '18px' }}>{remainingTime}</Text>
                     </div>
                 </div>
 

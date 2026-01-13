@@ -65,7 +65,6 @@ Table game_session {
   name varchar(150) [not null]
   start_date timestamp [not null]
   creator_id integer [not null] // FK -> teacher.teacher_id
-  is_active boolean [not null, default: false]
 }
 
 Table matches_for_game {

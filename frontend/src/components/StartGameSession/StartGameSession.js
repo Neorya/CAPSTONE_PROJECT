@@ -9,7 +9,7 @@ const { Title, Text } = Typography;
 
 const StartGameSession = () => {
     const navigate = useNavigate();
-    const { session, loading, error, elapsedTime } = useStartGameSession();
+    const { session, loading, error, remainingTime } = useStartGameSession();
 
     if (loading && !session) {
         return <div className="loading-container"><Spin size="large" /></div>;
@@ -40,7 +40,7 @@ const StartGameSession = () => {
                         <div style={{ width: 40 }}></div> {/* Spacer for centering */}
                     </div>
                     <div className="timer-large" id="timer-large">
-                        {elapsedTime}
+                        {remainingTime}
                     </div>
                     <Text className="subtitle" id="student-answered">
                         {session.students.length} of {session.students.length} students answered

@@ -11,6 +11,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy import Boolean, Column, Integer, String, Text, ForeignKey, Enum, DateTime
 from sqlalchemy.dialects.postgresql import ENUM as PG_ENUM
 from sqlalchemy.orm import relationship
+from typing import Optional
+
 
 from database import Base
 
@@ -198,12 +200,12 @@ class GameSession(Base):
 
     game_id = Column(Integer, primary_key=True)
     name = Column(String(150), nullable=False)
-    start_date = Column(DateTime, nullable=False)
+    start_date = Column(DateTime(timezone=True), nullable=False)
     creator_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.teacher.teacher_id"))
     creator = relationship("Teacher", back_populates="game_sessions")
-    is_active = Column(Boolean, default=True, nullable=False)
     duration_phase1 = Column(Integer, nullable=False)
     duration_phase2 = Column(Integer, nullable=False)
+    actual_start_date = Column(DateTime(timezone=True), nullable=True)
 
 
 class VoteType(enum.Enum):
@@ -287,8 +289,8 @@ class GameSessionFullDetailResponse(BaseModel):
     game_id: int = Field(..., description="ID of the game session")
     name: str = Field(..., description="Name of the game session")
     start_date: dt = Field(..., description="Start date of the game session")
+    actual_start_date: Optional[dt] = Field(..., description="Actual start date of the game session")
     creator_id: int = Field(..., description="ID of the teacher who created the session")
-    is_active: bool = Field(..., description="Whether the session has been started")
     total_students: int = Field(..., description="Total number of students joined")
     students: List[StudentResponse] = Field(..., description="List of joined students")
     matches: List[MatchInfoResponse] = Field(..., description="List of matches in the session")
@@ -312,11 +314,11 @@ class GameSessionStartResponse(BaseModel):
     """
     game_id: int = Field(..., description="ID of the game session")
     message: str = Field(..., description="Success message")
-    is_active: bool = Field(..., description="New status of the session (should be True)")
     total_students_assigned: int = Field(..., description="Number of students assigned to matches")
     assignments: List[StudentMatchAssignment] = Field(..., description="List of student-to-match assignments")
     duration_phase1: int = Field(..., description="First Phase Duration")
     duration_phase2: int = Field(..., description="Second Phase Duration")
+    actual_start_date: Optional[dt] = Field(..., description="Actual start date of the game session")
     
 class MatchJoinGameResponse(BaseModel):
     """

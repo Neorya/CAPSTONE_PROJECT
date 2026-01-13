@@ -7,6 +7,9 @@ import {
 } from '@ant-design/icons';
 
 import { useNavigate } from 'react-router-dom'; // Necessario per il reindirizzamento
+import { getGameSessionDetails } from '../../../services/gameSessionService';
+
+
 /**
  * SessionActionButtons - Action buttons for each session row
  * Provides view, clone, edit, and delete actions with confirmations
@@ -28,15 +31,26 @@ const SessionActionButtons = ({
   onDelete,
 }) => {
   const navigate = useNavigate();
+  const started = session.actual_start_date !== null;
+
   return (
     
     <Space size="small">
-      {session.is_active && (
-        <Tooltip title="Go to Active Game">
+      {
+      (
+        <Tooltip title="Go to Game Session">
           <Button
             type="primary"
             icon={<PlayCircleOutlined />} // Assicurati di importarlo da @ant-design/icons
-            onClick={() => navigate(`/pre-start-game-session/${session.game_id}`)} // Cambia il path secondo le tue rotte
+            onClick={async () => {
+              const data = await getGameSessionDetails(session.game_id);
+              const started = !!data.actual_start_date;
+          
+              navigate(started
+                ? `/start-game-session/${session.game_id}`
+                : `/pre-start-game-session/${session.game_id}`
+              );
+            }}
             style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }} // Colore verde per indicare "attivo"
           />
         </Tooltip>
