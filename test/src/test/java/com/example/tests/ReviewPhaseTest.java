@@ -20,7 +20,7 @@ public class ReviewPhaseTest extends BaseTest {
     @BeforeEach
     public void navigateToReviewPage() {
         navigateTo("/voting");
-        
+
         if (System.getenv("CI") != null) {
             try { Thread.sleep(2000); } catch (InterruptedException e) {}
         }
@@ -30,6 +30,7 @@ public class ReviewPhaseTest extends BaseTest {
     @Order(1)
     @DisplayName("Verify solutions list is displayed with anonymous IDs and timestamps")
     public void testDisplaySolutions() {
+
         assertTrue(reviewPage.isVotingSectionVisible(), "Voting section header should be visible");
         assertTrue(reviewPage.isSolutionsListVisible(), "Solutions list should be visible");
         assertTrue(reviewPage.isTimerVisible(), "Phase timer should be visible");
@@ -43,19 +44,19 @@ public class ReviewPhaseTest extends BaseTest {
             // Check for anonymity
             assertFalse(participantId.contains("User 1"), "Participant ID should be anonymous");
         }
+
     }
 
     @Test
     @Order(2)
     @DisplayName("Verify 'Incorrect' vote enables test case form and disables submit initially")
     public void testVotingIncorrectRequiresTestCase() {
+        
         reviewPage.clickViewDetails(0);
-
         reviewPage.clickIncorrectVote();
         
         assertTrue(reviewPage.isTestCaseFormVisible(), "Test case form should be visible when 'Incorrect' is selected");
         assertFalse(reviewPage.isSubmitButtonEnabled(), "Submit button should be disabled before test case input");
-
         reviewPage.setTestCaseInput("Array([1, 2, 3])");
         reviewPage.setTestCaseExpectedOutput("6");
 
@@ -120,10 +121,12 @@ public class ReviewPhaseTest extends BaseTest {
             "Success notification should appear when test case is valid");
     }
 
+
     @Test
     @Order(6)
     @DisplayName("Verify review queue is anonymous and correct size")
     public void testAnonymousReviewQueue() {
+
         
         List<WebElement> solutions = reviewPage.getSolutionItems();
         
@@ -152,7 +155,6 @@ public class ReviewPhaseTest extends BaseTest {
     @Order(8)
     @DisplayName("Verify cannot re-review after vote confirmation")
     public void testCannotReReviewAfterVote() {
-        // Get the ID of the first solution in the list
         int initialCount = reviewPage.getTodoListCount();
         String solutionId = reviewPage.getParticipantIdAtIndex(0);
         assertNotNull(solutionId, "Should have at least one solution to review");
@@ -166,7 +168,6 @@ public class ReviewPhaseTest extends BaseTest {
         
         boolean isPresent = reviewPage.isSolutionPresent(solutionId);
         assertFalse(isPresent, "Solution " + solutionId + " should not be present in the review list after voting");
-
     }
 
     @Test
@@ -181,6 +182,6 @@ public class ReviewPhaseTest extends BaseTest {
     @Order(10)
     @DisplayName("Verify UI locks when phase timer reaches 00:00")
     public void testPhaseTimeout() {
-        System.out.println("Test logic for Phase Timeout implemented but disabled until time-travel capability is added.");
+
     }
 }
