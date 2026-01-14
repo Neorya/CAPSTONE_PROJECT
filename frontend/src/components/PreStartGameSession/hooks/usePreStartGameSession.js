@@ -66,12 +66,6 @@ export const usePreStartGameSession = () => {
   
     const phase1EndMs = startMs + phase1DurationMs;
   
-    // 🔎 one-time diagnostics
-    console.log("actual_start_date raw:", startStr);
-    console.log("duration_phase1:", session?.duration_phase1, "->", phase1Minutes);
-    console.log("start:", new Date(startMs).toISOString());
-    console.log("end:", new Date(phase1EndMs).toISOString());
-  
     const tick = () => {
       const nowMs = Date.now();
       const remainingMs = Math.max(0, phase1EndMs - nowMs);

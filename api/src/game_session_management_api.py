@@ -218,7 +218,7 @@ async def get_game_session_students(
     response_model=GameSessionStartResponse,
     status_code=status.HTTP_200_OK,
     summary="Start a game session",
-    description="Starts a game session by setting is_active to true and assigning students to matches fairly."
+    description="Starts a game session by setting actual_start_date and assigning students to matches fairly."
 )
 async def start_game_session(
     game_id: int, db: Session = Depends(get_db)
@@ -227,7 +227,7 @@ async def start_game_session(
     Start a game session:
     1. Validates the game session exists
     2. Checks if the session is not already active
-    3. Sets is_active to True
+    3. Sets actual_start_date to current time
     4. Assigns students to matches using fair distribution (round-robin)
     5. Returns the assignments
     """
@@ -240,7 +240,12 @@ async def start_game_session(
             detail=f"Game session with id {game_id} not found"
         )
     
-    
+    # Check if already started
+    if game_session.actual_start_date is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Game session has already been started"
+        )
 
     
     # Get joined students
