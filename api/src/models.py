@@ -76,8 +76,6 @@ class Test(Base):
 
     match_setting = relationship("MatchSetting", back_populates="tests")
 
-    match_setting = relationship("MatchSetting", back_populates="tests")
-
 
 class StudentTest(Base):
     """
@@ -108,30 +106,21 @@ class StudentSolution(Base):
     student_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student.student_id"), nullable=False)
     
 
-class StudentTest(Base):
-    __tablename__ = "student_tests"
-    __table_args__ = {'schema': SCHEMA_NAME}
+class StudentSolutionTest(Base):
+    """
+    SQLAlchemy model for the 'student_solution_tests' table.
+    Tracks test results for student solutions.
+    """
+    __tablename__ = "student_solution_tests"
+    __table_args__ = (
+        {'schema': SCHEMA_NAME}
+    )
 
-    test_id = Column(Integer, primary_key=True)
-    test_in = Column(String(500), nullable=True)
-    test_out = Column(String(500), nullable=True)
+    teacher_test_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.tests.test_id"), primary_key=True, nullable=False)
+    student_test_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student_tests.test_id"), primary_key=True, nullable=False)
+    solution_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student_solutions.solution_id"), primary_key=True, nullable=False)
+    test_output = Column(Text, nullable=False)
 
-    match_for_game_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.matches_for_game.match_for_game_id"), nullable=False)
-    student_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student.student_id"), nullable=False)
-
-
-class StudentSolution(Base):
-    __tablename__ = "student_solutions"
-    __table_args__ = {'schema': SCHEMA_NAME}
-
-    solution_id = Column(Integer, primary_key=True)
-    code = Column(Text, nullable=False)
-    has_passed = Column(Boolean, nullable=False, default=False)
-    passed_test = Column(Integer, default=0)
-
-    match_for_game_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.matches_for_game.match_for_game_id"), nullable=False)
-    student_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student.student_id"), nullable=False)
-    
 
 class Match(Base):
     """

@@ -1,3 +1,4 @@
+import os
 from typing import List, Optional, Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -9,7 +10,7 @@ from models import (
     Match,
     MatchSetting,
     Test,
-    TestScopeEnum,
+    TestScope,
     MatchesForGame,
     StudentTest,
     StudentSolution,
@@ -125,7 +126,7 @@ def get_correlated_tests(
         db.query(Test)
         .filter(
             Test.match_set_id == match_entry.match_set_id,
-            Test.scope == TestScopeEnum.public
+            Test.scope == TestScope.public
         )
         .all()
     )
@@ -301,7 +302,7 @@ def submit_solution(
         for test in tests:
             result = run_cpp_executable(exe_path, test.test_in or "")
             
-            is_public = (test.scope == TestScopeEnum.public)
+            is_public = (test.scope == TestScope.public)
             if is_public:
                 total_public_tests += 1
             
