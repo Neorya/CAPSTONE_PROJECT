@@ -365,10 +365,15 @@ INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
 ('France', 'Paris', 'public', 4),
 ('Germany', 'Berlin', 'private', 4);
 
--- Match Setting 5
+-- Match Setting 5 (Force = mass × acceleration - simple integer multiplication)
+-- Input: two numbers (mass acceleration), Output: their product (force)
 INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
-('mass=10kg acceleration=2m/s²', 'Force=20N', 'public', 5),
-('mass=5kg acceleration=9.8m/s²', 'Force=49N', 'private', 5);
+('10 2', '20', 'public', 5),
+('5 10', '50', 'public', 5),
+('3 7', '21', 'public', 5),
+('100 1', '100', 'public', 5),
+('0 5', '0', 'private', 5),
+('1 1', '1', 'private', 5);
 
 -- Match Setting 6
 INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES

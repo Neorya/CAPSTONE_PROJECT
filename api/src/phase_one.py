@@ -192,6 +192,32 @@ def add_student_test(
     return StudentTestResponse(test_id=new_test.test_id, message="Test added successfully")
 
 
+@router.delete("/student_test/{test_id}")
+def delete_student_test(
+    test_id: int,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    db: Session = Depends(get_db),
+):
+    """
+    Delete a student test by its ID.
+    Only the student who created the test can delete it.
+    """
+    requester_id = int(current_user["sub"])
+    
+    test = db.query(StudentTest).filter(StudentTest.test_id == test_id).first()
+    
+    if not test:
+        raise HTTPException(status_code=404, detail="Test not found")
+    
+    if test.student_id != requester_id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this test")
+    
+    db.delete(test)
+    db.commit()
+    
+    return {"message": "Test deleted successfully", "test_id": test_id}
+
+
 @router.get("/student_tests", response_model=List[StudentTestRead])
 def get_student_tests(
     current_user: Annotated[dict, Depends(get_current_user)],

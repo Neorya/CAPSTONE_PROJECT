@@ -38,7 +38,7 @@ const TestCasesList = ({
                     key={test.id}
                     test={test}
                     label={`My Test ${index + 1}`}
-                    onDelete={() => onDeleteTest(index)}
+                    onDelete={() => onDeleteTest(test.id)}
                 />
             ))}
         </div>
