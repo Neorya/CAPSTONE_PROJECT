@@ -15,6 +15,7 @@ export const API_ENDPOINTS = {
   JOIN_GAME: '/api/join_game_session',
   GET_LAST_GAME: '/api/get_next_upcoming_game',
   HAS_STUDENT_JOINED: '/api/has_student_joined_game',
-  LEADERBOARD: '/api/leaderboard'
+  LEADERBOARD: '/api/leaderboard',
+  STUDENT_RESULTS: '/api/student-results'
 };
 

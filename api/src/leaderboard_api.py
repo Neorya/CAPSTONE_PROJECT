@@ -23,7 +23,7 @@ from models import (
 )
 
 from database import get_db
-from student_results_api import _get_test_status_and_indicator
+from student_results_api import _get_test_status
 
 # ============================================================================
 # Pydantic Response Models
@@ -133,7 +133,7 @@ def _calculate_all_student_scores_optimized(db: Session) -> List[Tuple[int, str,
             total_tests = len(tests)
             
             for test_output, expected_output in tests:
-                status_str, _ = _get_test_status_and_indicator(test_output, expected_output)
+                status_str = _get_test_status(test_output, expected_output)
                 if status_str == "Passed":
                     passed_tests += 1
             
