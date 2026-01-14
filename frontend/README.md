@@ -2,6 +2,15 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Environment variables
+
+Create React App only exposes environment variables prefixed with `REACT_APP_`.
+
+- `REACT_APP_API_URL` (default: `http://localhost:8000`)
+- `REACT_APP_AUTH_ENABLED` (default: `false`)
+  - `false`: bypass route protection + token validation + Google auth UI (useful for tests)
+  - `true`: enable auth flow and Google login
+
 ## Available Scripts
 
 In the project directory, you can run:

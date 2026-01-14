@@ -1,8 +1,15 @@
-import React from "react";
-import { Layout, Dropdown, Avatar, Space } from "antd";
+import React, { useMemo } from "react";
+import { Layout, Dropdown, Avatar, Space, Switch, Tooltip } from "antd";
 import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { logout, isDevModeEnabled } from "../../services/authService";
+import {
+  logout,
+  isDevModeEnabled,
+  isAuthEnabled,
+  setAuthEnabledOverride,
+  disableDevMode,
+  removeToken,
+} from "../../services/authService";
 import "./Navbar.css";
 
 const { Header } = Layout;
@@ -10,10 +17,27 @@ const { Header } = Layout;
 const Navbar = () => {
   const navigate = useNavigate();
   const isDevMode = isDevModeEnabled();
+  const authEnabled = useMemo(() => isAuthEnabled(), []);
 
   const handleLogout = async () => {
     await logout();
     navigate("/login");
+  };
+
+  const handleAuthToggle = (checked) => {
+    // Persist override and reload so route guards pick it up immediately.
+    setAuthEnabledOverride(checked);
+
+    // If enabling auth, clear any bypass token/dev mode so user must login properly.
+    if (checked) {
+      disableDevMode();
+      removeToken();
+      window.location.href = "/login";
+      return;
+    }
+
+    // If disabling auth, go back to home.
+    window.location.href = "/";
   };
 
   const menuItems = [
@@ -38,6 +62,24 @@ const Navbar = () => {
           <span>Codify</span>
         </div>
         <div className="navbar-right">
+          <Tooltip
+            title={
+              authEnabled
+                ? "Authentication is ON (Google login + route protection active)"
+                : "Authentication is OFF (bypasses route protection + token validation)"
+            }
+          >
+            <div className="auth-toggle">
+              {!authEnabled && <span className="auth-off-badge">AUTH OFF</span>}
+              <Switch
+                checked={authEnabled}
+                onChange={handleAuthToggle}
+                checkedChildren="Auth"
+                unCheckedChildren="Auth"
+                aria-label="Toggle authentication"
+              />
+            </div>
+          </Tooltip>
           <Dropdown
             menu={{ items: menuItems, onClick: handleMenuClick }}
             placement="bottomRight"

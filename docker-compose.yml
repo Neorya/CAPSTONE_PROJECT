@@ -59,5 +59,9 @@ services:
       - "3000:3000"
     environment:
       - CHOKIDAR_USEPOLLING=true
+      # Frontend env vars (Create React App only exposes REACT_APP_* variables)
+      # Default auth to disabled so tests/local dev are not blocked by OAuth.
+      - REACT_APP_AUTH_ENABLED=${REACT_APP_AUTH_ENABLED:-false}
+      - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:8000}
     depends_on:
       - api

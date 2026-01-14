@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, Typography, Button, Alert, Divider, Space } from "antd";
 import { GoogleOutlined, WarningOutlined, FireOutlined } from '@ant-design/icons';
 import { API_BASE_URL } from '../../services/config';
-import { enableDevMode } from '../../services/authService';
+import { enableDevMode, isAuthEnabled } from '../../services/authService';
 import "./Login.css";
 
 const { Title, Paragraph } = Typography;
@@ -10,8 +10,13 @@ const { Title, Paragraph } = Typography;
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const showDevButton = process.env.NODE_ENV === 'development';
+  const authEnabled = isAuthEnabled();
 
   const handleLogin = () => {
+    if (!authEnabled) {
+      window.location.href = '/';
+      return;
+    }
     setIsLoading(true);
     window.location.href = `${API_BASE_URL}/auth/initiate`;
   };
@@ -38,17 +43,36 @@ const Login = () => {
         </div>
 
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
-          <Button
-            type="default"
-            icon={<GoogleOutlined />}
-            size="large"
-            onClick={handleLogin}
-            block
-            loading={isLoading}
-            className="google-signin-button"
-          >
-            {isLoading ? 'Signing in...' : 'Sign in with Google'}
-          </Button>
+          {!authEnabled ? (
+            <>
+              <Alert
+                message="Authentication is currently disabled"
+                description="Route protection and Google sign-in are bypassed (controlled by REACT_APP_AUTH_ENABLED or the Navbar toggle)."
+                type="info"
+                showIcon
+              />
+              <Button
+                type="primary"
+                size="large"
+                block
+                onClick={() => (window.location.href = '/')}
+              >
+                Continue
+              </Button>
+            </>
+          ) : (
+            <Button
+              type="default"
+              icon={<GoogleOutlined />}
+              size="large"
+              onClick={handleLogin}
+              block
+              loading={isLoading}
+              className="google-signin-button"
+            >
+              {isLoading ? 'Signing in...' : 'Sign in with Google'}
+            </Button>
+          )}
 
           {showDevButton && (
             <div className="dev-mode-section">

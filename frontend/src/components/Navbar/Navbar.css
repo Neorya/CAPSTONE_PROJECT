@@ -25,6 +25,7 @@
 .navbar-right {
   display: flex;
   align-items: center;
+  gap: 12px;
 }
 
 .navbar-profile {
@@ -47,5 +48,21 @@
   padding: 2px 6px;
   border-radius: 4px;
   font-weight: 600;
+  text-transform: uppercase;
+}
+
+.auth-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-off-badge {
+  background-color: #faad14;
+  color: #1f1f1f;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
   text-transform: uppercase;
 }
