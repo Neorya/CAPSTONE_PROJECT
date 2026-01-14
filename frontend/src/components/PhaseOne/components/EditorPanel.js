@@ -13,6 +13,7 @@ const EditorPanel = ({
     setCode,
     timeLeft,
     handleRunPublicTests,
+    handleRunCustomTests,
     publicTestsCount,
     showOutput,
     setShowOutput,
@@ -80,6 +81,8 @@ const EditorPanel = ({
                     type="primary"
                     block
                     size="large"
+                    onClick={handleRunCustomTests}
+                    disabled={timeLeft === 0}
                 >
                     Test My Custom Inputs
                 </Button>

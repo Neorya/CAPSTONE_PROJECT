@@ -1,10 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
-const PUBLIC_TESTS = [
-    { id: 1, input: '1, 5, 7, 2', expected: '15', actual: '15', status: 'passed' },
-    { id: 2, input: '-1, 0, 1', expected: '0', actual: '1', status: 'failed' },
-    { id: 3, input: '10, 20', expected: '30', actual: null, status: 'not-run' }
-];
+import {
+    getTests,
+    postStudentTest,
+    getStudentTests,
+    deleteStudentTest,
+    postSolution,
+    postCustomTest,
+    getMatchDetails
+} from '../../../services/phaseOneService';
 
 const DEFAULT_CODE = `#include <iostream>
 using namespace std;
@@ -14,13 +20,35 @@ int main(){
 }
 `;
 
+const getUserIdFromToken = () => {
+    try {
+        const token = localStorage.getItem('token');
+        if (token) {
+            const decoded = jwtDecode(token);
+            return parseInt(decoded.sub, 10);
+        }
+    } catch (e) {
+        console.error('Error decoding token:', e);
+    }
+    return null;
+};
+
 export const useAlgorithmMatchPhaseOne = () => {
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+
+    const tokenUserId = getUserIdFromToken();
+    const urlGameId = searchParams.get('gameId');
+
+    const [studentId] = useState(tokenUserId || 1);
+    const [gameId] = useState(urlGameId ? parseInt(urlGameId, 10) : 3);
     const [activeTab, setActiveTab] = useState('tests');
     const [language, setLanguage] = useState('C++');
     const [code, setCode] = useState(() => {
         return localStorage.getItem('phase_one_user_code') || DEFAULT_CODE;
     });
     const [timeLeft, setTimeLeft] = useState(45 * 60);
+    const [publicTests, setPublicTests] = useState([]);
     const [customTests, setCustomTests] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newTestInput, setNewTestInput] = useState('');
@@ -28,6 +56,8 @@ export const useAlgorithmMatchPhaseOne = () => {
     const [showOutput, setShowOutput] = useState(false);
     const [runResults, setRunResults] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
     const [problemTitle, setProblemTitle] = useState("Array Sum");
     const [problemDescription, setProblemDescription] = useState("Given an array of integers, find the sum of its elements.");
 
@@ -39,10 +69,58 @@ export const useAlgorithmMatchPhaseOne = () => {
         return () => clearInterval(timer);
     }, []);
 
-
     useEffect(() => {
         localStorage.setItem('phase_one_user_code', code);
     }, [code]);
+
+    const loadMatchData = useCallback(async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
+
+            const matchDetails = await getMatchDetails(gameId);
+
+            if (matchDetails.title) setProblemTitle(matchDetails.title);
+            if (matchDetails.description) setProblemDescription(matchDetails.description);
+
+            const testsData = await getTests(studentId, gameId);
+
+            const mappedPublicTests = (testsData || []).map(test => ({
+                id: test.test_id,
+                input: test.test_in,
+                expected: test.test_out,
+                actual: null,
+                status: 'not-run'
+            }));
+            setPublicTests(mappedPublicTests);
+
+            const customTestsData = await getStudentTests(studentId, gameId);
+
+            const mappedCustomTests = (customTestsData || []).map(test => ({
+                id: test.test_id,
+                input: test.test_in,
+                expected: test.test_out,
+                actual: null,
+                status: 'not-run'
+            }));
+            setCustomTests(mappedCustomTests);
+
+        } catch (err) {
+            console.error("Error loading match data:", err);
+            if (err.status === 403 || err.status === 401 || err.status === 404) {
+                navigate('/home');
+                return;
+            }
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [gameId, navigate, studentId]);
+
+    useEffect(() => {
+        // Load tests + match details when opening the page
+        loadMatchData();
+    }, [loadMatchData]);
 
     const formatTime = (seconds) => {
         const m = Math.floor(seconds / 60);
@@ -50,26 +128,46 @@ export const useAlgorithmMatchPhaseOne = () => {
         return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     };
 
-    const handleAddTest = () => {
-        const newTest = {
-            id: Date.now(),
-            input: newTestInput,
-            expected: newTestOutput,
-            actual: null,
-            status: 'passed'
-        };
-        setCustomTests([...customTests, newTest]);
-        setIsModalOpen(false);
-        setNewTestInput('');
-        setNewTestOutput('');
-        showSuccess('Test Is Added');
+    const handleAddTest = async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
+            const result = await postStudentTest(studentId, gameId, newTestInput, newTestOutput);
+
+            const newTest = {
+                id: result.test_id || Date.now(),
+                input: newTestInput,
+                expected: newTestOutput,
+                actual: null,
+                status: 'not-run'
+            };
+
+            setCustomTests([...customTests, newTest]);
+            setIsModalOpen(false);
+            setNewTestInput('');
+            setNewTestOutput('');
+            showSuccess('Test Is Added');
+        } catch (err) {
+            console.error("Error adding test:", err);
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const handleDeleteTest = (index) => {
-        const updatedTests = [...customTests];
-        updatedTests.splice(index, 1);
-        setCustomTests(updatedTests);
-        showSuccess('Test Is Deleted');
+    const handleDeleteTest = async (testId) => {
+        try {
+            setIsLoading(true);
+            setError(null);
+            await deleteStudentTest(testId);
+            setCustomTests(customTests.filter(test => test.id !== testId));
+            showSuccess('Test Is Deleted');
+        } catch (err) {
+            console.error("Error deleting test:", err);
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const showSuccess = (msg) => {
@@ -77,17 +175,85 @@ export const useAlgorithmMatchPhaseOne = () => {
         setTimeout(() => setSuccessMessage(null), 3000);
     };
 
-    const handleRunPublicTests = () => {
-        setShowOutput(true);
-        setRunResults({
-            passed: 2,
-            failed: 2,
-            errors: [
-                "Error 1: Status 1: The separation of array [1] is not event: Failed: Input: [-1, 0, 1] Expected Output: 0, Actual Output: 1",
-                "Error 2: Status 2: The separation of array [] is not event: Failed: Input: [] Expected Output: 0, Actual Output: None"
-            ]
+    const transformTestResults = (result) => {
+        if (!result.compiled) {
+            return {
+                passed: 0,
+                failed: 0,
+                errors: [result.message],
+                testResults: []
+            };
+        }
+
+        const testResults = result.test_results || [];
+        const passed = testResults.filter(t => t.status === 'pass').length;
+        const failed = testResults.filter(t => t.status !== 'pass').length;
+        const errors = testResults
+            .filter(t => t.status !== 'pass')
+            .map(t => `Test ${t.test_id}: ${t.message || 'Output mismatch'}${t.actual_output ? ` (Got: ${t.actual_output})` : ''}`);
+
+        return { passed, failed, errors, testResults };
+    };
+
+    const updateTestsWithResults = (tests, testResults) => {
+        return tests.map(test => {
+            const result = testResults.find(r => r.test_id === test.id);
+            if (result) {
+                return {
+                    ...test,
+                    status: result.status === 'pass' ? 'passed' : 'failed',
+                    actual: result.actual_output || null
+                };
+            }
+            return test;
         });
     };
+
+    const handleRunPublicTests = async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
+            const result = await postSolution(studentId, gameId, code);
+
+            const transformedResult = transformTestResults(result);
+            setShowOutput(true);
+            setRunResults(transformedResult);
+
+            if (transformedResult.testResults.length > 0) {
+                setPublicTests(updateTestsWithResults(publicTests, transformedResult.testResults));
+            }
+        } catch (err) {
+            console.error("Error running public tests:", err);
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleRunCustomTests = async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
+            const result = await postCustomTest(studentId, gameId, code);
+
+            const transformedResult = transformTestResults(result);
+            setShowOutput(true);
+            setRunResults(transformedResult);
+
+            if (transformedResult.testResults.length > 0) {
+                setCustomTests(updateTestsWithResults(customTests, transformedResult.testResults));
+            }
+        } catch (err) {
+            console.error("Error running custom tests:", err);
+            setError(err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // NOTE: submit is currently equivalent to running the public tests; keeping the
+    // handler here makes it easy to add a dedicated "Submit" button later.
+    const handleSubmitSolution = handleRunPublicTests;
 
     return {
         activeTab,
@@ -98,6 +264,7 @@ export const useAlgorithmMatchPhaseOne = () => {
         setCode,
         timeLeft,
         formatTime,
+        publicTests,
         customTests,
         isModalOpen,
         setIsModalOpen,
@@ -112,7 +279,10 @@ export const useAlgorithmMatchPhaseOne = () => {
         handleAddTest,
         handleDeleteTest,
         handleRunPublicTests,
-        PUBLIC_TESTS,
+        handleRunCustomTests,
+        handleSubmitSolution,
+        isLoading,
+        error,
         problemTitle,
         problemDescription
     };

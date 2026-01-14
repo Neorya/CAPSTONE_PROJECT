@@ -30,8 +30,12 @@ services:
   api:
     build: ./api  
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    cap_add:
+      - SYS_ADMIN
+      - SYS_PTRACE
     security_opt:
       - seccomp=unconfined
+      - apparmor=unconfined
     volumes:
       - ./api/src:/app
       - ./api/nsjail.cfg:/app/nsjail.cfg

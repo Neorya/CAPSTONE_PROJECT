@@ -16,6 +16,7 @@ export const API_ENDPOINTS = {
   GET_LAST_GAME: '/api/get_next_upcoming_game',
   HAS_STUDENT_JOINED: '/api/has_student_joined_game',
   LEADERBOARD: '/api/leaderboard',
-  STUDENT_RESULTS: '/api/student-results'
+  STUDENT_RESULTS: '/api/student-results',
+  PHASE_ONE: '/api/phase-one'
 };
 
