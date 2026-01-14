@@ -36,8 +36,7 @@ const MatchSettingsList = () => {
           id: item.match_set_id,
           name: item.title,
           description: item.description,
-          public_test: item.public_test,
-          private_test: item.private_test,
+          tests: item.tests,
           reference_solution: item.reference_solution,
           status: item.is_ready ? "Ready" : "Draft",
         }));
@@ -72,9 +71,9 @@ const MatchSettingsList = () => {
       key: "action",
       width: 120,
       render: (_, record) => (
-        <Button 
+        <Button
           id={`btn-details-${record.id}`}
-          icon={<EyeOutlined />} 
+          icon={<EyeOutlined />}
           onClick={() => openPopup(record)}
         >
           Details
@@ -89,9 +88,9 @@ const MatchSettingsList = () => {
       <Card className="match-settings-card">
         <div className="page-header">
           <Tooltip title="Back to Home">
-            <Button 
+            <Button
               id="back-to-home-button"
-              icon={<ArrowLeftOutlined />} 
+              icon={<ArrowLeftOutlined />}
               onClick={() => navigate('/home')}
               shape="circle"
               size="large"
@@ -120,7 +119,7 @@ const MatchSettingsList = () => {
               optionType="button"
               buttonStyle="solid"
             >
-              <Radio.Button id="filter-opt-all"value="All">All</Radio.Button>
+              <Radio.Button id="filter-opt-all" value="All">All</Radio.Button>
               <Radio.Button id="filter-opt-ready" value="Ready">Ready</Radio.Button>
               <Radio.Button id="filter-opt-draft" value="Draft">Draft</Radio.Button>
             </Radio.Group>
@@ -130,7 +129,7 @@ const MatchSettingsList = () => {
         <Table
           dataSource={items}
           columns={columns}
-          loading={loading} 
+          loading={loading}
           pagination={{ pageSize: 8, showSizeChanger: false }}
           rowKey="id"
           className="match-settings-table"
