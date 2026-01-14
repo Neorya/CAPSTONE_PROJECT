@@ -161,8 +161,14 @@ class StudentJoinGame(Base):
 
     assigned_match_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.match.match_id"), nullable=True)
 
+class MatchJoinGame(Base):
+    __tablename__ = "match_for_game"
+    __table_args__ = {'schema': SCHEMA_NAME}
 
 
+    match_for_game_id = Column(Integer, primary_key=True)
+    match_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.match.match_id"))
+    game_id  = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.game_session.game_id"))
 
 class GameStatusEnum(enum.Enum):
     active = "active"
