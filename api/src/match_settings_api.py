@@ -46,8 +46,8 @@ class MatchSettingResponse(BaseModel):
     title: str = Field(..., description="Title of the match setting")
     description: str = Field(..., description="Detailed description")
     is_ready: bool = Field(..., description="Readiness status: true=ready, false=draft")
-    public_test: str = Field(..., description="Public tests (input and expected output)")
-    private_test: str = Field(..., description="Private tests (input and expected output)")
+    public_test: Optional[str] = Field(None, description="Public tests (input and expected output)")
+    private_test: Optional[str] = Field(None, description="Private tests (input and expected output)")
     reference_solution: str = Field(..., description="Reference solution code")
     creator_id: int = Field(
         ..., description="ID of the teacher who created this setting"
