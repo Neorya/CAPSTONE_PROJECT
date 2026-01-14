@@ -168,6 +168,10 @@ class GameStatusEnum(enum.Enum):
     active = "active"
     inactive = "inactive"
 
+class TestScopeEnum(enum.Enum):
+    public = "public"
+    private = "private"
+
 class GameSession(Base):
     __tablename__ = "game_session"
     __table_args__ = {'schema': SCHEMA_NAME}
@@ -180,6 +184,61 @@ class GameSession(Base):
     is_active = Column(Boolean, default=True, nullable=False)
     duration_phase1 = Column(Integer, nullable=False)
     duration_phase2 = Column(Integer, nullable=False)
+
+
+class Test(Base):
+    """
+    SQLAlchemy model for the 'tests' table (teacher-created tests).
+    """
+    __tablename__ = "tests"
+    __table_args__ = {'schema': SCHEMA_NAME}
+
+    test_id = Column(Integer, primary_key=True)
+    test_in = Column(String(500), nullable=True)
+    test_out = Column(String(500), nullable=True)
+    scope = Column(Enum(TestScopeEnum), nullable=False)
+    match_set_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.match_setting.match_set_id"), nullable=False)
+
+
+class StudentTest(Base):
+    """
+    SQLAlchemy model for the 'student_tests' table (student-created tests).
+    """
+    __tablename__ = "student_tests"
+    __table_args__ = {'schema': SCHEMA_NAME}
+
+    test_id = Column(Integer, primary_key=True)
+    test_in = Column(String(500), nullable=True)
+    test_out = Column(String(500), nullable=True)
+    match_for_game_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.matches_for_game.match_for_game_id"), nullable=False)
+    student_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student.student_id"), nullable=False)
+
+
+class StudentSolution(Base):
+    """
+    SQLAlchemy model for the 'student_solutions' table.
+    """
+    __tablename__ = "student_solutions"
+    __table_args__ = {'schema': SCHEMA_NAME}
+
+    solution_id = Column(Integer, primary_key=True)
+    code = Column(Text, nullable=False)
+    has_passed = Column(Boolean, nullable=False, default=False)
+    match_for_game_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.matches_for_game.match_for_game_id"), nullable=False)
+    student_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student.student_id"), nullable=False)
+
+
+class StudentSolutionTest(Base):
+    """
+    SQLAlchemy model for the 'student_solution_tests' table (many-to-many relationship).
+    """
+    __tablename__ = "student_solution_tests"
+    __table_args__ = {'schema': SCHEMA_NAME}
+
+    teacher_test_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.tests.test_id"), primary_key=True)
+    student_test_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student_tests.test_id"), primary_key=True)
+    solution_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student_solutions.solution_id"), primary_key=True)
+    test_output = Column(Text, nullable=False)
 
 # ============================================================================
 # Pydantic Models for Game Session Management API (User Story 3)
@@ -258,3 +317,5 @@ class MatchJoinGameResponse(BaseModel):
     match_for_game_id: int = Field(..., description="ID of the match-for-game record")
     match_id: int = Field(..., description="ID of the match")
     game_id: int = Field(..., description="ID of the game session")
+
+
