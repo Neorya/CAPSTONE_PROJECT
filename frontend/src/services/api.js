@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "./config";
+import { isAuthEnabled } from "./authService";
 
 let isRefreshing = false;
 let failedQueue = [];
@@ -22,7 +23,7 @@ export const apiFetch = async (url, options = {}) => {
         ...options.headers,
     };
 
-    if (token) {
+    if (isAuthEnabled() && token) {
         headers["Authorization"] = `Bearer ${token}`;
     }
 
@@ -33,6 +34,11 @@ export const apiFetch = async (url, options = {}) => {
 
     try {
         const response = await fetch(url, config);
+
+        // If auth is globally disabled, do not attempt refresh/redirect flows.
+        if (!isAuthEnabled()) {
+            return response;
+        }
 
         if (response.status === 401) {
             if (isRefreshing) {

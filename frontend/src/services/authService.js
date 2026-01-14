@@ -6,9 +6,46 @@
 import { API_BASE_URL } from "./config";
 
 /**
+ * Auth enable/disable controls
+ *
+ * - Build-time default is controlled by REACT_APP_AUTH_ENABLED.
+ * - Runtime override is stored in localStorage to allow quick toggling in dev/tests.
+ *
+ * IMPORTANT: CRA/Vite style env vars are baked at build time; changing them requires rebuild.
+ */
+const AUTH_ENABLED_OVERRIDE_KEY = "auth_enabled_override";
+const AUTH_ENABLED_DEFAULT = String(process.env.REACT_APP_AUTH_ENABLED || "false") === "true";
+
+/**
  * Dev mode flag key in localStorage
  */
 const DEV_MODE_KEY = "dev_mode_bypass";
+
+/**
+ * Determine whether authentication is enabled.
+ * If auth is disabled, route guards and token validation will be bypassed.
+ */
+export const isAuthEnabled = () => {
+  const override = localStorage.getItem(AUTH_ENABLED_OVERRIDE_KEY);
+  if (override === "true") return true;
+  if (override === "false") return false;
+  return AUTH_ENABLED_DEFAULT;
+};
+
+/**
+ * Persist a runtime override for whether auth is enabled.
+ * This is useful for local development and test environments.
+ */
+export const setAuthEnabledOverride = (enabled) => {
+  localStorage.setItem(AUTH_ENABLED_OVERRIDE_KEY, enabled ? "true" : "false");
+};
+
+/**
+ * Clear the runtime override and fall back to the build-time env default.
+ */
+export const clearAuthEnabledOverride = () => {
+  localStorage.removeItem(AUTH_ENABLED_OVERRIDE_KEY);
+};
 
 /**
  * Check if dev mode bypass is enabled
@@ -71,6 +108,11 @@ export const setToken = (token) => {
  * In dev mode, returns true if dev mode is enabled
  */
 export const validateToken = async () => {
+  // Global auth kill-switch (used in tests / local development)
+  if (!isAuthEnabled()) {
+    return true;
+  }
+
   // Check if dev mode is enabled
   // SECURITY NOTE: This bypasses backend token validation when dev mode is enabled.
   // Any code path that relies on validateToken for authorization will be circumvented.
@@ -118,6 +160,11 @@ export const validateToken = async () => {
  * Refresh the access token using the refresh token cookie
  */
 export const refreshToken = async () => {
+  // If auth is disabled, skip refresh attempts.
+  if (!isAuthEnabled()) {
+    return true;
+  }
+
   try {
     const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
       method: "POST",
@@ -150,6 +197,11 @@ export const refreshToken = async () => {
  */
 export const logout = async () => {
   try {
+    // If auth is disabled, just clear local state (no backend calls).
+    if (!isAuthEnabled()) {
+      return;
+    }
+
     // Only call backend logout if not in dev mode
     const token = getToken();
     if (token !== "dev_mode_token") {
