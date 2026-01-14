@@ -11,6 +11,7 @@ from student_results_api import router as student_results_router
 from leaderboard_api import router as leaderboard_router
 from authentication.routes.auth_routes import router as auth_router
 from phase_one import router as phase_one_router
+from phase_two import router as phase_two_router
 from authentication.config import validate_required_env_vars
 
 app = FastAPI()
@@ -43,6 +44,7 @@ app.include_router(student_results_router)
 app.include_router(leaderboard_router)
 app.include_router(auth_router)
 app.include_router(phase_one_router)
+app.include_router(phase_two_router)
 
 
 @app.get("/")
