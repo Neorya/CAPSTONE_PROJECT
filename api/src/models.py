@@ -17,9 +17,13 @@ from database import Base
 # Note: The 'capstone_app' schema is specified here
 SCHEMA_NAME = "capstone_app"
 
-class TestScope(enum.Enum):
-    private = "private"
+class TestScopeEnum(enum.Enum):
     public = "public"
+    private = "private"
+
+class GameStatusEnum(enum.Enum):
+    active = "active"
+    inactive = "inactive"
 
 class Teacher(Base):
     """
@@ -63,7 +67,7 @@ class MatchSetting(Base):
 
 class Test(Base):
     """
-    SQLAlchemy model for the 'tests' table.
+    SQLAlchemy model for the 'tests' table (teacher-created tests).
     """
     __tablename__ = "tests"
     __table_args__ = {'schema': SCHEMA_NAME}
@@ -71,25 +75,30 @@ class Test(Base):
     test_id = Column(Integer, primary_key=True)
     test_in = Column(String(500), nullable=True)
     test_out = Column(String(500), nullable=True)
-    scope = Column(Enum(TestScope), nullable=False)
+    scope = Column(Enum(TestScopeEnum), nullable=False)
     match_set_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.match_setting.match_set_id"), nullable=False)
 
     match_setting = relationship("MatchSetting", back_populates="tests")
 
 
 class StudentTest(Base):
+    """
+    SQLAlchemy model for the 'student_tests' table (student-created tests).
+    """
     __tablename__ = "student_tests"
     __table_args__ = {'schema': SCHEMA_NAME}
 
     test_id = Column(Integer, primary_key=True)
     test_in = Column(String(500), nullable=True)
     test_out = Column(String(500), nullable=True)
-
     match_for_game_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.matches_for_game.match_for_game_id"), nullable=False)
     student_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student.student_id"), nullable=False)
 
 
 class StudentSolution(Base):
+    """
+    SQLAlchemy model for the 'student_solutions' table.
+    """
     __tablename__ = "student_solutions"
     __table_args__ = {'schema': SCHEMA_NAME}
 
@@ -97,7 +106,6 @@ class StudentSolution(Base):
     code = Column(Text, nullable=False)
     has_passed = Column(Boolean, nullable=False, default=False)
     passed_test = Column(Integer, default=0)
-
     match_for_game_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.matches_for_game.match_for_game_id"), nullable=False)
     student_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student.student_id"), nullable=False)
     
@@ -164,13 +172,7 @@ class StudentJoinGame(Base):
 
 
 
-class GameStatusEnum(enum.Enum):
-    active = "active"
-    inactive = "inactive"
 
-class TestScopeEnum(enum.Enum):
-    public = "public"
-    private = "private"
 
 class GameSession(Base):
     __tablename__ = "game_session"
@@ -184,48 +186,6 @@ class GameSession(Base):
     is_active = Column(Boolean, default=True, nullable=False)
     duration_phase1 = Column(Integer, nullable=False)
     duration_phase2 = Column(Integer, nullable=False)
-
-
-class Test(Base):
-    """
-    SQLAlchemy model for the 'tests' table (teacher-created tests).
-    """
-    __tablename__ = "tests"
-    __table_args__ = {'schema': SCHEMA_NAME}
-
-    test_id = Column(Integer, primary_key=True)
-    test_in = Column(String(500), nullable=True)
-    test_out = Column(String(500), nullable=True)
-    scope = Column(Enum(TestScopeEnum), nullable=False)
-    match_set_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.match_setting.match_set_id"), nullable=False)
-
-
-class StudentTest(Base):
-    """
-    SQLAlchemy model for the 'student_tests' table (student-created tests).
-    """
-    __tablename__ = "student_tests"
-    __table_args__ = {'schema': SCHEMA_NAME}
-
-    test_id = Column(Integer, primary_key=True)
-    test_in = Column(String(500), nullable=True)
-    test_out = Column(String(500), nullable=True)
-    match_for_game_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.matches_for_game.match_for_game_id"), nullable=False)
-    student_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student.student_id"), nullable=False)
-
-
-class StudentSolution(Base):
-    """
-    SQLAlchemy model for the 'student_solutions' table.
-    """
-    __tablename__ = "student_solutions"
-    __table_args__ = {'schema': SCHEMA_NAME}
-
-    solution_id = Column(Integer, primary_key=True)
-    code = Column(Text, nullable=False)
-    has_passed = Column(Boolean, nullable=False, default=False)
-    match_for_game_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.matches_for_game.match_for_game_id"), nullable=False)
-    student_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student.student_id"), nullable=False)
 
 
 class StudentSolutionTest(Base):
