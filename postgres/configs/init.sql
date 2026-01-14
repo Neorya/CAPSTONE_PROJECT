@@ -90,6 +90,21 @@ CREATE TABLE capstone_app.tests (
 
 
 
+CREATE TYPE test_scope AS ENUM ('private', 'public');
+
+DROP TABLE IF EXISTS capstone_app.tests;
+
+CREATE TABLE capstone_app.tests (
+    test_id SERIAL PRIMARY KEY,
+    test_in VARCHAR(500),
+    test_out VARCHAR(500),
+    scope test_scope NOT NULL,
+  
+    match_set_id INTEGER REFERENCES capstone_app.match_setting(match_set_id) NOT NULL
+);
+
+
+
 -- Creation of Match Table & fk match teacher and match setting:  (User story 2)
 
 DROP TABLE IF EXISTS capstone_app.match;
@@ -170,6 +185,31 @@ CREATE TABLE capstone_app.student_solutions (
     has_passed BOOLEAN NOT NULL DEFAULT FALSE,
     match_for_game_id INTEGER REFERENCES capstone_app.matches_for_game(match_for_game_id) NOT NULL,
     student_id INTEGER REFERENCES capstone_app.student(student_id) NOT NULL
+);
+
+
+DROP TABLE IF EXISTS capstone_app.student_tests;
+
+CREATE TABLE capstone_app.student_tests (
+    test_id SERIAL PRIMARY KEY,
+    test_in VARCHAR(500),
+    test_out VARCHAR(500),
+
+    match_for_game_id INTEGER REFERENCES capstone_app.matches_for_game(match_for_game_id) NOT NULL,
+    student_id INTEGER REFERENCES capstone_app.student(student_id) NOT NULL
+
+);
+
+DROP TABLE IF EXISTS capstone_app.student_solutions;
+
+CREATE TABLE capstone_app.student_solutions (
+    solution_id SERIAL PRIMARY KEY,
+    code TEXT NOT NULL,
+    has_passed BOOLEAN NOT NULL DEFAULT FALSE,
+    passed_test INTEGER DEFAULT 0,
+    match_for_game_id INTEGER REFERENCES capstone_app.matches_for_game(match_for_game_id) NOT NULL,
+    student_id INTEGER REFERENCES capstone_app.student(student_id) NOT NULL
+
 );
 
 DROP TABLE IF EXISTS capstone_app.student_solution_tests;
@@ -313,33 +353,102 @@ VALUES ('Paolo', 'Gialli', 'p.gialli@capstone.it');
 
 -- Match Settings created by Teacher 1 (ID 1)
 INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
 ('Standard Mode 1', 'Quick match, 5 rounds.', TRUE, 'int square(int n) { return n * n; }', 1),
 ('Advanced Algebra', '15-round math challenge.', TRUE, 'int add(int x, int y) { return x + y; }', 1);
+('Standard Mode 1', 'Quick match, 5 rounds.', TRUE, 'def square(n): return n * n', 1),
+('Advanced Algebra', '15-round math challenge.', TRUE, 'def add(x, y): return x + y', 1);
 
 -- Match Settings created by Teacher 2 (ID 2)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
 ('History Facts', 'Review of Roman Empire history.', FALSE, '#include <map>\n#include <string>\n\nstd::map<std::string, std::string> history = { {"Julius Caesar", "44 BC"}, {"Augustus", "27 BC"} };', 2),
 ('Geography Quiz', 'Quiz on European capitals.', TRUE, '#include <map>\n#include <string>\n\nstd::map<std::string, std::string> capitals = { {"France", "Paris"}, {"Germany", "Berlin"} };', 2);
+('History Facts', 'Review of Roman Empire history.', FALSE, 'history = {"Julius Caesar": "44 BC", "Augustus": "27 BC"}', 2),
+('Geography Quiz', 'Quiz on European capitals.', TRUE, 'capitals = {"France": "Paris", "Germany": "Berlin"}', 2);
 
 -- Match Settings created by Teacher 3 (ID 3)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
 ('Science Fundamentals', 'Basics of Physics.', TRUE, 'double calculate_force(double mass, double acceleration) { return mass * acceleration; }', 3),
 ('Chemistry Equations', 'Balancing basic equations.', FALSE, '#include <string>\n\nstd::string balance_equation(std::string reactants) { return (reactants.find("H2+O2") != std::string::npos) ? "2H2O" : "CO2"; }', 3);
+('Science Fundamentals', 'Basics of Physics.', TRUE, 'def calculate_force(mass, acceleration): return mass * acceleration', 3),
+('Chemistry Equations', 'Balancing basic equations.', FALSE, 'def balance_equation(reactants): return "2H2O" if "H2+O2" in reactants else "CO2"', 3);
 
 -- Match Settings created by Teacher 4 (ID 4)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
 ('Literature Review 1', '19th Century English novels.', TRUE, '#include <map>\n#include <string>\n\nstd::map<std::string, std::string> authors = { {"Pride and Prejudice", "Jane Austen"}, {"Wuthering Heights", "Emily Brontë"} };', 4),
 ('Grammar Practice', 'Advanced Italian grammar.', TRUE, '#include <string>\n\nstd::string get_tense(std::string verb) { return (verb.find("mangio") != std::string::npos) ? "presente indicativo" : "passato prossimo"; }', 4);
+('Literature Review 1', '19th Century English novels.', TRUE, 'authors = {"Pride and Prejudice": "Jane Austen", "Wuthering Heights": "Emily Brontë"}', 4),
+('Grammar Practice', 'Advanced Italian grammar.', TRUE, 'def get_tense(verb): return "presente indicativo" if "mangio" in verb else "passato prossimo"', 4);
 
 -- Match Settings created by Teacher 5 (ID 5)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
 ('Coding Basics', 'Introduction to Python syntax.', TRUE, '#include <vector>\n#include <numeric>\n\nint sum_numbers(std::vector<int> args) { return std::accumulate(args.begin(), args.end(), 0); }', 5),
 ('Data Structures Review', 'Review of linked lists and trees.', FALSE, 'struct Node { int data; Node* next; Node(int d) : data(d), next(nullptr) {} };', 5);
+
+-- ######################################
+-- INSERT DATA INTO TESTS TABLE (Derived from old match_setting fields)
+-- ######################################
+
+-- Match Setting 1
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('5', '25', 'public', 1),
+('10', '100', 'private', 1);
+
+-- Match Setting 2
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('x=3 y=4', '7', 'public', 2),
+('x=7 y=9', '16', 'private', 2);
+
+-- Match Setting 3
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('Julius Caesar', '44 BC', 'public', 3),
+('Augustus', '27 BC', 'private', 3);
+
+-- Match Setting 4
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('France', 'Paris', 'public', 4),
+('Germany', 'Berlin', 'private', 4);
+
+-- Match Setting 5
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('mass=10kg acceleration=2m/s²', 'Force=20N', 'public', 5),
+('mass=5kg acceleration=9.8m/s²', 'Force=49N', 'private', 5);
+
+-- Match Setting 6
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('H2+O2', '2H2O', 'public', 6),
+('C+O2', 'CO2', 'private', 6);
+
+-- Match Setting 7
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('Pride and Prejudice', 'Jane Austen', 'public', 7),
+('Wuthering Heights', 'Emily Brontë', 'private', 7);
+
+-- Match Setting 8
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('io mangio', 'presente indicativo', 'public', 8),
+('io ho mangiato', 'passato prossimo', 'private', 8);
+
+-- Match Setting 9
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('1 2 3', '6', 'public', 9),
+('5 10 15', '30', 'private', 9);
+
+-- Match Setting 10
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('1 2 3', 'Linked List', 'public', 10),
+('4 5 6', 'Binary Tree', 'private', 10);
+('Coding Basics', 'Introduction to Python syntax.', TRUE, 'def sum_numbers(*args): return sum(args)', 5),
+('Data Structures Review', 'Review of linked lists and trees.', FALSE, 'class Node: def __init__(self, data): self.data = data; self.next = None', 5);
 
 -- ######################################
 -- INSERT DATA INTO TESTS TABLE (Derived from old match_setting fields)
