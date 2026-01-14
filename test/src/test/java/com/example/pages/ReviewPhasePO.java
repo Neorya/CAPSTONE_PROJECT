@@ -1,6 +1,7 @@
 package com.example.pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -12,13 +13,13 @@ public class ReviewPhasePO {
     private WebDriver driver;
     private WebDriverWait wait;
 
-    private static final String VOTING_SECTION_HEADER_XPATH = "//h2[contains(text(),'Voting Phase')]";
+    private static final String VOTING_SECTION_HEADER_ID = "voting-phase-header";
     private static final String VIEW_SOLUTIONS_LIST_ID = "view-solutions-list";
     private static final String SOLUTION_ITEM_XPATH = "//div[contains(@class, 'solution-item')]";
     private static final String PARTICIPANT_ID_XPATH = ".//span[contains(@class, 'participant-id')]";
     private static final String SUBMISSION_TIMESTAMP_XPATH = "//span[contains(@class, 'submission-timestamp')]";
     private static final String CODE_READONLY_CONTAINER_XPATH = "//div[contains(@id, 'code-editor-readonly')]";
-    private static final String VIEW_DETAILS_BUTTON_XPATH = "//button[contains(text(), 'View Details')]";
+    private static final String VIEW_DETAILS_BUTTON_XPATH = "//span[contains(text(), 'View Details')]";
     
     private static final String VOTE_CORRECT_RADIO_ID = "vote-correct";
     private static final String VOTE_INCORRECT_RADIO_ID = "vote-incorrect";
@@ -36,6 +37,8 @@ public class ReviewPhasePO {
     
     private static final String TODO_LIST_ID = "todo-review-list";
 
+    private static final String TITLE_ID = "voting-phase-header";
+
     public ReviewPhasePO(WebDriver driver) {
         this.driver = driver;
         int waitTimeout = (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) ? 30 : 10;
@@ -43,15 +46,18 @@ public class ReviewPhasePO {
     }
 
     public void clickIncorrectVote() {
-        wait.until(ExpectedConditions.elementToBeClickable(By.id(VOTE_INCORRECT_RADIO_ID))).click();
+        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(By.id(VOTE_INCORRECT_RADIO_ID)));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
     }
 
     public void clickCorrectVote() {
-        wait.until(ExpectedConditions.elementToBeClickable(By.id(VOTE_CORRECT_RADIO_ID))).click();
+        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(By.id(VOTE_CORRECT_RADIO_ID)));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
     }
 
     public void clickSkipVote() {
-        wait.until(ExpectedConditions.elementToBeClickable(By.id(VOTE_SKIP_RADIO_ID))).click();
+        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(By.id(VOTE_SKIP_RADIO_ID)));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
     }
     
 
@@ -73,6 +79,7 @@ public class ReviewPhasePO {
 
     public void clickViewDetails(int index) {
         List<WebElement> buttons = driver.findElements(By.xpath(VIEW_DETAILS_BUTTON_XPATH));
+
         if (index >= 0 && index < buttons.size()) {
              buttons.get(index).click();
         }
@@ -86,7 +93,7 @@ public class ReviewPhasePO {
 
     public boolean isVotingSectionVisible() {
         try {
-            return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(VOTING_SECTION_HEADER_XPATH))).isDisplayed();
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(VOTING_SECTION_HEADER_ID))).isDisplayed();
         } catch (Exception e) {
             return false;
         }
@@ -128,6 +135,10 @@ public class ReviewPhasePO {
          return solutionItem.findElement(By.xpath(SUBMISSION_TIMESTAMP_XPATH)).getText();
     }
 
+    public String getTitle() {
+        return driver.findElement(By.id(TITLE_ID)).getText();
+    }
+    
     public boolean isCodeReadOnly() {
         try {
             WebElement editor = driver.findElement(By.xpath(CODE_READONLY_CONTAINER_XPATH));
