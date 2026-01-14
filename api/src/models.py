@@ -76,6 +76,32 @@ class Test(Base):
 
     match_setting = relationship("MatchSetting", back_populates="tests")
 
+
+class StudentTest(Base):
+    __tablename__ = "student_tests"
+    __table_args__ = {'schema': SCHEMA_NAME}
+
+    test_id = Column(Integer, primary_key=True)
+    test_in = Column(String(500), nullable=True)
+    test_out = Column(String(500), nullable=True)
+
+    match_for_game_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.matches_for_game.match_for_game_id"), nullable=False)
+    student_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student.student_id"), nullable=False)
+
+
+class StudentSolution(Base):
+    __tablename__ = "student_solutions"
+    __table_args__ = {'schema': SCHEMA_NAME}
+
+    solution_id = Column(Integer, primary_key=True)
+    code = Column(Text, nullable=False)
+    has_passed = Column(Boolean, nullable=False, default=False)
+    passed_test = Column(Integer, default=0)
+
+    match_for_game_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.matches_for_game.match_for_game_id"), nullable=False)
+    student_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student.student_id"), nullable=False)
+    
+
 class Match(Base):
     """
     SQLAlchemy model for the 'match' table.
