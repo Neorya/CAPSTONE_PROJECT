@@ -1,0 +1,364 @@
+/**
+ * Solution Results Component Styles
+ * Styling for the solution review page with two-column layout
+ */
+
+/* Container */
+.solution-results-container {
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+}
+
+/* Header */
+.solution-results-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 16px 24px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.page-title-solution {
+    font-size: 36px;
+    font-weight: 600;
+    margin: 0;
+    color: #1a1a1a;
+}
+
+.student-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+
+/* Two Column Layout */
+.solution-results-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* Left Panel - Code Block */
+.left-panel {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.solution-code-block {
+    padding: 0;
+}
+
+.code-block-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    padding: 16px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    color: #1a1a1a;
+}
+
+.code-container {
+    padding: 16px;
+    background: #1e1e1e;
+    overflow-x: auto;
+}
+
+/* Right Panel - Score and Tests */
+.right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Score Display - Horizontal Card Layout */
+.score-display-card {
+    background: white;
+    border-radius: 12px;
+    padding: 28px 32px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #e8e8e8;
+}
+
+/* Right Section - Total Score */
+.score-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-left: 32px;
+}
+
+.score-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #8c8c8c;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.score-value {
+    font-size: 56px;
+    font-weight: 700;
+    color: #1890ff;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.score-separator {
+    font-size: 48px;
+    color: #d9d9d9;
+    font-weight: 400;
+}
+
+/* Vertical Divider */
+.score-divider {
+    width: 1px;
+    height: 80px;
+    background: linear-gradient(to bottom, transparent, #e8e8e8 20%, #e8e8e8 80%, transparent);
+}
+
+/* Right Section - Test Summary */
+.test-summary-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.test-summary-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #8c8c8c;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.test-summary-grid {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.test-summary-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #fafafa;
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
+    transition: all 0.2s ease;
+    min-width: 140px;
+}
+
+.test-summary-item:hover {
+    background: #f5f5f5;
+    border-color: #e0e0e0;
+    transform: translateY(-1px);
+}
+
+.test-summary-icon {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.test-summary-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.test-summary-title {
+    font-size: 12px;
+    color: #8c8c8c;
+    font-weight: 500;
+}
+
+.test-summary-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #262626;
+}
+
+/* Test Results Section */
+.test-results-section {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 16px 0;
+    padding: 8px 12px;
+    background: #fef3e6;
+    color: #d97706;
+    border-left: 4px solid #d97706;
+    border-radius: 4px;
+}
+
+.test-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Test Result Item */
+.test-result-item {
+    padding: 12px 16px;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    background: #fafafa;
+}
+
+.test-result-item.passed {
+    border-left: 4px solid #52c41a;
+    background: #f6ffed;
+}
+
+.test-result-item.failed {
+    border-left: 4px solid #ff4d4f;
+    background: #fff1f0;
+}
+
+.test-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    flex-wrap: wrap;
+}
+
+.test-number {
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.test-input,
+.test-expected {
+    color: #595959;
+}
+
+.test-arrow {
+    color: #8c8c8c;
+}
+
+.test-status-icon {
+    font-size: 16px;
+    font-weight: bold;
+    margin-left: auto;
+}
+
+.test-status-icon.passed {
+    color: #52c41a;
+}
+
+.test-status-icon.failed {
+    color: #ff4d4f;
+}
+
+.test-status-text {
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.test-status-text.passed {
+    color: #52c41a;
+}
+
+.test-status-text.failed {
+    color: #ff4d4f;
+}
+
+.test-failure-details {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #ffccc7;
+    font-size: 13px;
+    color: #cf1322;
+}
+
+.failure-label {
+    font-weight: 600;
+    margin-right: 4px;
+}
+
+.failure-output {
+    font-style: italic;
+}
+
+/* Loading State */
+.solution-results-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 16px;
+}
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #f0f0f0;
+    border-top-color: #1890ff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.solution-results-loading p {
+    font-size: 16px;
+    color: #595959;
+}
+
+/* Error State */
+.solution-results-error {
+    padding: 48px;
+    text-align: center;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin: 24px;
+}
+
+.solution-results-error h2 {
+    color: #ff4d4f;
+    margin-bottom: 12px;
+}
+
+.solution-results-error p {
+    color: #595959;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .solution-results-content {
+        grid-template-columns: 1fr;
+    }
+}
