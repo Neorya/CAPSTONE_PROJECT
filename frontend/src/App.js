@@ -51,7 +51,7 @@ function App() {
             <Route path="/pre-start-game-session/:id" element={<PreStartGameSession />} />
             <Route path="/join-game-session" element={<JoinGameSession />} />
             <Route path="/lobby" element={<Lobby />} />
-            <Route path="/phase1" element={<AlgorithmMatchPhaseOne />} />
+            <Route path="/phase-one" element={<AlgorithmMatchPhaseOne />} />
             <Route path="/voting" element={<SolutionReview />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
