@@ -1,8 +1,9 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Typography, List, Avatar, Spin, Alert, Tooltip } from "antd";
+import { Button, Card, Typography, List, Avatar, Spin, Tooltip } from "antd";
 import { ClockCircleOutlined } from "@ant-design/icons";
 import { usePreStartGameSession } from "./hooks/usePreStartGameSession";
+import AlertNotification from "../CreateMatchForm/components/AlertNotification";
 import { ArrowLeftOutlined, EyeOutlined } from "@ant-design/icons";
 import "./PreStartGameSession.css";
 
@@ -12,11 +13,6 @@ const PreStartGameSession = () => {
     const navigate = useNavigate();
     const { session, loading, error, gameId, remainingTime, startSession } = usePreStartGameSession();
 
-
-    if (error) {
-        return <Alert message="Error" description={error} type="error" showIcon />;
-    }
-   
     if (!session) { return null; }
 
 
@@ -33,6 +29,13 @@ const PreStartGameSession = () => {
     return (
         <div className="pre-start-session-container">
             <Card className="session-card">
+                {error && (
+                    <AlertNotification
+                        type="error"
+                        message={error}
+                        onClose={() => {}}
+                    />
+                )}
                 <div className="header-section">
                     <div className="header-top">
                         <Tooltip title="Back to Home">
