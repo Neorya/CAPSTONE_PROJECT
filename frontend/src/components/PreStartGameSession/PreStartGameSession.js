@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Card, Typography, List, Avatar, Spin, Tooltip } from "antd";
-import { ClockCircleOutlined } from "@ant-design/icons";
 import { usePreStartGameSession } from "./hooks/usePreStartGameSession";
 import AlertNotification from "../CreateMatchForm/components/AlertNotification";
 import { ArrowLeftOutlined, EyeOutlined } from "@ant-design/icons";
@@ -11,7 +10,7 @@ const { Title, Text } = Typography;
 
 const PreStartGameSession = () => {
     const navigate = useNavigate();
-    const { session, loading, error, gameId, remainingTime, startSession } = usePreStartGameSession();
+    const { session, loading, error, gameId, startSession } = usePreStartGameSession();
 
     if (!session) { return null; }
 
@@ -21,7 +20,30 @@ const PreStartGameSession = () => {
         if (!ok) return;
       
         navigate(`/start-game-session/${gameId}`);
-      };
+    };
+
+
+    const formatDateTime = (value) => {
+        if (!value) return "-";
+      
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return String(value);
+      
+        return d.toLocaleString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+    };
+      
+      
+    const formatMinutes = (mins) => {
+        if (mins === null || mins === undefined) return "-";
+        return `${mins} min`;
+    };
+      
       
       
       
@@ -48,12 +70,13 @@ const PreStartGameSession = () => {
                                 className="back-button"
                             />
                         </Tooltip>
-                        <Title level={2} style={{ margin: 0 }}>Game Session</Title>
+                        {/* <Title level={2} style={{ margin: 0 }}>Game Session</Title> */}
+                        <div style={{ marginTop: 12 }}>
+                            <Title level={2} style={{ margin: 0 }}>
+                                Start {session.name} Game Session
+                            </Title>
+                            </div>
                         <div style={{ width: 40 }}></div> {/* Spacer for centering */}
-                    </div>
-                    <div className="timer-display">
-                        <ClockCircleOutlined style={{ color: '#52c41a', marginRight: 8 }} />
-                        <Text strong style={{ fontSize: '18px' }}>{remainingTime}</Text>
                     </div>
                 </div>
 
@@ -88,6 +111,30 @@ const PreStartGameSession = () => {
                         ))}
                     </div>
                 </div>
+
+                <div className="section">
+                    <Text strong style={{ fontSize: "16px" }}>
+                        Session details
+                    </Text>
+
+                    <div className="session-details">
+                        <div className="detail-row">
+                        <Text type="secondary">Scheduled start</Text>
+                        <Text strong>{formatDateTime(session.start_date)}</Text>
+                        </div>
+
+                        <div className="detail-row">
+                        <Text type="secondary">Phase 1 duration</Text>
+                        <Text strong>{formatMinutes(session.duration_phase1)}</Text>
+                        </div>
+
+                        <div className="detail-row">
+                        <Text type="secondary">Phase 2 duration</Text>
+                        <Text strong>{formatMinutes(session.duration_phase2)}</Text>
+                        </div>
+                    </div>
+                </div>
+
 
                 <Button 
                     type="primary" 

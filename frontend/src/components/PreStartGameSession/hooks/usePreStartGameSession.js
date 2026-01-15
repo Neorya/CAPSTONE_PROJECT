@@ -10,10 +10,6 @@ export const usePreStartGameSession = () => {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [remainingTime, setRemainingTime] = useState('00:00');
-
-
-
 
   const fetchSession = useCallback(async () => {
     try {
@@ -51,46 +47,11 @@ export const usePreStartGameSession = () => {
       return () => clearInterval(interval);
   }, [id, fetchSession]);
 
-  // Calculate time remaining
-  useEffect(() => {
-    const startStr = session?.actual_start_date;
-    if (!startStr) {
-      setRemainingTime("00:00");
-      return;
-    }
-  
-    const startMs = new Date(startStr).getTime();
-    const phase1Minutes = Number(session?.duration_phase1);
-    const phase1DurationMs =
-      (Number.isFinite(phase1Minutes) ? phase1Minutes : 0) * 60 * 1000;
-  
-    const phase1EndMs = startMs + phase1DurationMs;
-  
-    const tick = () => {
-      const nowMs = Date.now();
-      const remainingMs = Math.max(0, phase1EndMs - nowMs);
-  
-      const minutes = Math.floor(remainingMs / 60000);
-      const seconds = Math.floor((remainingMs % 60000) / 1000);
-  
-      setRemainingTime(
-        `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
-      );
-    };
-  
-    tick(); // set immediately (don’t wait 1s)
-    const interval = setInterval(tick, 1000);
-    return () => clearInterval(interval);
-  }, [session?.actual_start_date, session?.duration_phase1]);
-  
-  
-
   return {
     session,
     loading,
     error,
     gameId: id,
-    remainingTime,
     startSession
   };
 };
