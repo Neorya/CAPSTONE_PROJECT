@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
 import HomePage from './components/Home';
@@ -14,18 +14,18 @@ import { Lobby } from './components/Lobby';
 import AlgorithmMatchPhaseOne from './components/PhaseOne/AlgorithmMatchPhaseOne';
 import { SolutionReview } from './components/SolutionReview';
 import './App.css';
-import { useEffect } from 'react';
 
 function App() {
-
-  // Simple token extraction on app load if present in URL
+  // Simple token extraction on app load if present in URL (from OAuth callback)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('access_token');
     if (token) {
-      localStorage.setItem('token', token);
-      // Optional: Clear URL params
-      window.history.replaceState({}, document.title, window.location.pathname);
+      setToken(token);
+      // Clear URL params and redirect to home (root)
+      window.history.replaceState({}, document.title, '/');
+      // Force a page reload to trigger route protection check
+      window.location.href = '/';
     }
   }, []);
 

@@ -68,11 +68,24 @@ CREATE TABLE capstone_app.match_setting (
     title VARCHAR(150) NOT NULL UNIQUE,
     description TEXT NOT NULL,
     is_ready BOOLEAN NOT NULL DEFAULT FALSE,
-    public_test VARCHAR(500),
-    private_test VARCHAR(500),
     reference_solution VARCHAR(1000), -- this is the code solution
     
     creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id)
+);
+
+
+
+CREATE TYPE test_scope AS ENUM ('private', 'public');
+
+DROP TABLE IF EXISTS capstone_app.tests;
+
+CREATE TABLE capstone_app.tests (
+    test_id SERIAL PRIMARY KEY,
+    test_in VARCHAR(500),
+    test_out VARCHAR(500),
+    scope test_scope NOT NULL,
+  
+    match_set_id INTEGER REFERENCES capstone_app.match_setting(match_set_id) NOT NULL
 );
 
 
@@ -122,7 +135,6 @@ CREATE TABLE capstone_app.matches_for_game (
 );
 
 
-
 -- The creation of students table: (User Story 5)
 
 DROP TABLE IF EXISTS capstone_app.student;
@@ -138,7 +150,39 @@ CREATE TABLE capstone_app.student (
 -- login_id INTEGER REFERENCES capstone_app.login(login_id)
 );
 
+DROP TABLE IF EXISTS capstone_app.student_tests;
 
+CREATE TABLE capstone_app.student_tests (
+    test_id SERIAL PRIMARY KEY,
+    test_in VARCHAR(500),
+    test_out VARCHAR(500),
+
+    match_for_game_id INTEGER REFERENCES capstone_app.matches_for_game(match_for_game_id) NOT NULL,
+    student_id INTEGER REFERENCES capstone_app.student(student_id) NOT NULL
+
+);
+
+DROP TABLE IF EXISTS capstone_app.student_solutions;
+
+CREATE TABLE capstone_app.student_solutions (
+    solution_id SERIAL PRIMARY KEY,
+    code TEXT NOT NULL,
+    has_passed BOOLEAN NOT NULL DEFAULT FALSE,
+    passed_test INTEGER DEFAULT 0,
+    match_for_game_id INTEGER REFERENCES capstone_app.matches_for_game(match_for_game_id) NOT NULL,
+    student_id INTEGER REFERENCES capstone_app.student(student_id) NOT NULL
+);
+
+DROP TABLE IF EXISTS capstone_app.student_solution_tests;
+
+CREATE TABLE capstone_app.student_solution_tests (
+  teacher_test_id INTEGER REFERENCES capstone_app.tests(test_id) NOT NULL,
+  student_test_id INTEGER REFERENCES capstone_app.student_tests(test_id) NOT NULL,
+  solution_id INTEGER REFERENCES capstone_app.student_solutions(solution_id) NOT NULL,
+  test_output TEXT NOT NULL,
+  PRIMARY KEY (teacher_test_id, student_test_id, solution_id),
+  CONSTRAINT uc_solution_id_test_id UNIQUE (solution_id, student_test_id, teacher_test_id)
+);
 
 --- The creation of table for relationship between students and game session: (User Story 5)
 
@@ -151,6 +195,33 @@ CREATE TABLE capstone_app.student_join_game (
   assigned_match_id INTEGER REFERENCES capstone_app.match(match_id),
   CONSTRAINT uc_student_game UNIQUE (student_id, game_id)
 );
+
+
+
+DROP TABLE IF EXISTS capstone_app.student_assigned_review;
+
+CREATE TABLE capstone_app.student_assigned_review (
+    student_assigned_review_id SERIAL PRIMARY KEY,
+    student_id INTEGER REFERENCES capstone_app.student(student_id) NOT NULL,
+    assigned_solution_id INTEGER REFERENCES capstone_app.student_solutions(solution_id) NOT NULL
+);
+
+CREATE TYPE vote AS ENUM ('correct', 'incorrect', 'skip');
+
+DROP TABLE IF EXISTS capstone_app.student_review_vote;
+
+CREATE TABLE capstone_app.student_review_vote (
+    review_vote_id SERIAL PRIMARY KEY,
+    student_assigned_review_id INTEGER REFERENCES capstone_app.student_assigned_review(student_assigned_review_id) NOT NULL,
+    vote vote NOT NULL,
+    proof_test_in VARCHAR(500) DEFAULT NULL,
+    proof_test_out VARCHAR(500) DEFAULT NULL,
+    valid BOOLEAN DEFAULT NULL,
+    note TEXT DEFAULT NULL
+);
+
+
+
 --Create a user for that schema: (User story 1)
 
 -- 2. Create the API user (Replace 'changeme' with a strong password)
@@ -166,9 +237,17 @@ capstone_app.users,
 capstone_app.refresh_tokens,
 capstone_app.teacher,
 capstone_app.match_setting,
+capstone_app.tests,
 capstone_app.match,
 capstone_app.game_session, 
-capstone_app.matches_for_game
+capstone_app.matches_for_game,
+capstone_app.student,
+capstone_app.student_tests,
+capstone_app.student_join_game,
+capstone_app.student_solutions,
+capstone_app.student_solution_tests,
+capstone_app.student_assigned_review,
+capstone_app.student_review_vote
 TO api_user;
 
 
@@ -233,35 +312,88 @@ VALUES ('Paolo', 'Gialli', 'p.gialli@capstone.it');
 -- ######################################
 
 -- Match Settings created by Teacher 1 (ID 1)
-INSERT INTO capstone_app.match_setting (title, description, is_ready, public_test, private_test, reference_solution, creator_id)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('Standard Mode 1', 'Quick match, 5 rounds.', TRUE, 'Input: 5, Output: 25', 'Input: 10, Output: 100', 'def square(n): return n * n', 1),
-('Advanced Algebra', '15-round math challenge.', TRUE, 'Input: x=3 y=4, Output: 7', 'Input: x=7 y=9, Output: 16', 'def add(x, y): return x + y', 1);
+('Standard Mode 1', 'Quick match, 5 rounds.', TRUE, 'int square(int n) { return n * n; }', 1),
+('Advanced Algebra', '15-round math challenge.', TRUE, 'int add(int x, int y) { return x + y; }', 1);
 
 -- Match Settings created by Teacher 2 (ID 2)
-INSERT INTO capstone_app.match_setting (title, description, is_ready, public_test, private_test, reference_solution, creator_id)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('History Facts', 'Review of Roman Empire history.', FALSE, 'Input: Julius Caesar, Output: 44 BC', 'Input: Augustus, Output: 27 BC', 'history = {"Julius Caesar": "44 BC", "Augustus": "27 BC"}', 2),
-('Geography Quiz', 'Quiz on European capitals.', TRUE, 'Input: France, Output: Paris', 'Input: Germany, Output: Berlin', 'capitals = {"France": "Paris", "Germany": "Berlin"}', 2);
+('History Facts', 'Review of Roman Empire history.', FALSE, '#include <map>\n#include <string>\n\nstd::map<std::string, std::string> history = { {"Julius Caesar", "44 BC"}, {"Augustus", "27 BC"} };', 2),
+('Geography Quiz', 'Quiz on European capitals.', TRUE, '#include <map>\n#include <string>\n\nstd::map<std::string, std::string> capitals = { {"France", "Paris"}, {"Germany", "Berlin"} };', 2);
 
 -- Match Settings created by Teacher 3 (ID 3)
-INSERT INTO capstone_app.match_setting (title, description, is_ready, public_test, private_test, reference_solution, creator_id)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('Science Fundamentals', 'Basics of Physics.', TRUE, 'Input: mass=10kg acceleration=2m/s², Output: Force=20N', 'Input: mass=5kg acceleration=9.8m/s², Output: Force=49N', 'def calculate_force(mass, acceleration): return mass * acceleration', 3),
-('Chemistry Equations', 'Balancing basic equations.', FALSE, 'Input: H2+O2, Output: 2H2O', 'Input: C+O2, Output: CO2', 'def balance_equation(reactants): return "2H2O" if "H2+O2" in reactants else "CO2"', 3);
+('Science Fundamentals', 'Basics of Physics.', TRUE, 'double calculate_force(double mass, double acceleration) { return mass * acceleration; }', 3),
+('Chemistry Equations', 'Balancing basic equations.', FALSE, '#include <string>\n\nstd::string balance_equation(std::string reactants) { return (reactants.find("H2+O2") != std::string::npos) ? "2H2O" : "CO2"; }', 3);
 
 -- Match Settings created by Teacher 4 (ID 4)
-INSERT INTO capstone_app.match_setting (title, description, is_ready, public_test, private_test, reference_solution, creator_id)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('Literature Review 1', '19th Century English novels.', TRUE, 'Input: Pride and Prejudice, Output: Jane Austen', 'Input: Wuthering Heights, Output: Emily Brontë', 'authors = {"Pride and Prejudice": "Jane Austen", "Wuthering Heights": "Emily Brontë"}', 4),
-('Grammar Practice', 'Advanced Italian grammar.', TRUE, 'Input: io mangio, Output: presente indicativo', 'Input: io ho mangiato, Output: passato prossimo', 'def get_tense(verb): return "presente indicativo" if "mangio" in verb else "passato prossimo"', 4);
+('Literature Review 1', '19th Century English novels.', TRUE, '#include <map>\n#include <string>\n\nstd::map<std::string, std::string> authors = { {"Pride and Prejudice", "Jane Austen"}, {"Wuthering Heights", "Emily Brontë"} };', 4),
+('Grammar Practice', 'Advanced Italian grammar.', TRUE, '#include <string>\n\nstd::string get_tense(std::string verb) { return (verb.find("mangio") != std::string::npos) ? "presente indicativo" : "passato prossimo"; }', 4);
 
 -- Match Settings created by Teacher 5 (ID 5)
-INSERT INTO capstone_app.match_setting (title, description, is_ready, public_test, private_test, reference_solution, creator_id)
+INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('Coding Basics', 'Introduction to Python syntax.', TRUE, 'Input: 1 2 3, Output: 6', 'Input: 5 10 15, Output: 30', 'def sum_numbers(*args): return sum(args)', 5),
-('Data Structures Review', 'Review of linked lists and trees.', FALSE, 'Input: 1 2 3, Output: Linked List', 'Input: 4 5 6, Output: Binary Tree', 'class Node: def __init__(self, data): self.data = data; self.next = None', 5);
+('Coding Basics', 'Introduction to Python syntax.', TRUE, '#include <vector>\n#include <numeric>\n\nint sum_numbers(std::vector<int> args) { return std::accumulate(args.begin(), args.end(), 0); }', 5),
+('Data Structures Review', 'Review of linked lists and trees.', FALSE, 'struct Node { int data; Node* next; Node(int d) : data(d), next(nullptr) {} };', 5);
 
+-- ######################################
+-- INSERT DATA INTO TESTS TABLE (Derived from old match_setting fields)
+-- ######################################
+
+-- Match Setting 1
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('5', '25', 'public', 1),
+('10', '100', 'private', 1);
+
+-- Match Setting 2
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('x=3 y=4', '7', 'public', 2),
+('x=7 y=9', '16', 'private', 2);
+
+-- Match Setting 3
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('Julius Caesar', '44 BC', 'public', 3),
+('Augustus', '27 BC', 'private', 3);
+
+-- Match Setting 4
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('France', 'Paris', 'public', 4),
+('Germany', 'Berlin', 'private', 4);
+
+-- Match Setting 5
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('mass=10kg acceleration=2m/s²', 'Force=20N', 'public', 5),
+('mass=5kg acceleration=9.8m/s²', 'Force=49N', 'private', 5);
+
+-- Match Setting 6
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('H2+O2', '2H2O', 'public', 6),
+('C+O2', 'CO2', 'private', 6);
+
+-- Match Setting 7
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('Pride and Prejudice', 'Jane Austen', 'public', 7),
+('Wuthering Heights', 'Emily Brontë', 'private', 7);
+
+-- Match Setting 8
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('io mangio', 'presente indicativo', 'public', 8),
+('io ho mangiato', 'passato prossimo', 'private', 8);
+
+-- Match Setting 9
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('1 2 3', '6', 'public', 9),
+('5 10 15', '30', 'private', 9);
+
+-- Match Setting 10
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id) VALUES
+('1 2 3', 'Linked List', 'public', 10),
+('4 5 6', 'Binary Tree', 'private', 10);
 
 
 -- The Creation of Populate script for the Match table (User story 2)
@@ -431,4 +563,163 @@ VALUES
 (9, 5, NULL),
 (10, 5, NULL);
 
+
+-- ######################################
+-- INSERT DATA INTO STUDENT_TESTS TABLE (Example Data)
+-- ######################################
+
+-- Student 1 (Mario) tests
+INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, student_id) VALUES
+('square(2)', '4', 1, 1),
+('square(4)', '16', 2, 1);
+
+-- Student 8 (Giulia) tests
+INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, student_id) VALUES
+('mass=10 acceleration=2', '20', 5, 8),
+('mass=5 acceleration=10', '50', 6, 8);
+
+-- Student 4 (Chiara) tests
+INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, student_id) VALUES
+('Pride and Prejudice', 'Jane Austen', 7, 4);
+
+-- Student 10 (Alessia) tests
+INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, student_id) VALUES
+('1 2 3', '6', 9, 10);
+
+-- Student 3 (Andrea) tests
+INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, student_id) VALUES
+('mass=2 acceleration=5', '10', 5, 3);
+
+-- ######################################
+-- INSERT DATA INTO STUDENT_SOLUTIONS TABLE (Example Data)
+-- ######################################
+
+-- Mario Rossi
+INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
+('int square(int n) { return n * n; }', TRUE, 1, 1),
+('int multiply(int a, int b) { return a * b; }', TRUE, 2, 1);
+
+-- Giulia Romano
+INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
+('def force(m, a): return m * a', TRUE, 5, 8),
+('def force_complex(m, a): return m * (a + 0)', TRUE, 6, 8);
+
+-- Chiara Neri
+INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
+('Jane Austen is the author', TRUE, 7, 4);
+
+-- Alessia Costa
+INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
+('def sum_list(l): return sum(l)', TRUE, 9, 10);
+
+-- Andrea Verdi
+INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
+('def mass_accel(m, a): return m * a', TRUE, 5, 3);
+
+-- ######################################
+-- INSERT DATA INTO STUDENT_SOLUTION_TESTS TABLE (Sample Data)
+-- ######################################
+
+-- Mario Rossi: Match 1 (50.0) + Match 2 (50.0) = 100.0
+INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
+(1, 1, 1, '25'),  (2, 1, 1, '100'), -- Match 1: 2/2 tests passed
+(1, 2, 2, '25'),  (2, 2, 2, '100'); -- Match 2: 2/2 tests passed
+
+-- Giulia Romano: Match 5 (50.0) + Match 6 (25.0) = 75.0
+INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
+(9, 3, 3, 'Force=20N'), (10, 3, 3, 'Force=49N'), -- Match 5: 2/2 tests passed
+(11, 4, 4, '2H2O'), (12, 4, 4, 'WRONG_DATA');    -- Match 6: 1/2 tests passed
+
+-- Chiara Neri: Match 7 (50.0) = 50.0
+INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
+(13, 5, 5, 'Jane Austen'), (14, 5, 5, 'Emily Brontë'); -- Match 7: 2/2 tests passed
+
+-- Alessia Costa: Match 9 (25.0) = 25.0
+INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
+(17, 6, 6, '6'), (18, 6, 6, 'WRONG_DATA'); -- Match 9: 1/2 tests passed
+
+-- Andrea Verdi: Match 5 (25.0) = 25.0 (Tie with Alessia)
+INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
+(9, 4, 3, 'Force=20N'),   -- Teacher test 9: Charlie's solution outputs Force=20N (correct)
+(10, 4, 3, 'Force=49N');  -- Teacher test 10: Charlie's solution outputs Force=49N (correct)
+
+
+-- ######################################
+-- INSERT DATA INTO STUDENT_ASSIGNED_REVIEW TABLE (Example Data)
+-- ######################################
+
+-- Student 2 is assigned to review Student 1's solution (solution_id 1)
+INSERT INTO capstone_app.student_assigned_review (student_id, assigned_solution_id) VALUES (2, 1);
+
+-- Student 3 is assigned to review Student 1's solution (solution_id 1)
+INSERT INTO capstone_app.student_assigned_review (student_id, assigned_solution_id) VALUES (3, 1);
+
+-- Student 4 is assigned to review Student 1's solution (solution_id 1)
+INSERT INTO capstone_app.student_assigned_review (student_id, assigned_solution_id) VALUES (4, 1);
+
+-- Student 1 is assigned to review Student 2's solution (solution_id 2)
+INSERT INTO capstone_app.student_assigned_review (student_id, assigned_solution_id) VALUES (1, 2);
+
+-- Student 3 is assigned to review Student 2's solution (solution_id 2)
+INSERT INTO capstone_app.student_assigned_review (student_id, assigned_solution_id) VALUES (3, 2);
+
+-- Student 4 is assigned to review Student 2's solution (solution_id 2)
+INSERT INTO capstone_app.student_assigned_review (student_id, assigned_solution_id) VALUES (4, 2);
+
+-- Student 5 is assigned to review Student 2's solution (solution_id 2)
+INSERT INTO capstone_app.student_assigned_review (student_id, assigned_solution_id) VALUES (5, 2);
+
+-- Student 1 is assigned to review Student 3's solution (solution_id 3)
+INSERT INTO capstone_app.student_assigned_review (student_id, assigned_solution_id) VALUES (1, 3);
+
+-- Student 2 is assigned to review Student 3's solution (solution_id 3)
+INSERT INTO capstone_app.student_assigned_review (student_id, assigned_solution_id) VALUES (2, 3);
+
+-- Student 4 is assigned to review Student 3's solution (solution_id 3)
+INSERT INTO capstone_app.student_assigned_review (student_id, assigned_solution_id) VALUES (4, 3);
+
+
+-- ######################################
+-- INSERT DATA INTO STUDENT_REVIEW_VOTE TABLE (Example Data)
+-- ######################################
+
+-- Vote for assignment 1 (Student 2 reviews Student 1's solution) - marks it as correct
+INSERT INTO capstone_app.student_review_vote (student_assigned_review_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(1, 'correct', NULL, NULL, TRUE, 'Clean and efficient implementation');
+
+-- Vote for assignment 2 (Student 3 reviews Student 1's solution) - marks it as correct with proof
+INSERT INTO capstone_app.student_review_vote (student_assigned_review_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(2, 'correct', 'square(4)', '16', TRUE, 'Tested with additional input, works perfectly');
+
+-- Vote for assignment 3 (Student 4 reviews Student 1's solution) - marks it as correct
+INSERT INTO capstone_app.student_review_vote (student_assigned_review_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(3, 'correct', NULL, NULL, TRUE, NULL);
+
+-- Vote for assignment 4 (Student 1 reviews Student 2's solution) - marks it as incorrect with proof
+INSERT INTO capstone_app.student_review_vote (student_assigned_review_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(4, 'incorrect', 'square(3)', '6', TRUE, 'The function adds instead of multiplying');
+
+-- Vote for assignment 5 (Student 3 reviews Student 2's solution) - marks it as incorrect with proof
+INSERT INTO capstone_app.student_review_vote (student_assigned_review_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(5, 'incorrect', 'square(5)', '10', TRUE, 'Wrong operator used, should return 25 not 10');
+
+-- Vote for assignment 6 (Student 4 reviews Student 2's solution) - skips the review
+INSERT INTO capstone_app.student_review_vote (student_assigned_review_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(6, 'skip', NULL, NULL, NULL, 'Not sure about this one');
+
+-- Vote for assignment 7 (Student 5 reviews Student 2's solution) - marks it as incorrect but invalid proof
+INSERT INTO capstone_app.student_review_vote (student_assigned_review_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(7, 'incorrect', 'square(2)', '4', FALSE, 'Found an issue but my test case was wrong');
+
+-- Vote for assignment 8 (Student 1 reviews Student 3's solution) - marks it as correct
+INSERT INTO capstone_app.student_review_vote (student_assigned_review_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(8, 'correct', NULL, NULL, TRUE, 'Good solution for force calculation');
+
+-- Vote for assignment 9 (Student 2 reviews Student 3's solution) - marks it as correct with proof
+INSERT INTO capstone_app.student_review_vote (student_assigned_review_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(9, 'correct', 'calculate_force(10, 5)', '50', TRUE, 'Verified with F=ma formula');
+
+-- Vote for assignment 10 (Student 4 reviews Student 3's solution) - skips the review
+INSERT INTO capstone_app.student_review_vote (student_assigned_review_id, vote, proof_test_in, proof_test_out, valid, note) VALUES
+(10, 'skip', NULL, NULL, NULL, NULL);
 

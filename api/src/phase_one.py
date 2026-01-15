@@ -1,0 +1,531 @@
+import os
+from typing import List, Optional, Annotated
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.orm import Session
+from pydantic import BaseModel, Field
+
+from database import get_db
+from models import (
+    StudentJoinGame,
+    Match,
+    MatchSetting,
+    Test,
+    TestScope,
+    MatchesForGame,
+    StudentTest,
+    StudentSolution,
+)
+from authentication.routes.auth_routes import get_current_user
+from code_runner import compile_cpp, run_cpp_executable
+
+router = APIRouter(prefix="/api/phase-one", tags=["phase-one"])
+
+
+class TestResponse(BaseModel):
+    test_id: int
+    test_in: str
+    test_out: str
+    scope: str
+    
+    class Config:
+        orm_mode = True
+
+class StudentTestRequest(BaseModel):
+    student_id: int
+    game_id: int
+    test_in: str = Field(..., description="The input of the test")
+    test_out: str = Field(..., description="The expected output of the test")
+
+class StudentTestResponse(BaseModel):
+    test_id: int
+    message: str
+
+class StudentTestRead(BaseModel):
+    test_id: int
+    test_in: str
+    test_out: str
+    match_for_game_id: int
+    student_id: int
+
+    class Config:
+        orm_mode = True
+
+class MatchDetailsResponse(BaseModel):
+    title: str
+    description: str
+
+class SubmitSolutionRequest(BaseModel):
+    student_id: int
+    game_id: int
+    code: str = Field(..., description="The source code of the solution")
+
+class SubmitSolutionResponse(BaseModel):
+    solution_id: int
+    message: str
+
+class TestResultDetail(BaseModel):
+    test_id: int
+    status: str # "pass", "fail", "timeout", "runtime_error"
+    message: str
+    actual_output: Optional[str] = None
+
+class SubmitSolutionResponse(BaseModel):
+    solution_id: Optional[int] = None
+    message: str
+    compiled: bool
+    test_results: List[TestResultDetail] = []
+
+class CustomTestRequest(BaseModel):
+    student_id: int
+    game_id: int
+    code: str = Field(..., description="The source code to test")
+
+class CustomTestResponse(BaseModel):
+    message: str
+    compiled: bool
+    test_results: List[TestResultDetail] = []
+
+
+
+@router.get("/tests", response_model=List[TestResponse])
+def get_correlated_tests(
+    student_id: int = Query(..., description="ID of the student"),
+    game_id: int = Query(..., description="ID of the game session"),
+    db: Session = Depends(get_db),
+):
+    """
+    Retrieve all tests correlated to the match setting of the assigned match to the student.
+    """
+    join_entry = (
+        db.query(StudentJoinGame)
+        .filter(
+            StudentJoinGame.student_id == student_id,
+            StudentJoinGame.game_id == game_id,
+        )
+        .first()
+    )
+
+    if not join_entry:
+        raise HTTPException(status_code=404, detail="Student not found in this game session")
+
+    if not join_entry.assigned_match_id:
+        raise HTTPException(status_code=404, detail="No match assigned to this student yet")
+
+    match_entry = (
+        db.query(Match)
+        .filter(Match.match_id == join_entry.assigned_match_id)
+        .first()
+    )
+    
+    if not match_entry:
+        raise HTTPException(status_code=404, detail="Assigned match not found")
+
+    if not match_entry.match_set_id:
+         raise HTTPException(status_code=404, detail="Match has no settings linked")
+    tests = (
+        db.query(Test)
+        .filter(
+            Test.match_set_id == match_entry.match_set_id,
+            Test.scope == TestScope.public
+        )
+        .all()
+    )
+    
+    return [
+        TestResponse(
+            test_id=t.test_id,
+            test_in=t.test_in,
+            test_out=t.test_out,
+            scope=t.scope.name if hasattr(t.scope, 'name') else str(t.scope)
+        )
+        for t in tests
+    ]
+
+
+@router.post("/student_test", response_model=StudentTestResponse)
+def add_student_test(
+    request: StudentTestRequest,
+    current_user: Annotated[dict, Depends(get_current_user)],
+    db: Session = Depends(get_db),
+):
+    """
+    Add a new test by the student.
+    """
+    if request.student_id != int(current_user["sub"]):
+        raise HTTPException(status_code=403, detail="Not authorized to add test for another student")
+
+    join_entry = (
+        db.query(StudentJoinGame)
+        .filter(
+            StudentJoinGame.student_id == request.student_id,
+            StudentJoinGame.game_id == request.game_id,
+        )
+        .first()
+    )
+    
+    if not join_entry or not join_entry.assigned_match_id:
+        raise HTTPException(status_code=404, detail="Student assignment not valid")
+
+    match_for_game = (
+        db.query(MatchesForGame)
+        .filter(
+            MatchesForGame.match_id == join_entry.assigned_match_id,
+            MatchesForGame.game_id == request.game_id
+        )
+        .first()
+    )
+    
+    if not match_for_game:
+        raise HTTPException(status_code=404, detail="Match not linked to this game session")
+
+    new_test = StudentTest(
+        test_in=request.test_in,
+        test_out=request.test_out,
+        match_for_game_id=match_for_game.match_for_game_id,
+        student_id=request.student_id
+    )
+    
+    db.add(new_test)
+    db.commit()
+    db.refresh(new_test)
+    
+    return StudentTestResponse(test_id=new_test.test_id, message="Test added successfully")
+
+
+@router.get("/student_tests", response_model=List[StudentTestRead])
+def get_student_tests(
+    current_user: Annotated[dict, Depends(get_current_user)],
+    db: Session = Depends(get_db),
+    game_id: int = Query(..., description="ID of the game session"),
+    student_id: Optional[int] = Query(None, description="ID of the student (Admin/Teacher only)"),
+):
+    """
+    Retrieve all tests created by the student for a specific game session.
+    If student_id is provided, checks if the requester is that student or an admin/teacher.
+    """
+    requester_id = int(current_user["sub"])
+
+    if student_id is not None:
+        if student_id != requester_id:
+            raise HTTPException(status_code=403, detail="Not authorized to view other students' tests")
+        target_student_id = student_id
+    else:
+        target_student_id = requester_id
+
+    tests = (
+        db.query(StudentTest)
+        .join(MatchesForGame, StudentTest.match_for_game_id == MatchesForGame.match_for_game_id)
+        .filter(
+            StudentTest.student_id == target_student_id,
+            MatchesForGame.game_id == game_id
+        )
+        .all()
+    )
+
+    return tests
+
+
+@router.post("/solution", response_model=SubmitSolutionResponse)
+def submit_solution(
+    current_user: Annotated[dict, Depends(get_current_user)],
+    request: SubmitSolutionRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Submit the solution of the student.
+    """
+
+    if request.student_id != int(current_user["sub"]):
+        raise HTTPException(status_code=403, detail="Not authorized to submit code for another student")
+
+    join_entry = (
+        db.query(StudentJoinGame)
+        .filter(
+            StudentJoinGame.student_id == request.student_id,
+            StudentJoinGame.game_id == request.game_id,
+        )
+        .first()
+    )
+    
+    if not join_entry or not join_entry.assigned_match_id:
+        raise HTTPException(status_code=404, detail="Student assignment not valid")
+
+    match_for_game = (
+        db.query(MatchesForGame)
+        .filter(
+            MatchesForGame.match_id == join_entry.assigned_match_id,
+            MatchesForGame.game_id == request.game_id
+        )
+        .first()
+    )
+    
+    if not match_for_game:
+        raise HTTPException(status_code=404, detail="Match not linked to this game session")
+
+    # Match Entry to get settings
+    match_entry = (
+        db.query(Match)
+        .filter(Match.match_id == join_entry.assigned_match_id)
+        .first()
+    )
+    
+    if not match_entry or not match_entry.match_set_id:
+         raise HTTPException(status_code=404, detail="Match configuration error")
+
+    # Compile the code
+    exe_path, compile_error = compile_cpp(request.code)
+    
+    if exe_path is None:
+        return SubmitSolutionResponse(
+            message=f"Compilation failed: {compile_error}",
+            compiled=False,
+            solution_id=None
+        )
+
+    # Run against tests
+    tests = (
+        db.query(Test)
+        .filter(Test.match_set_id == match_entry.match_set_id)
+        .all()
+    )
+
+    all_passed = True
+    test_results = []
+    
+    passed_test_count = 0
+    encountered_error = False
+    
+    passed_public_tests = 0
+    total_public_tests = 0
+    
+    try:
+        for test in tests:
+            result = run_cpp_executable(exe_path, test.test_in or "")
+            
+            is_public = (test.scope == TestScope.public)
+            if is_public:
+                total_public_tests += 1
+            
+            status = "fail"
+            message = ""
+            actual_out = ""
+            
+            if result["status"] == "success":
+                actual_out = (result["stdout"] or "").strip()
+                expected_out = (test.test_out or "").strip()
+                if actual_out == expected_out:
+                    status = "pass"
+                    passed_test_count += 1
+                    if is_public:
+                        passed_public_tests += 1
+                else:
+                    message = f"Output mismatch"
+            else:
+                status = result["status"]
+                message = result["stderr"]
+                encountered_error = True
+
+            if status != "pass":
+                all_passed = False
+            
+            if is_public:
+                test_results.append(TestResultDetail(
+                    test_id=test.test_id,
+                    status=status,
+                    message=message,
+                    actual_output=actual_out if status != "timeout" and status != "runtime_error" else None
+                ))
+            
+    finally:
+        if os.path.exists(exe_path):
+            try:
+                os.remove(exe_path)
+            except:
+                pass
+
+    solution_id = None
+    final_message = "Solution ran successfully."
+
+    if not encountered_error:
+        # Check if a solution already exists
+        existing_solution = (
+            db.query(StudentSolution)
+            .filter(
+                StudentSolution.student_id == request.student_id,
+                StudentSolution.match_for_game_id == match_for_game.match_for_game_id
+            )
+            .first()
+        )
+        
+        # If a solution has passed all the public test is marked as has_passed = true
+        if total_public_tests > 0 and passed_public_tests == total_public_tests:
+            solution_has_passed = True
+        else:
+            solution_has_passed = False
+            
+        should_save = False
+        
+        if existing_solution:
+            # If exists, check if It is improved or equaled
+            current_best = existing_solution.passed_test or 0
+            if passed_test_count >= current_best:
+                should_save = True
+                existing_solution.code = request.code
+                existing_solution.has_passed = solution_has_passed
+                existing_solution.passed_test = passed_test_count
+                db.commit()
+                db.refresh(existing_solution)
+                solution_id = existing_solution.solution_id
+                final_message = "Solution updated (score improved or matched)."
+            else:
+                final_message = f"Solution not saved: Score ({passed_test_count}) is lower than best ({current_best})."
+                solution_id = existing_solution.solution_id 
+        else:
+            should_save = True
+            new_solution = StudentSolution(
+                code=request.code,
+                has_passed=solution_has_passed,
+                passed_test=passed_test_count,
+                match_for_game_id=match_for_game.match_for_game_id,
+                student_id=request.student_id
+            )
+            db.add(new_solution)
+            db.commit()
+            db.refresh(new_solution)
+            solution_id = new_solution.solution_id
+            final_message = "Solution submitted successfully."
+            
+    else:
+        final_message = "Solution not saved due to runtime errors."
+    
+    return SubmitSolutionResponse(
+        solution_id=solution_id,
+        message=final_message,
+        compiled=True,
+        test_results=test_results
+    )
+
+
+@router.post("/custom_test", response_model=CustomTestResponse)
+def run_custom_tests(
+    current_user: Annotated[dict, Depends(get_current_user)],
+    request: CustomTestRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Run the student's code against their own custom tests.
+    Does NOT store the solution.
+    """
+    if request.student_id != int(current_user["sub"]):
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    # Fetch Student Tests
+    student_tests = (
+        db.query(StudentTest)
+        .join(MatchesForGame, StudentTest.match_for_game_id == MatchesForGame.match_for_game_id)
+        .filter(
+            StudentTest.student_id == request.student_id,
+            MatchesForGame.game_id == request.game_id
+        )
+        .all()
+    )
+
+    if not student_tests:
+        return CustomTestResponse(
+            message="No custom tests found. Create a test case first.",
+            compiled=False
+        )
+
+    exe_path, compile_error = compile_cpp(request.code)
+    
+    if exe_path is None:
+        return CustomTestResponse(
+            message=f"Compilation failed: {compile_error}",
+            compiled=False
+        )
+
+    test_results = []
+    
+    try:
+        for test in student_tests:
+            result = run_cpp_executable(exe_path, test.test_in or "")
+            
+            status = "fail"
+            message = ""
+            actual_out = ""
+
+            if result["status"] == "success":
+                actual_out = (result["stdout"] or "").strip()
+                expected_out = (test.test_out or "").strip()
+                
+                if actual_out == expected_out:
+                    status = "pass"
+                else:
+                    message = "Output mismatch"
+            else:
+                status = result["status"]
+                message = result["stderr"]
+
+            test_results.append(TestResultDetail(
+                test_id=test.test_id,
+                status=status,
+                message=message,
+                actual_output=actual_out if status != "timeout" and status != "runtime_error" else None
+            ))
+            
+    finally:
+        if os.path.exists(exe_path):
+            try:
+                os.remove(exe_path)
+            except:
+                pass
+
+    return CustomTestResponse(
+        message="Custom tests executed.",
+        compiled=True,
+        test_results=test_results
+    )
+
+
+@router.get("/match_details", response_model=MatchDetailsResponse)
+def get_match_details(
+    current_user: Annotated[dict, Depends(get_current_user)],
+    db: Session = Depends(get_db),
+    game_id: int = Query(..., description="ID of the game session"),
+):
+    """
+    Retrieve the title and description of the match assigned to the student.
+    """
+    target_student_id = int(current_user["sub"])
+
+    join_entry = (
+        db.query(StudentJoinGame)
+        .filter(
+            StudentJoinGame.student_id == target_student_id,
+            StudentJoinGame.game_id == game_id,
+        )
+        .first()
+    )
+
+    if not join_entry:
+        raise HTTPException(status_code=404, detail="Student not found in this game session")
+
+    if not join_entry.assigned_match_id:
+        raise HTTPException(status_code=404, detail="No match assigned to this student yet")
+
+    match_entry = (
+        db.query(Match)
+        .filter(Match.match_id == join_entry.assigned_match_id)
+        .first()
+    )
+
+    if not match_entry:
+        raise HTTPException(status_code=404, detail="Assigned match not found")
+        
+    if not match_entry.match_setting:
+         raise HTTPException(status_code=404, detail="Match setting not found")
+
+    return MatchDetailsResponse(
+        title=match_entry.title,
+        description=match_entry.match_setting.description
+    )

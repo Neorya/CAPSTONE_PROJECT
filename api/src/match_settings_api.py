@@ -15,6 +15,15 @@ from models import MatchSetting
 
 # Pydantic Models
 
+class TestItemResponse(BaseModel):
+    test_id: int
+    test_in: str
+    test_out: str
+    scope: str
+    
+    class Config:
+        orm_mode = True
+
 
 class MatchSettingResponse(BaseModel):
     """
@@ -37,12 +46,16 @@ class MatchSettingResponse(BaseModel):
     title: str = Field(..., description="Title of the match setting")
     description: str = Field(..., description="Detailed description")
     is_ready: bool = Field(..., description="Readiness status: true=ready, false=draft")
-    public_test: str = Field(..., description="Public tests (input and expected output)")
-    private_test: str = Field(..., description="Private tests (input and expected output)")
+    public_test: Optional[str] = Field(None, description="Public tests (input and expected output)")
+    private_test: Optional[str] = Field(None, description="Private tests (input and expected output)")
     reference_solution: str = Field(..., description="Reference solution code")
     creator_id: int = Field(
         ..., description="ID of the teacher who created this setting"
     )
+    tests: List[TestItemResponse] = Field(default=[], description="List of tests for this setting")
+
+    class Config:
+        orm_mode = True
 
 
 # Router
@@ -80,4 +93,38 @@ async def get_match_settings(
         query = query.filter(MatchSetting.is_ready == is_ready)
 
     # Execute the query and return all results
-    return query.all()
+    # Execute the query
+    results = query.all()
+
+    # Transform results to match response model, extracting tests
+    response = []
+    for ms in results:
+        # Find first public test
+        pub_test_obj = next((t for t in ms.tests if t.scope.name == "public"), None)
+        # Find first private test
+        priv_test_obj = next((t for t in ms.tests if t.scope.name == "private"), None)
+        
+        # Format strings as "Input: ..., Output: ..."
+        pub_str = f"Input: {pub_test_obj.test_in}, Output: {pub_test_obj.test_out}" if pub_test_obj else ""
+        priv_str = f"Input: {priv_test_obj.test_in}, Output: {priv_test_obj.test_out}" if priv_test_obj else ""
+        
+        response.append(MatchSettingResponse(
+            match_set_id=ms.match_set_id,
+            title=ms.title,
+            description=ms.description,
+            is_ready=ms.is_ready,
+            public_test=pub_str,
+            private_test=priv_str,
+            reference_solution=ms.reference_solution,
+            creator_id=ms.creator_id,
+            tests=[
+                TestItemResponse(
+                    test_id=t.test_id,
+                    test_in=t.test_in,
+                    test_out=t.test_out,
+                    scope=t.scope.name if hasattr(t.scope, 'name') else str(t.scope)
+                ) for t in ms.tests
+            ]
+        ))
+    
+    return response

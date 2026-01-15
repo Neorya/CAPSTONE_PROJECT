@@ -2,6 +2,22 @@
 For launching the containers use:
 docker compose up --build
 
+## Environment variables
+
+This repo uses a root `.env` file (ignored by git) for local configuration.
+
+- **Frontend**
+  - `REACT_APP_API_URL` (default `http://localhost:8000`)
+  - `REACT_APP_AUTH_ENABLED` (default `false`)  
+    When `false`, route protection + token validation + Google auth UI are bypassed (useful for tests).
+
+- **API**
+  - `JWT_SECRET_KEY`
+  - `SECRET_KEY`
+  - `GOOGLE_OAUTH_CLIENT_ID`
+  - `GOOGLE_OAUTH_CLIENT_SECRET`
+  - `GOOGLE_OAUTH_REDIRECT_URI`
+
 Rebuild:
 ```bash
 docker compose down -v
