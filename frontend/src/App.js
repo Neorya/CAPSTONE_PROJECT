@@ -18,6 +18,7 @@ import AppLayout from './components/AppLayout';
 import { setToken } from './services/authService';
 import AlgorithmMatchPhaseOne from './components/PhaseOne/AlgorithmMatchPhaseOne';
 import { SolutionReview } from './components/SolutionReview';
+import SolutionResults from './components/SolutionResults';
 
 import './App.css';
 
@@ -179,6 +180,8 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/phase-one" element={<AlgorithmMatchPhaseOne />} />
+            <Route path="/voting" element={<SolutionReview />} />
             {/* Catch-all route - redirects to root */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
