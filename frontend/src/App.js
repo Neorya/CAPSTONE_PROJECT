@@ -12,11 +12,13 @@ import { Login } from './components/Login';
 import { JoinGameSession } from './components/JoinGameSession';
 import { Lobby } from './components/Lobby';
 import HallOfFame from './components/HallOfFame';
-import SolutionResults from './components/SolutionResults';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import AppLayout from './components/AppLayout';
 import { setToken } from './services/authService';
+import AlgorithmMatchPhaseOne from './components/PhaseOne/AlgorithmMatchPhaseOne';
+import { SolutionReview } from './components/SolutionReview';
+
 import './App.css';
 
 function App() {

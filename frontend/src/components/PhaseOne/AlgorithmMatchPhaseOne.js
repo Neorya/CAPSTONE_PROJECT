@@ -27,7 +27,6 @@ const AlgorithmMatchPhaseOne = () => {
         timeLeft,
         formatTime,
         customTests,
-        publicTests,
         isModalOpen,
         setIsModalOpen,
         newTestInput,
@@ -41,6 +40,7 @@ const AlgorithmMatchPhaseOne = () => {
         handleAddTest,
         handleDeleteTest,
         handleRunPublicTests,
+        PUBLIC_TESTS,
         problemTitle,
         problemDescription
     } = useAlgorithmMatchPhaseOne();
@@ -56,7 +56,7 @@ const AlgorithmMatchPhaseOne = () => {
             label: 'Tests (Public & Mine)',
             children: (
                 <TestCasesList
-                    publicTests={publicTests}
+                    publicTests={PUBLIC_TESTS}
                     customTests={customTests}
                     onAddTestClick={() => setIsModalOpen(true)}
                     onDeleteTest={handleDeleteTest}
@@ -105,7 +105,7 @@ const AlgorithmMatchPhaseOne = () => {
                             setCode={setCode}
                             timeLeft={timeLeft}
                             handleRunPublicTests={handleRunPublicTests}
-                            publicTestsCount={publicTests?.length || 0}
+                            publicTestsCount={PUBLIC_TESTS.length}
                             showOutput={showOutput}
                             setShowOutput={setShowOutput}
                             runResults={runResults}
