@@ -19,6 +19,7 @@ import { setToken } from './services/authService';
 import AlgorithmMatchPhaseOne from './components/PhaseOne/AlgorithmMatchPhaseOne';
 import { SolutionReview } from './components/SolutionReview';
 import SolutionResults from './components/SolutionResults';
+import Profile from './components/Profile';
 
 import './App.css';
 
@@ -176,6 +177,16 @@ function App() {
                 <ProtectedRoute>
                   <AppLayout>
                     <SolutionResults />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Profile />
                   </AppLayout>
                 </ProtectedRoute>
               }

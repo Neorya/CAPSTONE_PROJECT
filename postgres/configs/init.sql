@@ -473,45 +473,36 @@ VALUES
 
 
 -- student 1: Mario Rossi
-
-INSERT INTO capstone_app.student (email, first_name, last_name, score)
-VALUES ('mario.rossi@studenti.it', 'Mario', 'Rossi', 95);
-
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('mario.rossi@studenti.it', 'Mario', 'Rossi', 0);
 -- student 2: Sara Bianchi
-INSERT INTO capstone_app.student (email, first_name, last_name, score)
-VALUES ('sara.bianchi@studenti.it', 'Sara', 'Bianchi', 78);
-
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('sara.bianchi@studenti.it', 'Sara', 'Bianchi', 0);
 -- student 3: Andrea Verdi 
-INSERT INTO capstone_app.student (email, first_name, last_name, score)
-VALUES ('andrea.verdi@studenti.it', 'Andrea', 'Verdi', 55);
-
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('andrea.verdi@studenti.it', 'Andrea', 'Verdi', 0);
 -- student 4: Chiara Neri 
-INSERT INTO capstone_app.student (email, first_name, last_name, score)
-VALUES ('chiara.neri@studenti.it', 'Chiara', 'Neri', 88);
-
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('chiara.neri@studenti.it', 'Chiara', 'Neri', 0);
 -- student 5: Luca Gialli
-INSERT INTO capstone_app.student (email, first_name, last_name, score)
-VALUES ('luca.gialli@studenti.it', 'Luca', 'Gialli', 62);
-
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('luca.gialli@studenti.it', 'Luca', 'Gialli', 0);
 -- student 6: Elena Ferri
-INSERT INTO capstone_app.student (email, first_name, last_name, score)
-VALUES ('elena.ferri@studenti.it', 'Elena', 'Ferri', 72);
-
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('elena.ferri@studenti.it', 'Elena', 'Ferri', 0);
 -- student 7: Marco Conti
-INSERT INTO capstone_app.student (email, first_name, last_name, score)
-VALUES ('marco.conti@studenti.it', 'Marco', 'Conti', 81);
-
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('marco.conti@studenti.it', 'Marco', 'Conti', 0);
 -- student 8: Giulia Romano
-INSERT INTO capstone_app.student (email, first_name, last_name, score)
-VALUES ('giulia.romano@studenti.it', 'Giulia', 'Romano', 90);
-
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('giulia.romano@studenti.it', 'Giulia', 'Romano', 0);
 -- student 9: Francesco Marino
-INSERT INTO capstone_app.student (email, first_name, last_name, score)
-VALUES ('francesco.marino@studenti.it', 'Francesco', 'Marino', 67);
-
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('francesco.marino@studenti.it', 'Francesco', 'Marino', 0);
 -- student 10: Alessia Costa
-INSERT INTO capstone_app.student (email, first_name, last_name, score)
-VALUES ('alessia.costa@studenti.it', 'Alessia', 'Costa', 85);
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('alessia.costa@studenti.it', 'Alessia', 'Costa', 0);
+-- student 11-20: New competition
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('leonardo.da@studenti.it', 'Leonardo', 'Da Vinci', 0);
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('galileo.galilei@studenti.it', 'Galileo', 'Galilei', 0);
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('dante.alighieri@studenti.it', 'Dante', 'Alighieri', 0);
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('sofia.loren@studenti.it', 'Sofia', 'Loren', 0);
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('alessandro.volta@studenti.it', 'Alessandro', 'Volta', 0);
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('enrico.fermi@studenti.it', 'Enrico', 'Fermi', 0);
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('rita.montalcini@studenti.it', 'Rita', 'Levi-Montalcini', 0);
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('marie.curie@studenti.it', 'Marie', 'Curie', 0);
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('isaac.newton@studenti.it', 'Isaac', 'Newton', 0);
+INSERT INTO capstone_app.student (email, first_name, last_name, score) VALUES ('ada.lovelace@studenti.it', 'Ada', 'Lovelace', 0);
 
 
 
@@ -570,84 +561,108 @@ VALUES
 
 
 -- ######################################
--- INSERT DATA INTO STUDENT_TESTS TABLE (Example Data)
+-- INSERT DATA INTO STUDENT_TESTS TABLE (Dummies for solutions)
 -- ######################################
 
--- Student 1 (Mario) tests
-INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, student_id) VALUES
-('square(2)', '4', 1, 1),
-('square(4)', '16', 2, 1);
+-- Each student solution needs a student_test record due to schema constraints
+-- For Match 1 (ID 1)
+INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, student_id)
+SELECT 'dummy_in', 'dummy_out', 1, s.student_id FROM capstone_app.student s;
 
--- Student 8 (Giulia) tests
-INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, student_id) VALUES
-('mass=10 acceleration=2', '20', 5, 8),
-('mass=5 acceleration=10', '50', 6, 8);
-
--- Student 4 (Chiara) tests
-INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, student_id) VALUES
-('Pride and Prejudice', 'Jane Austen', 7, 4);
-
--- Student 10 (Alessia) tests
-INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, student_id) VALUES
-('1 2 3', '6', 9, 10);
-
--- Student 3 (Andrea) tests
-INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, student_id) VALUES
-('mass=2 acceleration=5', '10', 5, 3);
+-- For Match 5 (ID 5)
+INSERT INTO capstone_app.student_tests (test_in, test_out, match_for_game_id, student_id)
+SELECT 'dummy_in', 'dummy_out', 5, s.student_id FROM capstone_app.student s;
 
 -- ######################################
--- INSERT DATA INTO STUDENT_SOLUTIONS TABLE (Example Data)
+-- INSERT DATA INTO STUDENT_SOLUTIONS TABLE
 -- ######################################
 
--- Mario Rossi
-INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
-('int square(int n) { return n * n; }', TRUE, 1, 1),
-('int multiply(int a, int b) { return a * b; }', TRUE, 2, 1);
+-- Students 1-15 submit solutions for Match 1 and Match 5
+INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id)
+SELECT 'code for match 1', TRUE, 1, s.student_id FROM capstone_app.student s WHERE s.student_id <= 15;
 
--- Giulia Romano
-INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
-('def force(m, a): return m * a', TRUE, 5, 8),
-('def force_complex(m, a): return m * (a + 0)', TRUE, 6, 8);
-
--- Chiara Neri
-INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
-('Jane Austen is the author', TRUE, 7, 4);
-
--- Alessia Costa
-INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
-('def sum_list(l): return sum(l)', TRUE, 9, 10);
-
--- Andrea Verdi
-INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id) VALUES
-('def mass_accel(m, a): return m * a', TRUE, 5, 3);
+INSERT INTO capstone_app.student_solutions (code, has_passed, match_for_game_id, student_id)
+SELECT 'code for match 5', TRUE, 5, s.student_id FROM capstone_app.student s WHERE s.student_id <= 15;
 
 -- ######################################
--- INSERT DATA INTO STUDENT_SOLUTION_TESTS TABLE (Sample Data)
+-- INSERT DATA INTO STUDENT_SOLUTION_TESTS TABLE (SCORING)
 -- ######################################
 
--- Mario Rossi: Match 1 (50.0) + Match 2 (50.0) = 100.0
-INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
-(1, 1, 1, '25'),  (2, 1, 1, '100'), -- Match 1: 2/2 tests passed
-(1, 2, 2, '25'),  (2, 2, 2, '100'); -- Match 2: 2/2 tests passed
+-- Scoring Algorithm Refresher:
+-- Match 1 has 2 tests (ID 1, 2). Max score 50. Each test 25 points.
+-- Match 5 has 6 tests (ID 9, 10, 11, 12, 13, 14). Max score 50. Each test 8.33 points.
 
--- Giulia Romano: Match 5 (50.0) + Match 6 (25.0) = 75.0
+-- Student 11 (Leonardo): THE GOAT (Rank 1)
+-- Match 1: 2/2 tests passed (50 pts)
+-- Match 5: 6/6 tests passed (50 pts)
+-- Total: 100.00
 INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
-(9, 3, 3, 'Force=20N'), (10, 3, 3, 'Force=49N'), -- Match 5: 2/2 tests passed
-(11, 4, 4, '2H2O'), (12, 4, 4, 'WRONG_DATA');    -- Match 6: 1/2 tests passed
+(1, 11, 11, '25'), (2, 11, 11, '100'), -- Match 1 passed
+(9, 31, 26, '20'), (10, 31, 26, '50'), (11, 31, 26, '21'), (12, 31, 26, '100'), (13, 31, 26, '0'), (14, 31, 26, '1'); -- Match 5 passed
 
--- Chiara Neri: Match 7 (50.0) = 50.0
+-- Student 1 (Mario): Elite (Rank 2)
+-- Match 1: 2/2 tests passed (50 pts)
+-- Match 5: 5/6 tests passed (41.67 pts)
+-- Total: 91.67
 INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
-(13, 5, 5, 'Jane Austen'), (14, 5, 5, 'Emily Brontë'); -- Match 7: 2/2 tests passed
+(1, 1, 1, '25'), (2, 1, 1, '100'), 
+(9, 21, 16, '20'), (10, 21, 16, '50'), (11, 21, 16, '21'), (12, 21, 16, '100'), (13, 21, 16, '0'), (14, 21, 16, 'WRONG');
 
--- Alessia Costa: Match 9 (25.0) = 25.0
+-- Student 12 (Galileo): Strong (Rank 3)
+-- Match 1: 2/2 tests passed (50 pts)
+-- Match 5: 4/6 tests passed (33.33 pts)
+-- Total: 83.33
 INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
-(17, 6, 6, '6'), (18, 6, 6, 'WRONG_DATA'); -- Match 9: 1/2 tests passed
+(1, 12, 12, '25'), (2, 12, 12, '100'), 
+(9, 32, 27, '20'), (10, 32, 27, '50'), (11, 32, 27, '21'), (12, 32, 27, '100'), (13, 32, 27, 'FAIL'), (14, 32, 27, 'FAIL');
 
--- Andrea Verdi: Match 5 (25.0) = 25.0 (Tie with Alessia)
+-- Student 2 (Sara): Consistent (Rank 4)
+-- Match 1: 1/2 tests passed (25 pts)
+-- Match 5: 6/6 tests passed (50 pts)
+-- Total: 75.00
 INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
-(9, 4, 3, 'Force=20N'),   -- Teacher test 9: Charlie's solution outputs Force=20N (correct)
-(10, 4, 3, 'Force=49N');  -- Teacher test 10: Charlie's solution outputs Force=49N (correct)
+(1, 2, 2, '25'), (2, 2, 2, 'FAIL'), 
+(9, 22, 17, '20'), (10, 22, 17, '50'), (11, 22, 17, '21'), (12, 22, 17, '100'), (13, 22, 17, '0'), (14, 22, 17, '1');
 
+-- Student 13 (Dante): Tying with Sara (Rank 4)
+-- Match 1: 1/2 tests passed (25 pts)
+-- Match 5: 6/6 tests passed (50 pts)
+-- Total: 75.00
+INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
+(1, 13, 13, '25'), (2, 13, 13, 'FAIL'), 
+(9, 33, 28, '20'), (10, 33, 28, '50'), (11, 33, 28, '21'), (12, 33, 28, '100'), (13, 33, 28, '0'), (14, 33, 28, '1');
+
+-- Student 8 (Giulia): (Rank 6)
+-- Match 1: 2/2 tests passed (50 pts)
+-- Match 5: 2/6 tests passed (16.67 pts)
+-- Total: 66.67
+INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
+(1, 8, 8, '25'), (2, 8, 8, '100'), 
+(9, 28, 23, '20'), (10, 28, 23, '50'), (11, 28, 23, 'X'), (12, 28, 23, 'X'), (13, 28, 23, 'X'), (14, 28, 23, 'X');
+
+-- Student 3 (Andrea): (Rank 7)
+-- Match 1: 1/2 tests passed (25 pts)
+-- Match 5: 3/6 tests passed (25.00 pts)
+-- Total: 50.00
+INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
+(1, 3, 3, '25'), (2, 3, 3, 'FAIL'), 
+(9, 23, 18, '20'), (10, 23, 18, '50'), (11, 23, 18, '21'), (12, 23, 18, 'X'), (13, 23, 18, 'X'), (14, 23, 18, 'X');
+
+-- Student 4 (Chiara): THE GOAT 2 (Rank 2)
+-- Match 1: 2/2 tests passed (50 pts)
+-- Match 5: 6/6 tests passed (50 pts)
+-- Total: 100.00
+INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
+(1, 4, 4, '25'), (2, 4, 4, '100'), 
+(9, 24, 19, '20'), (10, 24, 19, '50'), (11, 24, 19, '21'), (12, 24, 19, '100'), (13, 24, 19, '0'), (14, 24, 19, '1');
+
+-- Fill in some others with minimal scores to show a long tail
+INSERT INTO capstone_app.student_solution_tests (teacher_test_id, student_test_id, solution_id, test_output) VALUES
+(1, 5, 5, '25'), (9, 25, 20, 'ERR'),
+(1, 6, 6, 'ERR'), (9, 26, 21, '20'),
+(1, 7, 7, 'ERR'), (9, 27, 22, '20'), (10, 27, 22, '50'),
+(1, 9, 9, '25'), (1, 10, 10, 'ERR'), (9, 30, 25, '20'),
+(1, 14, 14, '25'), (1, 15, 15, '25');
 
 -- ######################################
 -- INSERT DATA INTO STUDENT_ASSIGNED_REVIEW TABLE (Example Data)

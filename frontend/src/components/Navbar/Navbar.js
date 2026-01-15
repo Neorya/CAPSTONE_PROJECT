@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Layout, Dropdown, Avatar, Space, Switch, Tooltip } from "antd";
 import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +10,7 @@ import {
   disableDevMode,
   removeToken,
 } from "../../services/authService";
+import { getUserProfile } from "../../services/userService";
 import "./Navbar.css";
 
 const { Header } = Layout;
@@ -18,6 +19,21 @@ const Navbar = () => {
   const navigate = useNavigate();
   const isDevMode = isDevModeEnabled();
   const authEnabled = useMemo(() => isAuthEnabled(), []);
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await getUserProfile();
+        setProfile(data);
+      } catch (err) {
+        console.error("Failed to fetch profile in navbar:", err);
+      }
+    };
+    if (authEnabled) {
+      fetchProfile();
+    }
+  }, [authEnabled]);
 
   const handleLogout = async () => {
     await logout();
@@ -42,6 +58,11 @@ const Navbar = () => {
 
   const menuItems = [
     {
+      key: "profile",
+      label: "My Profile",
+      icon: <UserOutlined />,
+    },
+    {
       key: "logout",
       label: "Logout",
       icon: <LogoutOutlined />,
@@ -52,13 +73,15 @@ const Navbar = () => {
   const handleMenuClick = ({ key }) => {
     if (key === "logout") {
       handleLogout();
+    } else if (key === "profile") {
+      navigate("/profile");
     }
   };
 
   return (
     <Header className="navbar-header">
       <div className="navbar-content">
-        <div className="navbar-logo">
+        <div className="navbar-logo" onClick={() => navigate("/")} style={{ cursor: 'pointer' }}>
           <span>Codify</span>
         </div>
         <div className="navbar-right">
@@ -88,6 +111,7 @@ const Navbar = () => {
             <Space className="navbar-profile" style={{ cursor: "pointer" }}>
               <Avatar
                 icon={<UserOutlined />}
+                src={profile?.profile_url}
                 size="default"
                 style={{ backgroundColor: "#1890ff" }}
               />
