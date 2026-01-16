@@ -39,11 +39,16 @@ jobs:
         run: |
           docker compose build --no-cache
           docker compose up -d
+        env:
+          JWT_SECRET_KEY: "ci_secret_key"
+          GOOGLE_OAUTH_CLIENT_ID: "ci_client_id"
+          GOOGLE_OAUTH_CLIENT_SECRET: "ci_client_secret"
+          GOOGLE_OAUTH_REDIRECT_URI: "http://localhost:8000/auth/callback"
 
       - name: Wait for services to be healthy
         run: |
           echo "Waiting for API..."
-          timeout 60 bash -c 'until curl -f http://localhost:8000/docs > /dev/null 2>&1; do sleep 2; done'
+          timeout 120 bash -c 'until curl -f http://localhost:8000/docs > /dev/null 2>&1; do sleep 2; done'
           echo "API is ready"
           
           echo "Waiting for frontend..."
