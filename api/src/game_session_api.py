@@ -47,7 +47,6 @@ class GameSessionDetail(BaseModel):
     creator_id: int = Field(..., description="Id of the Teacher that created the Game Session")
     start_date: datetime = Field(..., description="Start date of the Game Session")
     match_id: List[int] = Field(..., description="List of Match Ids associated with the Game Session")
-    is_active: bool = Field(..., description="Used for check if the Game Session Is Active Or Not")
     duration_phase1: int = Field(..., description="Duration of the first phase")
     duration_phase2: int = Field(..., description="Duration of the sewcond phase")
 
@@ -262,7 +261,6 @@ async def list_game_sessions_by_creator(
                 creator_id=gs.creator_id,
                 start_date=gs.start_date,
                 match_id=match_map.get(gs.game_id, []),
-                is_active = gs.is_active,
                 duration_phase1 = gs.duration_phase1,
                 duration_phase2 = gs.duration_phase2
             )
@@ -461,7 +459,6 @@ async def update_game_session(
         match_id=match_ids,
         duration_phase1 = game_session.duration_phase1,
         duration_phase2 = game_session.duration_phase2,
-        is_active = game_session.is_active
     )
    
 @router.get(
@@ -500,5 +497,4 @@ async def get_game_session_from_id(
         match_id=match_ids,
         duration_phase1 = game_session.duration_phase1,
         duration_phase2 = game_session.duration_phase2,
-        is_active = game_session.is_active
     )

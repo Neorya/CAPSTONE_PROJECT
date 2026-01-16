@@ -10,10 +10,6 @@ export const usePreStartGameSession = () => {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [elapsedTime, setElapsedTime] = useState('00:00');
-
-
-
 
   const fetchSession = useCallback(async () => {
     try {
@@ -28,15 +24,15 @@ export const usePreStartGameSession = () => {
   }, [id, session]);
 
   const startSession = useCallback(async () => {
-   try {
+    try {
       await startGameSession(id);
+      return true;
     } catch (err) {
       setError(err.message);
       return false;
-    } finally {
-      return true;
     }
-}, [id]);
+  }, [id]);
+  
 
   useEffect(() => {
     if (id) {
@@ -51,33 +47,11 @@ export const usePreStartGameSession = () => {
       return () => clearInterval(interval);
   }, [id, fetchSession]);
 
-  // Calculate time remaining
-  useEffect(() => {
-    
-    if (!session) return;
-    
-    const interval = setInterval(() => {
-        const start = new Date(session.start_date).getTime();
-        const now = new Date().getTime();
-        const diff = Math.max(0, start - now);
-        
-        const minutes = Math.floor(diff / 60000);
-        const seconds = Math.floor((diff % 60000) / 1000);
-        
-        setElapsedTime(
-            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-        );
-    }, 1000);
-    
-    return () => clearInterval(interval);
-  }, [session]);
-
   return {
     session,
     loading,
     error,
     gameId: id,
-    elapsedTime,
     startSession
   };
 };

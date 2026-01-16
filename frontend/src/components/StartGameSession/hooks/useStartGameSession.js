@@ -7,7 +7,7 @@ export const useStartGameSession = () => {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [elapsedTime, setElapsedTime] = useState('00:00');
+  const [remainingTime, setRemainingTime] = useState('00:00');
 
   const fetchSession = useCallback(async () => {
     try {
@@ -31,29 +31,32 @@ export const useStartGameSession = () => {
 
   useEffect(() => {
     if (!session) return;
-    
-    const interval = setInterval(() => {
-        const now = new Date().getTime();
-        const startDate = new Date(session.start_date).getTime();
-
-        const durationFirstPhase = session.duration_phase1;
-   
-        const diff = Math.max(0, ((startDate + ( durationFirstPhase * 60 * 1000)) - now ));
-        const minutes = Math.floor(diff / 60000);
-        const seconds = Math.floor((diff % 60000) / 1000);
-        
-        setElapsedTime(
-            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-        );
-    }, 1000);
-    
+  
+    const startDate = new Date(session.actual_start_date).getTime();
+    const phase1End = startDate + session.duration_phase1 * 60 * 1000;
+  
+    const tick = () => {
+      const now = Date.now();
+      const diff = Math.max(0, phase1End - now);
+      const minutes = Math.floor(diff / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+  
+      setRemainingTime(
+        `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+      );
+    };
+  
+    tick();
+  
+    const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
   }, [session]);
+  
 
   return {
     session,
     loading,
     error,
-    elapsedTime
+    remainingTime
   };
 };

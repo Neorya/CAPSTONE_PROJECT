@@ -113,11 +113,11 @@ DROP TABLE IF EXISTS capstone_app.game_session;
 CREATE TABLE capstone_app.game_session (
     game_id SERIAL PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
-    start_date TIMESTAMP NOT NULL,
+    start_date TIMESTAMPTZ NOT NULL,
+    actual_start_date TIMESTAMPTZ,
     duration_phase1 INTEGER NOT NULL,-- in minutes
     duration_phase2 INTEGER NOT NULL, -- in minutes
-    creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id) NOT NULL,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE
+    creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id) NOT NULL
 );
 
 
@@ -428,13 +428,13 @@ VALUES
 -- INSERT DATA INTO GAME_SESSION TABLE (5 RECORDS)
 -- ######################################
 
-INSERT INTO capstone_app.game_session (name, start_date, duration_phase1, duration_phase2, creator_id, is_active)
+INSERT INTO capstone_app.game_session (name, start_date, duration_phase1, duration_phase2, creator_id)
 VALUES
-('Spring Semester Game Session', '2025-12-19 19:00:00.000', 45, 30, 1, TRUE),
-('Summer Workshop Session', '2028-01-16 10:30:00', 60, 60, 2, FALSE),
-('Fall Competition Session', '2028-01-17 14:00:00', 20, 15, 3, TRUE),
-('Winter Training Session', '2028-01-18 11:00:00', 30, 30, 4, FALSE),
-('Annual Championship Session', '2028-01-19 15:30:00', 90, 45, 5, FALSE);
+('Spring Semester Game Session', '2025-12-19 19:00:00.000', 45, 30, 1),
+('Summer Workshop Session', '2028-01-16 10:30:00', 60, 60, 2),
+('Fall Competition Session', '2028-01-17 14:00:00', 20, 15, 3),
+('Winter Training Session', '2028-01-18 11:00:00', 30, 30, 4),
+('Annual Championship Session', '2028-01-19 15:30:00', 90, 45, 5);
 
 
 -- ######################################
