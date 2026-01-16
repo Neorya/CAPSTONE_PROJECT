@@ -183,7 +183,7 @@ async def create_game_session(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Request error"
         )
-    print("game session data duration phase1: ", game_session_data.duration_phase1)
+
     new_game_session = GameSession(creator_id=game_session_data.creator_id, name=game_session_data.name, start_date=game_session_data.start_date, duration_phase1=game_session_data.duration_phase1, duration_phase2=game_session_data.duration_phase2) 
     db.add(new_game_session)
     
@@ -253,7 +253,6 @@ async def list_game_sessions_by_creator(
     response: List[GameSessionDetail] = []
 
     for gs in game_sessions:
-        print(gs)
         response.append(
             GameSessionDetail(
                 game_id=gs.game_id,

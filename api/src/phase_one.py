@@ -288,7 +288,7 @@ def submit_solution(
     if not match_for_game:
         raise HTTPException(status_code=404, detail="Match not linked to this game session")
 
-    # Match Entry to get settings
+    # Get match entry with settings (single query instead of separate query)
     match_entry = (
         db.query(Match)
         .filter(Match.match_id == join_entry.assigned_match_id)
