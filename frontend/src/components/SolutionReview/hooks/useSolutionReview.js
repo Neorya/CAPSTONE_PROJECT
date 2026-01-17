@@ -41,7 +41,7 @@ export const useSolutionReview = () => {
             const fetchedSolutions = await getAssignSolution(1);
             console.log(fetchedSolutions);
             let mapSolutions = (fetchedSolutions || []).map(sol => ({
-                id: sol.assigned_solution_id,
+                id: sol.student_assigned_review_id,
                 code: sol.code,
                 participantId: sol.pseudonym
             }));
@@ -63,9 +63,8 @@ export const useSolutionReview = () => {
 
     const submitVote = async (solutionId, voteType, testCase = null, note = "") => {
         const solution = solutions.find(s => s.id === solutionId);
-        await postStudentVote(solution.id, voteType.type, testCase.input, testCase.expectedOutput, note);
-
-
+        if (testCase === null ) testCase = { input: "", expectedOutput: ""};
+        await postStudentVote(solution.id, voteType, testCase.input, testCase.expectedOutput, note);
 
         // Update votes map
         setVotes(prev => ({
