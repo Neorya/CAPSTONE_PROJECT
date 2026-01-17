@@ -10,6 +10,7 @@ import './SolutionReview.css';
  */
 const SolutionReview = () => {
     // Custom hook for solution review data and actions
+
     const {
         solutions,
         selectedSolution,
@@ -17,8 +18,7 @@ const SolutionReview = () => {
         isPhaseEnded,
         selectSolution,
         submitVote
-    } = useSolutionReview();
-
+    } = useSolutionReview(); // Pass gameId as needed
     // Local UI state
     const [voteType, setVoteType] = useState(null);
     const [testInput, setTestInput] = useState('');
@@ -81,7 +81,7 @@ const SolutionReview = () => {
             return;
         }
 
-        const success = submitVote(selectedSolution.id, voteType, testCase);
+        const success = submitVote(selectedSolution.id, voteType, testCase, notes);
 
         if (success) {
             message.success('Vote Submitted Successfully');
