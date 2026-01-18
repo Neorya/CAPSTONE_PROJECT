@@ -108,7 +108,7 @@ const HallOfFameContainer = () => {
             key: 'score',
             width: 150,
             align: 'right',
-            render: (score) => <span className="score-value" data-testid="score-value">{score.toFixed(2)}</span>,
+            render: (score) => <span className="hall-of-fame-score" data-testid="score-value">{score.toFixed(2)}</span>,
         },
     ];
 

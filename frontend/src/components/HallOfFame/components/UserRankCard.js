@@ -37,7 +37,7 @@ const UserRankCard = ({ currentUserRank, handleWhereAmI, isOpen, onClose }) => {
                         </div>
                         <div className="rank-item" id="rank-item-score">
                             <Text strong>Score:</Text>
-                            <Text className="rank-value" id="drawer-score-value">{currentUserRank.score.toFixed(2)}</Text>
+                            <Text className="hall-of-fame-score" id="drawer-score-value">{currentUserRank.score.toFixed(2)}</Text>
                         </div>
                         {currentUserRank.points_to_next_rank != null && (
                             <div className="rank-item next-rank" id="rank-item-next-rank">

@@ -33,13 +33,22 @@
   text-align: center;
 }
 
+.hall-of-fame-header #back-to-home-button {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
 .header-text-content {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.page-title {
+.hall-of-fame-header .page-title {
   font-size: 56px !important;
   font-weight: 800 !important;
   color: #1a1a1a !important;
@@ -47,7 +56,7 @@
   letter-spacing: -1.5px;
 }
 
-.page-subtitle {
+.hall-of-fame-header .page-subtitle {
   display: block;
   font-size: 18px;
   color: #666;
@@ -99,24 +108,26 @@
 }
 
 /* Ant Design Table Overrides */
-.ant-table-thead>tr>th {
+.hall-of-fame-container .ant-table-thead>tr>th {
   background: #f8f9fa !important;
   font-weight: 700 !important;
   text-transform: uppercase;
   font-size: 12px;
   letter-spacing: 1px;
   color: #888 !important;
-  padding: 20px 24px !important;
+  padding: 12px 24px !important;
 }
 
-.ant-table-tbody>tr>td {
-  padding: 24px !important;
+.hall-of-fame-container .ant-table-tbody>tr>td {
+  padding: 16px 24px !important;
   font-size: 16px;
 }
 
 .medal {
-  font-size: 32px;
+  font-size: 38px;
   display: inline-block;
+  line-height: 1;
+  vertical-align: middle;
 }
 
 .rank-number {
@@ -130,7 +141,7 @@
   color: #2d3436;
 }
 
-.score-value {
+.hall-of-fame-score {
   font-family: 'JetBrains Mono', monospace;
   font-weight: 700;
   color: #1890ff;

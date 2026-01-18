@@ -95,24 +95,20 @@ const HomePage = () => {
             onClick={() => navigate(item.route)}
           >
             <div className="bento-card-inner">
-              <div
-                className="bento-icon"
-                style={{
-                  backgroundColor: `${item.accent}15`,
-                  color: item.accent
-                }}
-              >
-                {item.icon}
+              <div className="bento-header">
+                <div
+                  className="bento-icon"
+                  style={{
+                    backgroundColor: `${item.accent}15`,
+                    color: item.accent
+                  }}
+                >
+                  {item.icon}
+                </div>
+                <h3 className="bento-title">{item.title}</h3>
               </div>
               <div className="bento-text">
-                <h3 className="bento-title">{item.title}</h3>
                 <p className="bento-description">{item.description}</p>
-              </div>
-              <div
-                className="bento-arrow"
-                style={{ color: item.accent }}
-              >
-                →
               </div>
             </div>
             <div
@@ -122,7 +118,7 @@ const HomePage = () => {
           </div>
         ))}
       </div>
-    </div>
+    </div >
   );
 };
 
