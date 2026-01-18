@@ -138,33 +138,19 @@ def submit_vote(
     if not solution:
         raise HTTPException(status_code=404, detail="Solution not found")
 
-    # Get match info to access reference solution and tests
-    match_for_game = (
-        db.query(MatchesForGame)
+    # Get match info to access reference solution and tests (single joined query instead of 3 sequential)
+    result = (
+        db.query(MatchesForGame, Match, MatchSetting)
+        .join(Match, Match.match_id == MatchesForGame.match_id)
+        .join(MatchSetting, MatchSetting.match_set_id == Match.match_set_id)
         .filter(MatchesForGame.match_for_game_id == solution.match_for_game_id)
         .first()
     )
 
-    if not match_for_game:
-        raise HTTPException(status_code=404, detail="Match for game not found")
-
-    match = (
-        db.query(Match)
-        .filter(Match.match_id == match_for_game.match_id)
-        .first()
-    )
-
-    if not match or not match.match_set_id:
-        raise HTTPException(status_code=404, detail="Match or match setting not found")
-
-    match_setting = (
-        db.query(MatchSetting)
-        .filter(MatchSetting.match_set_id == match.match_set_id)
-        .first()
-    )
-
-    if not match_setting:
-        raise HTTPException(status_code=404, detail="Match setting not found")
+    if not result:
+        raise HTTPException(status_code=404, detail="Match configuration not found")
+    
+    match_for_game, match, match_setting = result
 
     valid = None
 
