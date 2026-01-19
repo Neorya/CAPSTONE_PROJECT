@@ -71,7 +71,7 @@ export const useAlgorithmMatchPhaseOne = () => {
             setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
         }, 1000);
         return () => clearInterval(timer);
-    }, [timeLeft !== null]); // Only re-run when timer gets initialized
+    }, [timeLeft]); // Re-run whenever timeLeft changes
 
     // Redirect to phase two when time runs out
     useEffect(() => {

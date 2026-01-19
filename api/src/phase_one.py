@@ -564,8 +564,14 @@ def get_match_details(
     # Calculate remaining time for phase 1
     remaining_seconds = 0
     if game_session.actual_start_date:
+        # Initialize start_dt with the actual_start_date of the game session
+        start_dt = game_session.actual_start_date
+
         # duration_phase1 is in minutes, convert to seconds
-        phase1_end_time = game_session.actual_start_date.timestamp() + (game_session.duration_phase1 * 60)
+        # Ensure start_dt is timezone-aware (assume UTC if naive)
+        if start_dt.tzinfo is None or start_dt.tzinfo.utcoffset(start_dt) is None:
+            start_dt = start_dt.replace(tzinfo=timezone.utc)
+        phase1_end_time = start_dt.timestamp() + (game_session.duration_phase1 * 60)
         now = datetime.now(timezone.utc).timestamp()
         remaining_seconds = max(0, int(phase1_end_time - now))
 
