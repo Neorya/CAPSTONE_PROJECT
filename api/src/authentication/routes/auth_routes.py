@@ -302,7 +302,13 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token", auto_error=False)
 
 # Testing mode flag - when enabled, authentication is bypassed for automated tests
 # SECURITY: This should NEVER be enabled in production environments
+# NOTE: This flag is evaluated once at module load time. Changes to the environment
+# variable after application startup will not take effect until the application restarts.
 API_TESTING_MODE = os.getenv("API_TESTING_MODE", "false").lower() == "true"
+
+# Log testing mode status once at module load time to avoid log spam
+if API_TESTING_MODE:
+    logger.warning("⚠️ API_TESTING_MODE enabled - authentication will be bypassed for all requests")
 
 async def get_current_user(token: Annotated[str | None, Depends(oauth2_scheme)]):
     """
@@ -311,7 +317,6 @@ async def get_current_user(token: Annotated[str | None, Depends(oauth2_scheme)])
     """
     # Testing mode bypass - only for automated tests
     if API_TESTING_MODE:
-        logger.warning("⚠️ API_TESTING_MODE enabled - authentication bypassed")
         return {
             "sub": "1",  # Mock user ID
             "email": "test@example.com",
