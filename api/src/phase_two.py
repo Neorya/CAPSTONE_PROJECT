@@ -99,6 +99,129 @@ def get_phase_two_timing(
     )
 
 
+class AssignReviewsResponse(BaseModel):
+    """Response model for review assignment."""
+    message: str
+    total_assignments: int
+    assignments_per_student: dict
+
+
+def _ensure_reviews_assigned(game_id: int, db: Session) -> int:
+    """
+    Helper function to ensure reviews are assigned for a game session.
+    Returns the number of new assignments created (0 if already assigned).
+    
+    Rules:
+    1. Students only review solutions from the SAME match_for_game_id (same problem)
+    2. Students CANNOT review their own solution
+    3. Each student reviews up to `review_number` solutions (from Match settings)
+    4. If there are fewer students than review_number, students review all available solutions
+    """
+    # Check if reviews have already been assigned for this game
+    existing_assignments = (
+        db.query(StudentAssignedReview)
+        .join(StudentSolution, StudentAssignedReview.assigned_solution_id == StudentSolution.solution_id)
+        .join(MatchesForGame, StudentSolution.match_for_game_id == MatchesForGame.match_for_game_id)
+        .filter(MatchesForGame.game_id == game_id)
+        .first()
+    )
+    
+    if existing_assignments:
+        return 0  # Already assigned
+    
+    # Get all matches in this game session with their review_number
+    matches_for_game = (
+        db.query(MatchesForGame, Match)
+        .join(Match, MatchesForGame.match_id == Match.match_id)
+        .filter(MatchesForGame.game_id == game_id)
+        .all()
+    )
+    
+    if not matches_for_game:
+        return 0
+    
+    total_assignments = 0
+    
+    # Process each match_for_game separately (students only review same problem)
+    for mfg, match in matches_for_game:
+        review_number = match.review_number or 3  # default to 3 if not set
+        
+        # Get all solutions for this match_for_game
+        solutions = (
+            db.query(StudentSolution)
+            .filter(StudentSolution.match_for_game_id == mfg.match_for_game_id)
+            .all()
+        )
+        
+        if len(solutions) < 2:
+            # Need at least 2 students to do reviews
+            continue
+        
+        student_ids = [sol.student_id for sol in solutions]
+        
+        # For each student, assign them solutions to review
+        for student_id in student_ids:
+            # Get other students' solutions (exclude own)
+            other_solutions = [sol for sol in solutions if sol.student_id != student_id]
+            
+            # Limit to review_number, but take all if fewer available
+            solutions_to_review = other_solutions[:min(review_number, len(other_solutions))]
+            
+            for solution in solutions_to_review:
+                # Create the review assignment
+                assignment = StudentAssignedReview(
+                    student_id=student_id,
+                    assigned_solution_id=solution.solution_id
+                )
+                db.add(assignment)
+                total_assignments += 1
+    
+    if total_assignments > 0:
+        db.commit()
+    
+    return total_assignments
+
+
+@router.post("/assign_reviews", response_model=AssignReviewsResponse)
+def assign_reviews_for_game(
+    game_id: int = Query(..., description="ID of the game session"),
+    db: Session = Depends(get_db),
+):
+    """
+    Assign solutions for review to students in a game session.
+    
+    Rules:
+    1. Students only review solutions from the SAME match_for_game_id (same problem)
+    2. Students CANNOT review their own solution
+    3. Each student reviews up to `review_number` solutions (from Match settings)
+    4. If there are fewer students than review_number, students review all available solutions
+    
+    This endpoint can be called manually or is auto-triggered when students request their assignments.
+    """
+    # Verify game session exists and has started
+    game_session = db.query(GameSession).filter(GameSession.game_id == game_id).first()
+    if not game_session:
+        raise HTTPException(status_code=404, detail="Game session not found")
+    
+    if not game_session.actual_start_date:
+        raise HTTPException(status_code=400, detail="Game session has not started yet")
+    
+    total_assignments = _ensure_reviews_assigned(game_id, db)
+    
+    if total_assignments == 0:
+        return AssignReviewsResponse(
+            message="Reviews were already assigned for this game session",
+            total_assignments=0,
+            assignments_per_student={}
+        )
+    
+    return AssignReviewsResponse(
+        message=f"Successfully assigned {total_assignments} reviews for game session {game_id}",
+        total_assignments=total_assignments,
+        assignments_per_student={}
+    )
+
+
 @router.get("/assigned_solutions", response_model=List[AssignedSolutionResponse])
 def get_assigned_solutions(
     current_user: Annotated[dict, Depends(get_current_user)],
@@ -107,8 +230,12 @@ def get_assigned_solutions(
 ):
     """
     Retrieve all solutions assigned to the authenticated student for review.
+    Automatically assigns reviews if not already done (lazy initialization).
     """
     student_id = int(current_user["sub"])
+    
+    # Ensure reviews are assigned (will do nothing if already assigned)
+    _ensure_reviews_assigned(game_id, db)
 
     assigned_reviews = (
         db.query(StudentAssignedReview)

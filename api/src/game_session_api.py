@@ -13,7 +13,7 @@ import re
 
 # Import the database dependency and ORM models
 from database import get_db
-from models import Match, GameSession, MatchesForGame, Teacher, StudentJoinGame, StudentTest, StudentSolution, StudentSolutionTest
+from models import Match, GameSession, MatchesForGame, Teacher, StudentJoinGame, StudentTest, StudentSolution, StudentSolutionTest, StudentAssignedReview, StudentReviewVote
 
 # ============================================================================
 # Pydantic Models
@@ -311,7 +311,26 @@ async def delete_game_session(
                 db.query(StudentTest).filter(StudentTest.match_for_game_id.in_(match_for_game_ids)).all()
             ]
             
-            # Delete student_solution_tests first (references both solutions and student_tests)
+            # Delete review votes first (references assigned reviews)
+            if solution_ids:
+                # Get assigned review IDs that reference these solutions
+                assigned_review_ids = [
+                    r.student_assigned_review_id for r in
+                    db.query(StudentAssignedReview).filter(StudentAssignedReview.assigned_solution_id.in_(solution_ids)).all()
+                ]
+                
+                if assigned_review_ids:
+                    # Delete review votes
+                    db.query(StudentReviewVote).filter(
+                        StudentReviewVote.student_assigned_review_id.in_(assigned_review_ids)
+                    ).delete(synchronize_session=False)
+                
+                # Delete assigned reviews
+                db.query(StudentAssignedReview).filter(
+                    StudentAssignedReview.assigned_solution_id.in_(solution_ids)
+                ).delete(synchronize_session=False)
+            
+            # Delete student_solution_tests (references both solutions and student_tests)
             if solution_ids:
                 db.query(StudentSolutionTest).filter(
                     StudentSolutionTest.solution_id.in_(solution_ids)
