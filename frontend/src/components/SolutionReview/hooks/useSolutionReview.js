@@ -34,7 +34,7 @@ export const useSolutionReview = () => {
                         if (interval) clearInterval(interval);
                         // Redirect to results page after phase 2 ends
                         setTimeout(() => {
-                            navigate(`/hall-of-fame?gameId=${gameId}`);
+                            navigate(`/game-results?gameId=${gameId}`);
                         }, 2000);
                         return;
                     }

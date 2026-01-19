@@ -12,6 +12,7 @@ import { Login } from './components/Login';
 import { JoinGameSession } from './components/JoinGameSession';
 import { Lobby } from './components/Lobby';
 import HallOfFame from './components/HallOfFame';
+import GameResults from './components/GameResults';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import AppLayout from './components/AppLayout';
@@ -177,6 +178,16 @@ function App() {
                 <ProtectedRoute>
                   <AppLayout>
                     <SolutionResults />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/game-results"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <GameResults />
                   </AppLayout>
                 </ProtectedRoute>
               }
