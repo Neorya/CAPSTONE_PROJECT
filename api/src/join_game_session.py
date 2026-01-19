@@ -60,27 +60,21 @@ async def student_join_game(
     """
     Allows a student to join a game session
     If the student is already enrolled in that game session, it raises a 409 Conflict error
-    If the game session is not the next upcoming one, it raises a 400 Bad Request error
-    If no game sessions are found, it raises a 404 Not Found error
+    If no game session is found with the given ID, it raises a 404 Not Found error
     If student already played all match settings of that game session, it raises a 400 Bad Request error
     If the game session has ACTUALLY started it is not possible to join, it raises a 400 Bad Request error
     On success, it returns a message indicating successful enrollment
     """
-    time_difference = func.abs(extract("epoch", GameSession.start_date - func.now()))
-    result = db.query(GameSession).order_by(time_difference).limit(1).first()
+    # Get the specific game session by ID
+    game_session = db.query(GameSession).filter(GameSession.game_id == input_data.game_id).first()
 
-    if result is None:
+    if game_session is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="No game session found"
-        )
-
-    if input_data.game_id != result.game_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="The game session passed is not the next upcoming one",
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Game session not found"
         )
         
-    if result.actual_start_date is not None:
+    if game_session.actual_start_date is not None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The game session has already started, it's not possible to join",
