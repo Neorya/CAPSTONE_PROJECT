@@ -47,7 +47,7 @@ export const useAlgorithmMatchPhaseOne = () => {
     const [code, setCode] = useState(() => {
         return localStorage.getItem('phase_one_user_code') || DEFAULT_CODE;
     });
-    const [timeLeft, setTimeLeft] = useState(45 * 60);
+    const [timeLeft, setTimeLeft] = useState(0); // Will be set from backend based on game session
     const [publicTests, setPublicTests] = useState([]);
     const [customTests, setCustomTests] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -85,6 +85,12 @@ export const useAlgorithmMatchPhaseOne = () => {
 
             if (matchDetails.title) setProblemTitle(matchDetails.title);
             if (matchDetails.description) setProblemDescription(matchDetails.description);
+            
+            // Set the remaining time from the backend
+            if (matchDetails.remaining_seconds !== undefined) {
+                setTimeLeft(matchDetails.remaining_seconds);
+                console.log('PhaseOne: Setting time left to:', matchDetails.remaining_seconds, 'seconds');
+            }
 
             const testsData = await getTests(studentId, gameId);
             console.log('PhaseOne: Tests loaded:', testsData);

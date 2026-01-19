@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 
 from database import get_db
+from datetime import datetime, timezone
 from models import (
     StudentJoinGame,
     Match,
@@ -14,6 +15,7 @@ from models import (
     MatchesForGame,
     StudentTest,
     StudentSolution,
+    GameSession,
 )
 from authentication.routes.auth_routes import get_current_user
 from code_runner import compile_cpp, run_cpp_executable
@@ -53,6 +55,9 @@ class StudentTestRead(BaseModel):
 class MatchDetailsResponse(BaseModel):
     title: str
     description: str
+    duration_phase1: int  # Duration in minutes
+    actual_start_date: Optional[str] = None  # ISO format datetime string
+    remaining_seconds: int  # Remaining seconds for phase 1
 
 class SubmitSolutionRequest(BaseModel):
     student_id: int
@@ -551,7 +556,23 @@ def get_match_details(
     if not match_entry.match_setting:
          raise HTTPException(status_code=404, detail="Match setting not found")
 
+    # Get game session for timing info
+    game_session = db.query(GameSession).filter(GameSession.game_id == game_id).first()
+    if not game_session:
+        raise HTTPException(status_code=404, detail="Game session not found")
+
+    # Calculate remaining time for phase 1
+    remaining_seconds = 0
+    if game_session.actual_start_date:
+        # duration_phase1 is in minutes, convert to seconds
+        phase1_end_time = game_session.actual_start_date.timestamp() + (game_session.duration_phase1 * 60)
+        now = datetime.now(timezone.utc).timestamp()
+        remaining_seconds = max(0, int(phase1_end_time - now))
+
     return MatchDetailsResponse(
         title=match_entry.title,
-        description=match_entry.match_setting.description
+        description=match_entry.match_setting.description,
+        duration_phase1=game_session.duration_phase1,
+        actual_start_date=game_session.actual_start_date.isoformat() if game_session.actual_start_date else None,
+        remaining_seconds=remaining_seconds
     )

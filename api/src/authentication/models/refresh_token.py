@@ -4,7 +4,7 @@ SQLAlchemy model for the RefreshToken entity.
 Maps to capstone_app.refresh_tokens table.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from database import Base
 
@@ -30,9 +30,9 @@ class RefreshToken(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('capstone_app.users.id', ondelete='CASCADE'), nullable=False)
     token_hash = Column(String, unique=True, nullable=False)
-    expires_at = Column(DateTime, nullable=False)
-    revoked_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    revoked_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
 
     def __repr__(self) -> str:
         status = "revoked" if self.revoked_at else "active"
@@ -51,6 +51,6 @@ class RefreshToken(Base):
         """
         if self.revoked_at is not None:
             return False
-        if self.expires_at < datetime.utcnow():
+        if self.expires_at < datetime.now(timezone.utc):
             return False
         return True
