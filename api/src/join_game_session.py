@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import func, extract, exists
+from sqlalchemy import func, extract
 from database import get_db
 from models import Student, StudentJoinGame, GameSession, MatchesForGame
 from datetime import datetime
@@ -177,34 +177,23 @@ async def has_student_joined_game(
     db: Session = Depends(get_db),
 ) -> StudentJoinedResponse:
     """
-    Allows to check if a student has joined a specific game session.
-    
-    OPTIMIZED: Uses a single query with EXISTS subqueries instead of 3 separate queries.
-    On success, it returns True if the student has joined the game session, otherwise False.
+    Allows to check if a student has joined a specific game session
+    On success, it returns True if the student has joined the game session, otherwise False
     """
     
-    # Check student exists, game exists, and enrollment status in a combined approach
-    # First verify student exists
-    student_exists = db.query(
-        exists().where(Student.student_id == student_id)
-    ).scalar()
-    
-    if not student_exists:
+    if not db.query(Student).filter(Student.student_id == student_id).first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
 
-    game_exists = db.query(
-        exists().where(GameSession.game_id == game_id)
-    ).scalar()
-    
-    if not game_exists:
+    if not db.query(GameSession).filter(GameSession.game_id == game_id).first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Game session not found")
 
-    # Check enrollment - this is now the only significant query
-    joined = db.query(
-        exists().where(
+    enrollment = (
+        db.query(StudentJoinGame)
+        .filter(
             StudentJoinGame.student_id == student_id,
-            StudentJoinGame.game_id == game_id
+            StudentJoinGame.game_id == game_id,
         )
-    ).scalar()
+        .first()
+    )
 
-    return StudentJoinedResponse(joined=joined)
+    return StudentJoinedResponse(joined=enrollment is not None)

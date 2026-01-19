@@ -7,7 +7,7 @@ Provides endpoints for browsing and filtering match settings based on theri stat
 from typing import List, Optional
 from fastapi import APIRouter, Query, Depends
 from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session
 
 from database import get_db
 from models import MatchSetting
@@ -85,15 +85,15 @@ async def get_match_settings(
         List of match settings matching the filter criteria
     """
     # Start by creating a query for the MatchSetting model
-    # Use selectinload to eagerly load tests relationship (prevents N+1 queries)
-    query = db.query(MatchSetting).options(selectinload(MatchSetting.tests))
+    query = db.query(MatchSetting)
 
     # Apply readiness filter if provided
     if is_ready is not None:
         # This adds a "WHERE is_ready = :is_ready_param" to the SQL query
         query = query.filter(MatchSetting.is_ready == is_ready)
 
-    # Execute the query (tests are already eagerly loaded)
+    # Execute the query and return all results
+    # Execute the query
     results = query.all()
 
     # Transform results to match response model, extracting tests

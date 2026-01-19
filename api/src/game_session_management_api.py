@@ -112,11 +112,31 @@ async def get_game_session_full_details(
             detail=f"Game session with id {game_id} not found"
         )
     
-    # Get joined students (single query)
-    joined_records = db.query(Student).join(
-        StudentJoinGame, Student.student_id == StudentJoinGame.student_id
-    ).filter(StudentJoinGame.game_id == game_id).all()
+    # Get joined students
+    joined_records = db.query(Student).join(StudentJoinGame, Student.student_id == StudentJoinGame.student_id).filter(StudentJoinGame.game_id == game_id).all()
+
+    students = []
+    for record in joined_records:
+        student_data = {
+            "student_id": record.student_id,
+            "first_name": record.first_name,
+            "last_name": record.last_name,
+            "email": record.email
+        }
+        if student_data:
+            students.append(StudentResponse(
+                student_id=student_data["student_id"],  #should be student_data.student_id
+                first_name=student_data["first_name"],  #should be student_data.first_name
+                last_name=student_data["last_name"],  #should be student_data.last_name
+                email=student_data["email"]  #should be student_data.email
+            ))
     
+    # Get matches for this game session
+    # TODO: Replace with database join query
+    match_ids = db.query(Match).join(MatchesForGame, Match.match_id == MatchesForGame.match_id).filter(MatchesForGame.game_id == game_id).all()
+    matches = []
+
+    joined_records = db.query(Student).join(StudentJoinGame, Student.student_id == StudentJoinGame.student_id).filter(StudentJoinGame.game_id == game_id).all()
     students = [
         StudentResponse(
             student_id=record.student_id,
@@ -125,18 +145,16 @@ async def get_game_session_full_details(
             email=record.email
         ) for record in joined_records
     ]
+
+    # Get matches for this game session
     
-    # Get matches for this game session (single query)
-    match_records = db.query(Match).join(
-        MatchesForGame, Match.match_id == MatchesForGame.match_id
-    ).filter(MatchesForGame.game_id == game_id).all()
-    
+    match_ids = db.query(Match).join(MatchesForGame, Match.match_id == MatchesForGame.match_id).filter(MatchesForGame.game_id == game_id).all()
     matches = [
         MatchInfoResponse(
             match_id=m.match_id,
             title=m.title,
             difficulty_level=m.difficulty_level
-        ) for m in match_records
+        ) for m in match_ids
     ]
     
     return GameSessionFullDetailResponse(
@@ -291,12 +309,11 @@ async def start_game_session(
     # Set actual start date (the time the teacher pressed the start button -> needed in order to calculate phase end times)
     game_session.actual_start_date = datetime.now(timezone.utc)
 
-    # Build lookup dict for O(1) access instead of O(n²) nested loop
-    record_lookup = {record.student_id: record for record in joined_records}
     for assignment in raw_assignments:
-        record = record_lookup.get(assignment["student_id"])
-        if record:
-            record.assigned_match_id = assignment["assigned_match_id"]
+        for record in joined_records:
+            if record.student_id == assignment["student_id"]:
+                record.assigned_match_id = assignment["assigned_match_id"]
+                break
 
     # Build response with full assignment details    
     # Fetch student and match details for response

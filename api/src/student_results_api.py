@@ -524,8 +524,6 @@ def get_student_game_score(
     - Implementation and review scores (review scores are placeholders for future)
     
     Useful for teachers to see the leaderboard and overall performance.
-    
-    OPTIMIZED: Uses bulk queries instead of N+1 pattern for better performance.
     """
 )
 def get_game_session_scores(
@@ -534,11 +532,6 @@ def get_game_session_scores(
 ) -> GameSessionScoresResponse:
     """
     Get scores for all students in a game session.
-    
-    PERFORMANCE OPTIMIZATION:
-    - Uses bulk queries to fetch all data in 5-6 database round-trips
-    - Avoids N+1 query pattern (previously ~8 queries per student)
-    - Aggregates scores in-memory for efficiency
     
     Args:
         game_id: ID of the game session
@@ -551,7 +544,7 @@ def get_game_session_scores(
         HTTPException: If game session not found
     """
     
-    # 1. Verify game session exists (1 query)
+    # Verify game session exists
     game = db.query(GameSession).filter(GameSession.game_id == game_id).first()
     if not game:
         raise HTTPException(
@@ -559,170 +552,25 @@ def get_game_session_scores(
             detail=f"Game session with ID {game_id} not found"
         )
     
-    # 2. Get all student joins for this game session (1 query)
+    # Get all students in this game session
     student_joins = db.query(StudentJoinGame).filter(
         StudentJoinGame.game_id == game_id
     ).all()
     
-    if not student_joins:
-        return GameSessionScoresResponse(
-            game_id=game.game_id,
-            game_name=game.name,
-            total_students=0,
-            students_scores=[]
-        )
-    
-    student_ids = [sj.student_id for sj in student_joins]
-    
-    # 3. Fetch all students in bulk (1 query)
-    students = db.query(Student).filter(Student.student_id.in_(student_ids)).all()
-    student_map = {s.student_id: s for s in students}
-    
-    # 4. Get all matches for this game session (1 query)
-    matches_for_game = db.query(MatchesForGame).filter(
-        MatchesForGame.game_id == game_id
-    ).all()
-    
-    if not matches_for_game:
-        # No matches configured - return students with zero scores
-        students_scores = []
-        for student_id in student_ids:
-            student = student_map.get(student_id)
-            if student:
-                students_scores.append(StudentGameScoreResponse(
-                    student_id=student.student_id,
-                    student_name=f"{student.first_name} {student.last_name}",
-                    email=student.email,
-                    game_id=game.game_id,
-                    game_name=game.name,
-                    overall_score=0.0,
-                    matches=[]
-                ))
-        return GameSessionScoresResponse(
-            game_id=game.game_id,
-            game_name=game.name,
-            total_students=len(students_scores),
-            students_scores=students_scores
-        )
-    
-    match_for_game_ids = [mfg.match_for_game_id for mfg in matches_for_game]
-    match_ids = [mfg.match_id for mfg in matches_for_game]
-    
-    # 5. Fetch all match details in bulk (1 query)
-    matches = db.query(Match).filter(Match.match_id.in_(match_ids)).all()
-    match_map = {m.match_id: m for m in matches}
-    
-    # Create mapping from match_for_game_id to match details
-    mfg_to_match = {}
-    for mfg in matches_for_game:
-        mfg_to_match[mfg.match_for_game_id] = match_map.get(mfg.match_id)
-    
-    # 6. Fetch all solutions for all students in this game (1 query)
-    all_solutions = db.query(StudentSolution).filter(
-        StudentSolution.student_id.in_(student_ids),
-        StudentSolution.match_for_game_id.in_(match_for_game_ids)
-    ).all()
-    
-    # Create nested map: student_id -> match_for_game_id -> solution
-    solution_map = {}
-    for sol in all_solutions:
-        if sol.student_id not in solution_map:
-            solution_map[sol.student_id] = {}
-        solution_map[sol.student_id][sol.match_for_game_id] = sol
-    
-    # 7. Fetch all test results for all solutions in bulk (1 query)
-    solution_ids = [sol.solution_id for sol in all_solutions]
-    all_test_results = []
-    if solution_ids:
-        all_test_results = db.query(StudentSolutionTest).filter(
-            StudentSolutionTest.solution_id.in_(solution_ids)
-        ).all()
-    
-    # Create map: solution_id -> list of test results
-    test_results_map = {}
-    for tr in all_test_results:
-        if tr.solution_id not in test_results_map:
-            test_results_map[tr.solution_id] = []
-        test_results_map[tr.solution_id].append(tr)
-    
-    # 8. Fetch all teacher tests for test result comparison (1 query)
-    teacher_test_ids = list(set(tr.teacher_test_id for tr in all_test_results))
-    teacher_tests = []
-    if teacher_test_ids:
-        teacher_tests = db.query(Test).filter(Test.test_id.in_(teacher_test_ids)).all()
-    teacher_test_map = {t.test_id: t for t in teacher_tests}
-    
-    # Now aggregate scores in memory
     students_scores = []
     
-    for student_id in student_ids:
-        student = student_map.get(student_id)
-        if not student:
+    for student_join in student_joins:
+        # Use the existing endpoint logic to get each student's score
+        try:
+            student_score = get_student_game_score(
+                student_id=student_join.student_id,
+                game_id=game_id,
+                db=db
+            )
+            students_scores.append(student_score)
+        except HTTPException:
+            # Skip students that cause errors
             continue
-        
-        match_scores = []
-        overall_score = 0.0
-        
-        for mfg in matches_for_game:
-            match = mfg_to_match.get(mfg.match_for_game_id)
-            if not match:
-                continue
-            
-            # Get solution for this student and match
-            student_solutions = solution_map.get(student_id, {})
-            solution = student_solutions.get(mfg.match_for_game_id)
-            
-            if not solution:
-                # Student hasn't submitted a solution for this match
-                match_scores.append(StudentScoreBreakdown(
-                    match_id=match.match_id,
-                    match_title=match.title,
-                    implementation_score=0.0,
-                    review_score=0.0,
-                    total_score=0.0,
-                    tests_passed=0,
-                    total_tests=0
-                ))
-                continue
-            
-            # Get test results for this solution
-            test_results = test_results_map.get(solution.solution_id, [])
-            total_tests = len(test_results)
-            passed_tests = 0
-            
-            for tr in test_results:
-                teacher_test = teacher_test_map.get(tr.teacher_test_id)
-                if teacher_test:
-                    status_str = _get_test_status(tr.test_output, teacher_test.test_out)
-                    if status_str == "Passed":
-                        passed_tests += 1
-            
-            # Calculate implementation score
-            implementation_score = _calculate_implementation_score(passed_tests, total_tests)
-            review_score = 0.0  # Placeholder for future
-            match_total_score = implementation_score + review_score
-            
-            match_scores.append(StudentScoreBreakdown(
-                match_id=match.match_id,
-                match_title=match.title,
-                implementation_score=implementation_score,
-                review_score=review_score,
-                total_score=match_total_score,
-                tests_passed=passed_tests,
-                total_tests=total_tests
-            ))
-            
-            overall_score += match_total_score
-        
-        students_scores.append(StudentGameScoreResponse(
-            student_id=student.student_id,
-            student_name=f"{student.first_name} {student.last_name}",
-            email=student.email,
-            game_id=game.game_id,
-            game_name=game.name,
-            overall_score=round(overall_score, 2),
-            matches=match_scores
-        ))
     
     # Sort students by overall score (descending)
     students_scores.sort(key=lambda x: x.overall_score, reverse=True)
