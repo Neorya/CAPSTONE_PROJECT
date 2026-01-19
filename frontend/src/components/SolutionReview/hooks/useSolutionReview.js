@@ -1,44 +1,73 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getAssignSolution, postStudentVote } from '../../../services/phaseTwoService';
-const MOCK_SOLUTIONS = [
-    {
-        id: 'sol-1',
-        participantId: 'User 2',
-        code: "#include <iostream>" }];
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { getAssignSolution, postStudentVote, getPhaseTwoTiming } from '../../../services/phaseTwoService';
 
 export const useSolutionReview = () => {
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const gameId = searchParams.get('gameId');
+
     const [solutions, setSolutions] = useState([]);
     const [selectedSolution, setSelectedSolution] = useState(null);
     const [votes, setVotes] = useState({});
-    const [remainingTime, setRemainingTime] = useState('45:00');
+    const [remainingTime, setRemainingTime] = useState(null);
     const [isPhaseEnded, setIsPhaseEnded] = useState(false);
+    const [timerInitialized, setTimerInitialized] = useState(false);
 
-    // Timer countdown
+    // Fetch timing from backend and set up countdown
     useEffect(() => {
-        // Mock: Phase 2 ends in 45 minutes from now
-        const endTime = Date.now() + (45 * 60 * 1000);
-        const interval = setInterval(() => {
-            const now = Date.now();
-            const diff = Math.max(0, endTime - now);
+        if (!gameId) return;
 
-            if (diff === 0) {
-                setIsPhaseEnded(true);
-                clearInterval(interval);
+        let interval = null;
+
+        const initTimer = async () => {
+            try {
+                const timing = await getPhaseTwoTiming(gameId);
+                let remainingSeconds = timing.remaining_seconds;
+                
+                setTimerInitialized(true);
+
+                const updateTimer = () => {
+                    if (remainingSeconds <= 0) {
+                        setRemainingTime('00:00');
+                        setIsPhaseEnded(true);
+                        if (interval) clearInterval(interval);
+                        // Redirect to results page after phase 2 ends
+                        setTimeout(() => {
+                            navigate(`/hall-of-fame?gameId=${gameId}`);
+                        }, 2000);
+                        return;
+                    }
+
+                    const minutes = Math.floor(remainingSeconds / 60);
+                    const seconds = remainingSeconds % 60;
+                    setRemainingTime(
+                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+                    );
+                    remainingSeconds--;
+                };
+
+                updateTimer();
+                interval = setInterval(updateTimer, 1000);
+            } catch (err) {
+                console.error("Error fetching phase 2 timing:", err);
+                // Fallback to default timer if backend fails
+                setRemainingTime('45:00');
+                setTimerInitialized(true);
             }
+        };
 
-            const minutes = Math.floor(diff / 60000);
-            const seconds = Math.floor((diff % 60000) / 1000);
-            setRemainingTime(
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-            );
-        }, 1000);
-        return () => clearInterval(interval);
-    }, []);
+        initTimer();
+
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [gameId, navigate]);
 
     const loadSolutions = useCallback(async () => {
+        if (!gameId) return;
         try {
-            // Assicurati che getAssignSolution(1) non fallisca silenziosamente
-            const fetchedSolutions = await getAssignSolution(1);
+            const fetchedSolutions = await getAssignSolution(gameId);
             console.log(fetchedSolutions);
             let mapSolutions = (fetchedSolutions || []).map(sol => ({
                 id: sol.student_assigned_review_id,
@@ -46,11 +75,10 @@ export const useSolutionReview = () => {
                 participantId: sol.pseudonym
             }));
             setSolutions(mapSolutions);
-            // Probabilmente vorrai fare setSolutions(fetchedSolutions) qui
         } catch(err) {
-            console.error("Errore nel caricamento:", err);
+            console.error("Error loading solutions:", err);
         }
-    }, []); // Dipendenze vuote: la funzione è stabile
+    }, [gameId]);
 
     useEffect(() => {
         loadSolutions();
@@ -90,6 +118,7 @@ export const useSolutionReview = () => {
         votes,
         remainingTime,
         isPhaseEnded,
+        timerInitialized,
         selectSolution,
         submitVote,
         getVoteStatus

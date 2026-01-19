@@ -45,10 +45,10 @@ const SolutionsList = ({
                     {/* Timer */}
                     <Card className="timer-card" bordered={false}>
                         <Space direction="vertical" align="center" style={{ width: '100%' }}>
-                            <Text type="secondary">Voting Starts In:</Text>
+                            <Text type="secondary">Review Ends In:</Text>
                             <div className="timer-display">
                                 <ClockCircleOutlined className="timer-icon" />
-                                <span id="phase-timer" className="timer-text">{remainingTime}</span>
+                                <span id="phase-timer" className="timer-text">{remainingTime || '--:--'}</span>
                             </div>
                         </Space>
                     </Card>

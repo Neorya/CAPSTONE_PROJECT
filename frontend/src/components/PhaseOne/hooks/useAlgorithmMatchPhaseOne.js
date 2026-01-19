@@ -47,7 +47,8 @@ export const useAlgorithmMatchPhaseOne = () => {
     const [code, setCode] = useState(() => {
         return localStorage.getItem('phase_one_user_code') || DEFAULT_CODE;
     });
-    const [timeLeft, setTimeLeft] = useState(0); // Will be set from backend based on game session
+    const [timeLeft, setTimeLeft] = useState(null); // null until loaded from backend
+    const [timerInitialized, setTimerInitialized] = useState(false);
     const [publicTests, setPublicTests] = useState([]);
     const [customTests, setCustomTests] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -63,11 +64,23 @@ export const useAlgorithmMatchPhaseOne = () => {
 
 
     useEffect(() => {
+        // Only start countdown if timer has been initialized with a value
+        if (timeLeft === null) return;
+        
         const timer = setInterval(() => {
             setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
         }, 1000);
         return () => clearInterval(timer);
-    }, []);
+    }, [timeLeft !== null]); // Only re-run when timer gets initialized
+
+    // Redirect to phase two when time runs out
+    useEffect(() => {
+        // Only redirect if timer was initialized (not null) and has reached 0
+        if (timerInitialized && timeLeft === 0) {
+            console.log('Phase One: Time is up! Redirecting to phase two...');
+            navigate(`/voting?gameId=${gameId}`);
+        }
+    }, [timeLeft, timerInitialized, navigate, gameId]);
 
     useEffect(() => {
         localStorage.setItem('phase_one_user_code', code);
@@ -89,6 +102,7 @@ export const useAlgorithmMatchPhaseOne = () => {
             // Set the remaining time from the backend
             if (matchDetails.remaining_seconds !== undefined) {
                 setTimeLeft(matchDetails.remaining_seconds);
+                setTimerInitialized(true);
                 console.log('PhaseOne: Setting time left to:', matchDetails.remaining_seconds, 'seconds');
             }
 
@@ -137,6 +151,7 @@ export const useAlgorithmMatchPhaseOne = () => {
     }, [loadMatchData]);
 
     const formatTime = (seconds) => {
+        if (seconds === null) return '--:--';
         const m = Math.floor(seconds / 60);
         const s = seconds % 60;
         return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;

@@ -1,4 +1,5 @@
 from typing import List, Optional, Annotated
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
@@ -14,6 +15,7 @@ from models import (
     Match,
     MatchSetting,
     Test,
+    GameSession,
 )
 from authentication.routes.auth_routes import get_current_user
 from code_runner import compile_cpp, run_cpp_executable
@@ -55,6 +57,46 @@ class VoteResponse(BaseModel):
     message: str
     valid: Optional[bool] = None
 
+
+class PhaseTwoTimingResponse(BaseModel):
+    """Response model for phase 2 timing info."""
+    duration_phase2: int = Field(..., description="Duration of phase 2 in minutes")
+    phase2_start_time: Optional[datetime] = Field(None, description="When phase 2 started (actual_start_date + duration_phase1)")
+    remaining_seconds: int = Field(..., description="Seconds remaining in phase 2")
+
+
+@router.get("/timing", response_model=PhaseTwoTimingResponse)
+def get_phase_two_timing(
+    game_id: int = Query(..., description="ID of the game session"),
+    db: Session = Depends(get_db),
+):
+    """
+    Get timing information for phase 2 of a game session.
+    Returns the duration and remaining time for the review phase.
+    """
+    game_session = db.query(GameSession).filter(GameSession.game_id == game_id).first()
+    
+    if not game_session:
+        raise HTTPException(status_code=404, detail="Game session not found")
+    
+    if not game_session.actual_start_date:
+        raise HTTPException(status_code=400, detail="Game session has not started yet")
+    
+    # Calculate when phase 2 starts (after phase 1 ends)
+    phase1_duration_seconds = (game_session.duration_phase1 or 0) * 60
+    phase2_duration_seconds = (game_session.duration_phase2 or 0) * 60
+    
+    phase2_start_time = game_session.actual_start_date.timestamp() + phase1_duration_seconds
+    phase2_end_time = phase2_start_time + phase2_duration_seconds
+    
+    now = datetime.now(timezone.utc).timestamp()
+    remaining_seconds = max(0, int(phase2_end_time - now))
+    
+    return PhaseTwoTimingResponse(
+        duration_phase2=game_session.duration_phase2 or 0,
+        phase2_start_time=datetime.fromtimestamp(phase2_start_time, tz=timezone.utc),
+        remaining_seconds=remaining_seconds
+    )
 
 
 @router.get("/assigned_solutions", response_model=List[AssignedSolutionResponse])

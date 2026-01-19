@@ -23,6 +23,22 @@ export async function getAssignSolution(gameId) {
     return response.json();
 }
 
+export async function getPhaseTwoTiming(gameId) {
+    const response = await fetch(`${BASE_URL}/timing?game_id=${gameId}`, {
+        headers: getHeaders()
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Error data:", errorData);
+        const error = new Error(errorData.detail || "Error fetching phase 2 timing");
+        error.status = response.status;
+        throw error;
+    }
+
+    return response.json();
+}
+
 
 export async function postStudentVote (student_assigned_review_id, vote, proof_test_in = null, proof_test_out = null, note = null) {
     const response = await fetch(`${BASE_URL}/vote`, {
