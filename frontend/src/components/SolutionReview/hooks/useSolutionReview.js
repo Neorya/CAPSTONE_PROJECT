@@ -1,120 +1,13 @@
-import { useState, useEffect } from 'react';
-
-// Mock data for development - will be replaced with API calls
+import { useState, useEffect, useCallback } from 'react';
+import { getAssignSolution, postStudentVote } from '../../../services/phaseTwoService';
 const MOCK_SOLUTIONS = [
     {
         id: 'sol-1',
         participantId: 'User 2',
-        code: `#include <iostream>
-#include <vector>
-#include <string>
-
-// Student fills in this function
-int solveInt N, const std::vector<int>& A) {
-  // TODO: Implement your solution here
-  int result = 0;
-  return result;
-}
-
-int main() {
-  // Automatic Input Handling
-  int N;
-  std::cin >> N;
-  std::vector<int> A(N);
-  for (int i = 0; i < N; ++i) {
-    std::cin >> A[i];
-  }
-
-  // Call solve function
-  int result = solve(N, A);
-
-  // Automatic Output Handling
-  std::cout << result << std::endl;
-  return 0;
-}`,
-        timestamp: '2026-01-10T14:30:00Z'
-    },
-    {
-        id: 'sol-2',
-        participantId: 'User 3',
-        code: `#include <iostream>
-#include <vector>
-
-int solve(int N, const std::vector<int>& A) {
-  int sum = 0;
-  for (int i = 0; i < N; i++) {
-    sum += A[i];
-  }
-  return sum;
-}
-
-int main() {
-  int N;
-  std::cin >> N;
-  std::vector<int> A(N);
-  for (int i = 0; i < N; ++i) {
-    std::cin >> A[i];
-  }
-  int result = solve(N, A);
-  std::cout << result << std::endl;
-  return 0;
-}`,
-        timestamp: '2026-01-10T14:28:00Z'
-    },
-    {
-        id: 'sol-3',
-        participantId: 'User 4',
-        code: `#include <iostream>
-#include <vector>
-
-int solve(int N, const std::vector<int>& A) {
-  return N * 2;
-}
-
-int main() {
-  int N;
-  std::cin >> N;
-  std::vector<int> A(N);
-  for (int i = 0; i < N; ++i) {
-    std::cin >> A[i];
-  }
-  int result = solve(N, A);
-  std::cout << result << std::endl;
-  return 0;
-}`,
-        timestamp: '2026-01-10T14:25:00Z'
-    },
-    {
-        id: 'sol-4',
-        participantId: 'User 5',
-        code: `#include <iostream>
-#include <vector>
-
-int solve(int N, const std::vector<int>& A) {
-  int product = 1;
-  for (int val : A) {
-    product *= val;
-  }
-  return product;
-}
-
-int main() {
-  int N;
-  std::cin >> N;
-  std::vector<int> A(N);
-  for (int i = 0; i < N; ++i) {
-    std::cin >> A[i];
-  }
-  int result = solve(N, A);
-  std::cout << result << std::endl;
-  return 0;
-}`,
-        timestamp: '2026-01-10T14:22:00Z'
-    }
-];
+        code: "#include <iostream>" }];
 
 export const useSolutionReview = () => {
-    const [solutions, setSolutions] = useState(MOCK_SOLUTIONS);
+    const [solutions, setSolutions] = useState([]);
     const [selectedSolution, setSelectedSolution] = useState(null);
     const [votes, setVotes] = useState({});
     const [remainingTime, setRemainingTime] = useState('45:00');
@@ -124,7 +17,6 @@ export const useSolutionReview = () => {
     useEffect(() => {
         // Mock: Phase 2 ends in 45 minutes from now
         const endTime = Date.now() + (45 * 60 * 1000);
-
         const interval = setInterval(() => {
             const now = Date.now();
             const diff = Math.max(0, endTime - now);
@@ -140,22 +32,45 @@ export const useSolutionReview = () => {
                 `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
             );
         }, 1000);
-
         return () => clearInterval(interval);
     }, []);
+
+    const loadSolutions = useCallback(async () => {
+        try {
+            // Assicurati che getAssignSolution(1) non fallisca silenziosamente
+            const fetchedSolutions = await getAssignSolution(1);
+            console.log(fetchedSolutions);
+            let mapSolutions = (fetchedSolutions || []).map(sol => ({
+                id: sol.student_assigned_review_id,
+                code: sol.code,
+                participantId: sol.pseudonym
+            }));
+            setSolutions(mapSolutions);
+            // Probabilmente vorrai fare setSolutions(fetchedSolutions) qui
+        } catch(err) {
+            console.error("Errore nel caricamento:", err);
+        }
+    }, []); // Dipendenze vuote: la funzione è stabile
+
+    useEffect(() => {
+        loadSolutions();
+    }, [loadSolutions]); 
 
     const selectSolution = (solutionId) => {
         const solution = solutions.find(s => s.id === solutionId);
         setSelectedSolution(solution);
     };
 
-    const submitVote = (solutionId, voteType, testCase = null) => {
+    const submitVote = async (solutionId, voteType, testCase = null, note = "") => {
+        const solution = solutions.find(s => s.id === solutionId);
+        if (testCase === null ) testCase = { input: "", expectedOutput: ""};
+        await postStudentVote(solution.id, voteType, testCase.input, testCase.expectedOutput, note);
+
         // Update votes map
         setVotes(prev => ({
             ...prev,
             [solutionId]: { type: voteType, testCase }
         }));
-
         // Remove from solutions list (can't re-review)
         setSolutions(prev => prev.filter(s => s.id !== solutionId));
 

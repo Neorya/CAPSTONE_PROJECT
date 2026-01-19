@@ -17,6 +17,7 @@ export const API_ENDPOINTS = {
   HAS_STUDENT_JOINED: '/api/has_student_joined_game',
   LEADERBOARD: '/api/leaderboard',
   STUDENT_RESULTS: '/api/student-results',
-  PHASE_ONE: '/api/phase-one'
+  PHASE_ONE: '/api/phase-one',
+  PHASE_TWO: '/api/phase-two',
 };
 
