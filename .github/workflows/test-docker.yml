@@ -87,3 +87,7 @@ jobs:
       - name: Stop services
         if: always()
         run: docker compose down
+
+      - name: Clean up .env file
+        if: always()
+        run: rm -f .env
