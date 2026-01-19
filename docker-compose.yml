@@ -1,8 +1,10 @@
 networks:
   backend:
 
+
 volumes:
   postgres_data:
+
 
 services:
   db:
@@ -22,13 +24,13 @@ services:
       - "5432:5432"
     #Without this the api endpoint can try to reach postgres before It's ready to accept connection
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U changeme -d changeme"]
+      test: [ "CMD-SHELL", "pg_isready -U changeme -d changeme" ]
       interval: 5s
       timeout: 5s
-      retries: 5  
+      retries: 5
 
   api:
-    build: ./api  
+    build: ./api
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     cap_add:
       - SYS_ADMIN
@@ -40,7 +42,7 @@ services:
       - ./api/src:/app
       - ./api/nsjail.cfg:/app/nsjail.cfg
     ports:
-      - "8000:8000" 
+      - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://changeme:changeme@db/changeme
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
@@ -48,8 +50,9 @@ services:
       - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
       - GOOGLE_OAUTH_CLIENT_SECRET=${GOOGLE_OAUTH_CLIENT_SECRET}
       - GOOGLE_OAUTH_REDIRECT_URI=${GOOGLE_OAUTH_REDIRECT_URI}
+      - API_TESTING_MODE=${API_TESTING_MODE:-false}
     depends_on:
-      db: 
+      db:
         condition: service_healthy
     networks:
       - backend
@@ -64,7 +67,9 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
       # Frontend env vars (Create React App only exposes REACT_APP_* variables)
-      # Default auth to disabled so tests/local dev are not blocked by OAuth.
+      # REACT_APP_TESTING_MODE=true disables authentication for tests/local dev
+      # Falls back to REACT_APP_AUTH_ENABLED for backwards compatibility
+      - REACT_APP_TESTING_MODE=${REACT_APP_TESTING_MODE:-false}
       - REACT_APP_AUTH_ENABLED=${REACT_APP_AUTH_ENABLED:-false}
       - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:8000}
     depends_on:

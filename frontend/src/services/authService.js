@@ -8,13 +8,19 @@ import { API_BASE_URL } from "./config";
 /**
  * Auth enable/disable controls
  *
- * - Build-time default is controlled by REACT_APP_AUTH_ENABLED.
+ * - Build-time default is controlled by REACT_APP_TESTING_MODE or REACT_APP_AUTH_ENABLED.
+ * - REACT_APP_TESTING_MODE takes precedence for consistency with backend.
  * - Runtime override is stored in localStorage to allow quick toggling in dev/tests.
  *
  * IMPORTANT: CRA/Vite style env vars are baked at build time; changing them requires rebuild.
  */
 const AUTH_ENABLED_OVERRIDE_KEY = "auth_enabled_override";
-const AUTH_ENABLED_DEFAULT = String(process.env.REACT_APP_AUTH_ENABLED || "false") === "true";
+
+// Check REACT_APP_TESTING_MODE first (inverted logic - testing mode means auth disabled)
+// Fall back to REACT_APP_AUTH_ENABLED for backwards compatibility
+const TESTING_MODE = String(process.env.REACT_APP_TESTING_MODE || "false") === "true";
+const AUTH_ENABLED_LEGACY = String(process.env.REACT_APP_AUTH_ENABLED || "false") === "true";
+const AUTH_ENABLED_DEFAULT = TESTING_MODE ? false : AUTH_ENABLED_LEGACY;
 
 /**
  * Dev mode flag key in localStorage

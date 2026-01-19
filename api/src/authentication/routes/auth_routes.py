@@ -298,12 +298,34 @@ async def logout(
 from fastapi.security import OAuth2PasswordBearer
 from typing import Annotated
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token", auto_error=False)
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+# Testing mode flag - when enabled, authentication is bypassed for automated tests
+# SECURITY: This should NEVER be enabled in production environments
+API_TESTING_MODE = os.getenv("API_TESTING_MODE", "false").lower() == "true"
+
+async def get_current_user(token: Annotated[str | None, Depends(oauth2_scheme)]):
     """
     Dependency to validate access token and return user info.
+    In testing mode, returns a mock user to bypass authentication.
     """
+    # Testing mode bypass - only for automated tests
+    if API_TESTING_MODE:
+        logger.warning("⚠️ API_TESTING_MODE enabled - authentication bypassed")
+        return {
+            "sub": "1",  # Mock user ID
+            "email": "test@example.com",
+            "role": "teacher"  # Default to teacher role for full access
+        }
+    
+    # Normal authentication flow
+    if token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
     try:
         payload = AuthService.validate_access_token(token)
         return payload
