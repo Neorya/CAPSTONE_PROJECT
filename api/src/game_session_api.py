@@ -13,7 +13,7 @@ import re
 
 # Import the database dependency and ORM models
 from database import get_db
-from models import Match, GameSession, MatchesForGame, Teacher
+from models import Match, GameSession, MatchesForGame, Teacher, StudentJoinGame, StudentTest, StudentSolution, StudentSolutionTest, StudentAssignedReview, StudentReviewVote
 
 # ============================================================================
 # Pydantic Models
@@ -292,17 +292,75 @@ async def delete_game_session(
         )
         
     try:
-        # delete associated match links first (no new ones)
-        _replace_game_session_matches(game_id, [], db)
-        # then delete the game session
+        # Get all matches_for_game IDs for this game session
+        match_for_game_ids = [
+            mfg.match_for_game_id for mfg in 
+            db.query(MatchesForGame).filter(MatchesForGame.game_id == game_id).all()
+        ]
+        
+        if match_for_game_ids:
+            # Get all solution IDs for these matches
+            solution_ids = [
+                s.solution_id for s in 
+                db.query(StudentSolution).filter(StudentSolution.match_for_game_id.in_(match_for_game_ids)).all()
+            ]
+            
+            # Get all student test IDs for these matches
+            student_test_ids = [
+                t.test_id for t in 
+                db.query(StudentTest).filter(StudentTest.match_for_game_id.in_(match_for_game_ids)).all()
+            ]
+            
+            # Delete review votes first (references assigned reviews)
+            if solution_ids:
+                # Get assigned review IDs that reference these solutions
+                assigned_review_ids = [
+                    r.student_assigned_review_id for r in
+                    db.query(StudentAssignedReview).filter(StudentAssignedReview.assigned_solution_id.in_(solution_ids)).all()
+                ]
+                
+                if assigned_review_ids:
+                    # Delete review votes
+                    db.query(StudentReviewVote).filter(
+                        StudentReviewVote.student_assigned_review_id.in_(assigned_review_ids)
+                    ).delete(synchronize_session=False)
+                
+                # Delete assigned reviews
+                db.query(StudentAssignedReview).filter(
+                    StudentAssignedReview.assigned_solution_id.in_(solution_ids)
+                ).delete(synchronize_session=False)
+            
+            # Delete student_solution_tests (references both solutions and student_tests)
+            if solution_ids:
+                db.query(StudentSolutionTest).filter(
+                    StudentSolutionTest.solution_id.in_(solution_ids)
+                ).delete(synchronize_session=False)
+            
+            # Delete student solutions
+            db.query(StudentSolution).filter(
+                StudentSolution.match_for_game_id.in_(match_for_game_ids)
+            ).delete(synchronize_session=False)
+            
+            # Delete student tests
+            db.query(StudentTest).filter(
+                StudentTest.match_for_game_id.in_(match_for_game_ids)
+            ).delete(synchronize_session=False)
+        
+        # Delete student join records
+        db.query(StudentJoinGame).filter(StudentJoinGame.game_id == game_id).delete(synchronize_session=False)
+        
+        # Delete matches_for_game records
+        db.query(MatchesForGame).filter(MatchesForGame.game_id == game_id).delete(synchronize_session=False)
+        
+        # Delete the game session
         db.delete(game_session)
         db.commit()
     
-    except Exception:
+    except Exception as e:
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Server error while deleting game session"
+            detail=f"Server error while deleting game session: {str(e)}"
         )
         
     

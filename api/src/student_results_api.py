@@ -581,3 +581,119 @@ def get_game_session_scores(
         total_students=len(students_scores),
         students_scores=students_scores
     )
+
+
+# ============================================================================
+# Endpoint 4: Get Student's Solution ID for a Game Session
+# ============================================================================
+
+class StudentSolutionIdResponse(BaseModel):
+    """
+    Response model for getting student's solution ID in a game session.
+    """
+    student_id: int = Field(..., description="ID of the student")
+    game_id: int = Field(..., description="ID of the game session")
+    solution_id: Optional[int] = Field(None, description="ID of the student's solution, if exists")
+    has_solution: bool = Field(..., description="Whether the student has submitted a solution")
+
+
+@router.get(
+    "/solution/student/{student_id}/game/{game_id}",
+    response_model=StudentSolutionIdResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get a student's solution ID for a game session",
+    description="""
+    Retrieves the solution ID for a specific student in a game session.
+    
+    This is useful for redirecting students to their results page after Phase 2 ends.
+    Returns the solution_id if the student has submitted a solution, otherwise has_solution is false.
+    """
+)
+def get_student_solution_id(
+    student_id: int,
+    game_id: int,
+    db: Session = Depends(get_db)
+) -> StudentSolutionIdResponse:
+    """
+    Get the solution ID for a specific student in a game session.
+    
+    Args:
+        student_id: ID of the student
+        game_id: ID of the game session
+        db: Database session
+    
+    Returns:
+        StudentSolutionIdResponse with solution ID if exists
+    
+    Raises:
+        HTTPException: If student or game session not found, or student not in game
+    """
+    
+    # Verify student exists
+    student = db.query(Student).filter(Student.student_id == student_id).first()
+    if not student:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Student with ID {student_id} not found"
+        )
+    
+    # Verify game session exists
+    game = db.query(GameSession).filter(GameSession.game_id == game_id).first()
+    if not game:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Game session with ID {game_id} not found"
+        )
+    
+    # Verify student is in the game session
+    student_join = db.query(StudentJoinGame).filter(
+        and_(
+            StudentJoinGame.student_id == student_id,
+            StudentJoinGame.game_id == game_id
+        )
+    ).first()
+    
+    if not student_join:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Student {student_id} is not enrolled in game session {game_id}"
+        )
+    
+    # Get the match_for_game for the student's assigned match
+    match_for_game = db.query(MatchesForGame).filter(
+        and_(
+            MatchesForGame.game_id == game_id,
+            MatchesForGame.match_id == student_join.assigned_match_id
+        )
+    ).first()
+    
+    if not match_for_game:
+        return StudentSolutionIdResponse(
+            student_id=student_id,
+            game_id=game_id,
+            solution_id=None,
+            has_solution=False
+        )
+    
+    # Get the student's solution for this match_for_game
+    solution = db.query(StudentSolution).filter(
+        and_(
+            StudentSolution.student_id == student_id,
+            StudentSolution.match_for_game_id == match_for_game.match_for_game_id
+        )
+    ).first()
+    
+    if not solution:
+        return StudentSolutionIdResponse(
+            student_id=student_id,
+            game_id=game_id,
+            solution_id=None,
+            has_solution=False
+        )
+    
+    return StudentSolutionIdResponse(
+        student_id=student_id,
+        game_id=game_id,
+        solution_id=solution.solution_id,
+        has_solution=True
+    )

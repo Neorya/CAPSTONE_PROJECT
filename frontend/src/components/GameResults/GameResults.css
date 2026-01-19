@@ -1,0 +1,47 @@
+.game-results-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    gap: 16px;
+}
+
+.game-results-loading p {
+    font-size: 16px;
+    color: #666;
+}
+
+.game-results-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    gap: 16px;
+    text-align: center;
+}
+
+.game-results-error h2 {
+    color: #ff4d4f;
+    margin: 0;
+}
+
+.game-results-error p {
+    color: #666;
+    margin: 0;
+}
+
+.game-results-error button {
+    padding: 8px 24px;
+    background-color: #1890ff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.game-results-error button:hover {
+    background-color: #40a9ff;
+}

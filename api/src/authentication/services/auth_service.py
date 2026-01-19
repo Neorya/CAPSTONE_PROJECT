@@ -25,6 +25,7 @@ from authentication.exceptions import (
     DatabaseError,
     ConfigurationError
 )
+from models import Student
 
 logger = logging.getLogger(__name__)
 
@@ -104,6 +105,19 @@ class AuthService:
                 role="student" 
             )
             user = UserRepository.create(db, user_data.dict())
+            
+            # Also create a Student record with matching ID for legacy API compatibility
+            if user.role == UserRoleEnum.student:
+                student = Student(
+                    student_id=user.id,
+                    email=user.email,
+                    first_name=user.first_name,
+                    last_name=user.last_name,
+                    score=0
+                )
+                db.add(student)
+                db.commit()
+                logger.info(f"Created Student record for user {user.id}")
 
         access_token = AuthService.issue_access_token(user)
         refresh_token, _ = AuthService.issue_refresh_token(user.id, db)

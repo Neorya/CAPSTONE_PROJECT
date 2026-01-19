@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Card, Tooltip, Typography, message, Spin, Empty } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
@@ -58,7 +58,33 @@ const JoinGameSession = () => {
     return "ready";
   })();
 
-  // get available game + check if student already joined
+  // Function to fetch available game session
+  const fetchGameSession = useCallback(async () => {
+    if (!studentId) return;
+    
+    try {
+      const session = await getAvailableGame();
+
+      if (session && session.game_id) {
+        setGameSession(session);
+
+        // check if student has already joined this session
+        const joined = await hasStudentAlreadyJoinedSession(
+          studentId,
+          session.game_id
+        );
+        setStudentAlreadyJoined(joined);
+      } else {
+        setGameSession(null);
+      }
+    } catch (error) {
+      console.error("Error fetching game session:", error);
+      setGameSession(null);
+      setStudentAlreadyJoined(false);
+    }
+  }, [studentId]);
+
+  // Initial fetch + polling for available game sessions
   useEffect(() => {
     if (!studentId) {
       console.error("No student ID found in token");
@@ -67,32 +93,17 @@ const JoinGameSession = () => {
     }
 
     const init = async () => {
-      try {
-        const session = await getAvailableGame();
-
-        if (session && session.game_id) {
-          setGameSession(session);
-
-          // check if student has already joined this session
-          const joined = await hasStudentAlreadyJoinedSession(
-            studentId,
-            session.game_id
-          );
-          setStudentAlreadyJoined(joined);
-        } else {
-          setGameSession(null);
-        }
-      } catch (error) {
-        console.error("Error initializing game session page:", error);
-        setGameSession(null);
-        setStudentAlreadyJoined(false);
-      } finally {
-        setInitializing(false);
-      }
+      await fetchGameSession();
+      setInitializing(false);
     };
 
     init();
-  }, [studentId]);
+
+    // Poll every 5 seconds to check for available game sessions
+    const pollInterval = setInterval(fetchGameSession, 5000);
+
+    return () => clearInterval(pollInterval);
+  }, [studentId, fetchGameSession]);
 
   // handle join button click
   const handleJoin = async () => {
