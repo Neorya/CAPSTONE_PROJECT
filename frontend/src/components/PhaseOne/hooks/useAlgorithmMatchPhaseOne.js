@@ -78,12 +78,16 @@ export const useAlgorithmMatchPhaseOne = () => {
             setIsLoading(true);
             setError(null);
 
+            console.log('PhaseOne: Loading match data for gameId:', gameId, 'studentId:', studentId);
+
             const matchDetails = await getMatchDetails(gameId);
+            console.log('PhaseOne: Match details loaded:', matchDetails);
 
             if (matchDetails.title) setProblemTitle(matchDetails.title);
             if (matchDetails.description) setProblemDescription(matchDetails.description);
 
             const testsData = await getTests(studentId, gameId);
+            console.log('PhaseOne: Tests loaded:', testsData);
 
             const mappedPublicTests = (testsData || []).map(test => ({
                 id: test.test_id,
@@ -95,6 +99,7 @@ export const useAlgorithmMatchPhaseOne = () => {
             setPublicTests(mappedPublicTests);
 
             const customTestsData = await getStudentTests(studentId, gameId);
+            console.log('PhaseOne: Custom tests loaded:', customTestsData);
 
             const mappedCustomTests = (customTestsData || []).map(test => ({
                 id: test.test_id,
@@ -107,7 +112,10 @@ export const useAlgorithmMatchPhaseOne = () => {
 
         } catch (err) {
             console.error("Error loading match data:", err);
+            console.error("Error status:", err.status);
+            console.error("Error details:", err);
             if (err.status === 403 || err.status === 401 || err.status === 404) {
+                console.log('PhaseOne: Redirecting to /home due to error status:', err.status);
                 navigate('/home');
                 return;
             }

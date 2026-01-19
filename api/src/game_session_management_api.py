@@ -195,6 +195,37 @@ async def get_game_session_students(
     )
 
 
+@router.get(
+    "/game_session/{game_id}/status",
+    status_code=status.HTTP_200_OK,
+    summary="Check if game session has started",
+    description="Returns whether the game session has started (actual_start_date is set). Used by students polling in lobby."
+)
+async def check_game_session_status(
+    game_id: int, db: Session = Depends(get_db)
+) -> Dict[str, Any]:
+    """
+    Check if a game session has started.
+    
+    Returns:
+    - has_started: boolean indicating if actual_start_date is set
+    - actual_start_date: the actual start date if started, otherwise None
+    """
+    game_session = db.query(GameSession).filter(GameSession.game_id == game_id).first()
+
+    if not game_session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Game session with id {game_id} not found"
+        )
+    
+    return {
+        "game_id": game_id,
+        "has_started": game_session.actual_start_date is not None,
+        "actual_start_date": game_session.actual_start_date
+    }
+
+
 @router.post(
     "/game_session/{game_id}/start",
     response_model=GameSessionStartResponse,
@@ -267,8 +298,6 @@ async def start_game_session(
         if record:
             record.assigned_match_id = assignment["assigned_match_id"]
 
-    db.commit()
-    
     # Build response with full assignment details    
     # Fetch student and match details for response
     student_data = db.query(Student).filter(Student.student_id.in_(student_ids)).all()

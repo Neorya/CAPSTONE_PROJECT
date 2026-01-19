@@ -17,13 +17,11 @@ from authentication.config import validate_required_env_vars
 
 app = FastAPI()
 
-# Validate required environment variables at startup
-@app.on_event("startup")
-def validate_config():
-    """Validate that all required authentication environment variables are set."""
-    validate_required_env_vars()
+# Add SessionMiddleware first (applied last, so inner)
+# In production, use a secure secret key from environment variables
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "your-secret-key"))
 
-# Configure CORS
+# Configure CORS last (applied first, so outer)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],  # Frontend URL
@@ -32,9 +30,11 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-# Add SessionMiddleware for Authlib
-# In production, use a secure secret key from environment variables
-app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "your-secret-key"))
+# Validate required environment variables at startup
+@app.on_event("startup")
+def validate_config():
+    """Validate that all required authentication environment variables are set."""
+    validate_required_env_vars()
 
 app.include_router(match_settings_router)
 app.include_router(match_router)

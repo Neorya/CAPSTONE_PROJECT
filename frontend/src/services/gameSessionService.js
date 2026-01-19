@@ -236,4 +236,30 @@ export async function startGameSession(gameId) {
   }
 }
 
-
+/**
+ * Checks if a game session has started (actual_start_date is set).
+ *
+ * @param {string|number} gameId - The ID of the game session to check.
+ * @returns {Promise<Object>} A promise that resolves to an object with has_started, game_id, and actual_start_date.
+ */
+export async function checkGameSessionStatus(gameId) {
+  try {
+    const url = new URL(`${API_ENDPOINTS.GAME_SESSIONS}/${gameId}/status`, API_BASE_URL);
+    const res = await apiFetch(url.toString());
+    if (!res.ok) {
+      let errorMessage = `Failed to check game session status: ${res.statusText}`;
+      try {
+        const errorData = await res.json();
+        if (errorData && errorData.detail) {
+          errorMessage = errorData.detail;
+        }
+      } catch (jsonErr) {
+        // Ignore JSON parse errors
+      }
+      throw new Error(errorMessage);
+    }
+    return await res.json();
+  } catch (err) {
+    throw new Error(err.message);
+  }
+}

@@ -191,8 +191,22 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route path="/phase-one" element={<AlgorithmMatchPhaseOne />} />
-            <Route path="/voting" element={<SolutionReview />} />
+            <Route 
+              path="/phase-one" 
+              element={
+                <ProtectedRoute>
+                  <AlgorithmMatchPhaseOne />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/voting" 
+              element={
+                <ProtectedRoute>
+                  <SolutionReview />
+                </ProtectedRoute>
+              } 
+            />
             {/* Catch-all route - redirects to root */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Card, Tooltip, Typography, message, Spin, Empty } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
+import { jwtDecode } from "jwt-decode";
 import GameSessionCard from "./components/GameSessionCard";
 import {
   joinGameSession,
@@ -12,12 +13,31 @@ import {
 const { Title, Text } = Typography;
 
 /**
+ * Get the student ID from the JWT token stored in localStorage
+ */
+const getStudentIdFromToken = () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decoded = jwtDecode(token);
+      return parseInt(decoded.sub, 10);
+    }
+  } catch (e) {
+    console.error('Error decoding token:', e);
+  }
+  return null;
+};
+
+/**
  * JoinGameSession component allows a student to join an available in-person game session.
  *
  * @returns {JSX.Element} The rendered component for joining a game session.
  */
 const JoinGameSession = () => {
   const navigate = useNavigate();
+
+  // Get the actual student ID from the token
+  const studentId = getStudentIdFromToken();
 
   // state for fetching session and checking if student already joined
   const [initializing, setInitializing] = useState(true);
@@ -40,12 +60,11 @@ const JoinGameSession = () => {
 
   // get available game + check if student already joined
   useEffect(() => {
-    /**
-     * ================================TODO ==============================
-     * The studentId is currently hardcoded to 1. 
-     * ====================================================================
-     */
-    const studentId = 1; // TODO: replace with real logged-in student id
+    if (!studentId) {
+      console.error("No student ID found in token");
+      setInitializing(false);
+      return;
+    }
 
     const init = async () => {
       try {
@@ -73,23 +92,22 @@ const JoinGameSession = () => {
     };
 
     init();
-  }, []);
+  }, [studentId]);
 
   // handle join button click
   const handleJoin = async () => {
     console.log("joinState at click:", joinState);
     // if already joined, navigate to lobby/game page
     if (joinState === "alreadyJoined") {
-      navigate("/lobby");
+      navigate("/lobby", { state: { gameId: gameSession.game_id } });
       return;
     }
-    if (joinState !== "ready" || !gameSession) return;
+    if (joinState !== "ready" || !gameSession || !studentId) return;
     setJoining(true);
     try {
-      // TODO change this (1) to actual student id
-      await joinGameSession(1, gameSession.game_id);
+      await joinGameSession(studentId, gameSession.game_id);
       message.success("Joined successfully!");
-      navigate("/lobby");
+      navigate("/lobby", { state: { gameId: gameSession.game_id } });
     } catch (error) {
       message.warning(error.message || "Failed to join the session.");
       console.error("Error joining game session:", error);
