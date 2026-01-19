@@ -27,6 +27,32 @@ const Login = () => {
     window.location.href = '/';
   };
 
+  const handleDevLogin = async (role) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/dev-login?role=${role}`, {
+        method: 'POST',
+        credentials: 'include', // Include cookies
+      });
+
+      if (!response.ok) {
+        throw new Error('Dev login failed');
+      }
+
+      const data = await response.json();
+
+      // Store the access token
+      localStorage.setItem('token', data.access_token);
+
+      // Redirect to home
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Dev login error:', error);
+      alert(`Failed to login as ${role}. Please check the console for details.`);
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="login-container">
       <div className="tech-corner tech-tl" />
@@ -84,25 +110,37 @@ const Login = () => {
 
           {showDevButton && (
             <div className="dev-mode-section">
-              <Divider plain>Developer Access</Divider>
+              <Divider plain>Developer Access (DEV MODE ONLY)</Divider>
               <Alert
                 message="Developer Sandbox"
-                description="Bypass authentication for local testing and debugging."
+                description="Quick login as test users for local testing. These buttons only appear in development mode."
                 type="warning"
                 icon={<WarningOutlined />}
                 showIcon
                 className="dev-alert"
               />
-              <Button
-                type="text"
-                size="large"
-                onClick={handleSkipLogin}
-                block
-                loading={isLoading}
-                className="skip-login-btn"
-              >
-                Skip Authentication
-              </Button>
+              <Space direction="vertical" size="small" style={{ width: '100%', marginTop: 12 }}>
+                <Button
+                  type="dashed"
+                  size="large"
+                  onClick={() => handleDevLogin('student')}
+                  block
+                  loading={isLoading}
+                  className="dev-login-btn dev-student-btn"
+                >
+                  🎓 Login as Student (Dev)
+                </Button>
+                <Button
+                  type="dashed"
+                  size="large"
+                  onClick={() => handleDevLogin('teacher')}
+                  block
+                  loading={isLoading}
+                  className="dev-login-btn dev-teacher-btn"
+                >
+                  👨‍🏫 Login as Teacher (Dev)
+                </Button>
+              </Space>
             </div>
           )}
         </Space>

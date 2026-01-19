@@ -9,7 +9,7 @@ Provides endpoints for:
 User Story 3: Teacher starts game session and views joined students and matches
 """
 
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Annotated
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
@@ -27,6 +27,7 @@ from models import (
 
 
 from database import get_db
+from authentication.routes.auth_routes import require_teacher
 
 # Import Pydantic models
 from models import (
@@ -252,7 +253,9 @@ async def check_game_session_status(
     description="Starts a game session by setting actual_start_date and assigning students to matches fairly."
 )
 async def start_game_session(
-    game_id: int, db: Session = Depends(get_db)
+    game_id: int,
+    current_user: Annotated[dict, Depends(require_teacher)],
+    db: Session = Depends(get_db)
 ) -> GameSessionStartResponse:
     """
     Start a game session:
