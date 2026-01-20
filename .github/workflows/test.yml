@@ -77,6 +77,12 @@ jobs:
           python main.py &
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/matchdb
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY || 'test-jwt-secret-key-for-ci-testing-only' }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY || 'test-secret-key-for-ci-testing-only' }}
+          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID || 'test-client-id' }}
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET || 'test-client-secret' }}
+          GOOGLE_OAUTH_REDIRECT_URI: ${{ secrets.GOOGLE_OAUTH_REDIRECT_URI || 'http://localhost:8000/auth/callback' }}
+          API_TESTING_MODE: "true"
 
       - name: Wait for API to be ready
         run: |
@@ -93,6 +99,8 @@ jobs:
         run: |
           cd frontend
           npm start &
+        env:
+          REACT_APP_TESTING_MODE: "true"
 
       - name: Wait for application to be ready
         run: |
