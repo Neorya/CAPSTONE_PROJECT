@@ -342,6 +342,20 @@ async def get_current_user(token: Annotated[str | None, Depends(oauth2_scheme)])
         )
 
 
+async def require_teacher(current_user: Annotated[dict, Depends(get_current_user)]) -> dict:
+    """
+    Dependency that ensures the current user is a teacher.
+    Raises 403 Forbidden if the user is not a teacher.
+    """
+    role = current_user.get("role", "")
+    if role != "teacher":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only teachers can perform this action"
+        )
+    return current_user
+
+
 @router.get(
     "/validate",
     response_model=TokenValidationResponse,
@@ -410,3 +424,84 @@ async def check_role_change(
     except Exception as e:
         logger.error(f"Unexpected error during role change check: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.post(
+    "/dev-login",
+    response_model=TokenResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Dev mode login (TESTING ONLY)",
+    description="Login as a test user without OAuth. Only works in development mode."
+)
+async def dev_mode_login(
+    role: str,
+    response: Response,
+    db: Session = Depends(get_db)
+) -> TokenResponse:
+    """
+    Dev mode login endpoint for testing.
+    Allows quick login as student or teacher without OAuth flow.
+    
+    SECURITY: This endpoint should only be enabled in development!
+    """
+    # Check if we're in development mode
+    is_dev = os.getenv("ENVIRONMENT", "development") == "development"
+    if not is_dev:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Dev mode login is only available in development environment"
+        )
+    
+    # Validate role
+    if role not in ["student", "teacher"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Role must be 'student' or 'teacher'"
+        )
+    
+    try:
+        # Get the dev user from database
+        from authentication.repositories.user_repository import UserRepository
+        
+        email = f"dev.{role}@test.com"
+        user = UserRepository.get_by_email(db, email)
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Dev {role} user not found in database"
+            )
+        
+        # Issue tokens
+        access_token = AuthService.issue_access_token(user)
+        refresh_token, _ = AuthService.issue_refresh_token(user.id, db)
+        
+        logger.info(f"Dev mode login: {role} ({user.email})")
+        
+        # Set refresh token in cookie
+        refresh_token_max_age = REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            max_age=refresh_token_max_age,
+            httponly=True,
+            secure=False,  # Dev mode
+            samesite="lax",
+            path="/auth"
+        )
+        
+        return TokenResponse(
+            access_token=access_token,
+            refresh_token=None,  # Sent via cookie
+            token_type="Bearer",
+            expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error during dev mode login: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Dev mode login failed"
+        )
+

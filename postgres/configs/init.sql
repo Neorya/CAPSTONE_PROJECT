@@ -279,7 +279,10 @@ VALUES
 ('100222333444555666777', 'teacher4@test.com', 'Oscar', 'Owens', 'teacher', 0),
 ('100888999000111222333', 'admin2@test.com', 'Paul', 'Parker', 'admin', 0),
 ('100444555666777888999', 'student11@test.com', 'Quinn', 'Quick', 'student', 120),
-('100101202303404505606', 'student12@test.com', 'Rachel', 'Ross', 'student', 220);
+('100101202303404505606', 'student12@test.com', 'Rachel', 'Ross', 'student', 220),
+-- Dev mode test users
+('DEV_STUDENT_12345678', 'dev.student@test.com', 'Dev', 'Student', 'student', 0),
+('DEV_TEACHER_87654321', 'dev.teacher@test.com', 'Dev', 'Teacher', 'teacher', 0);
 
 -- ######################################
 -- INSERT DATA INTO TEACHER TABLE (5 RECORDS)

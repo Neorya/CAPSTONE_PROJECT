@@ -171,6 +171,35 @@
   background: #fff1f0 !important;
 }
 
+.dev-login-btn {
+  height: 46px !important;
+  background: transparent !important;
+  border: 1px dashed #d9d9d9 !important;
+  border-radius: 10px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.dev-student-btn {
+  color: #1890ff !important;
+}
+
+.dev-student-btn:hover {
+  border-style: solid !important;
+  border-color: #1890ff !important;
+  background: #e6f7ff !important;
+}
+
+.dev-teacher-btn {
+  color: #52c41a !important;
+}
+
+.dev-teacher-btn:hover {
+  border-style: solid !important;
+  border-color: #52c41a !important;
+  background: #f6ffed !important;
+}
+
 /* Tech decorative elements - Light Version */
 .tech-corner {
   position: absolute;
