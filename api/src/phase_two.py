@@ -174,20 +174,6 @@ def _ensure_reviews_assigned(game_id: int, db: Session) -> int:
                     student_id=student_id,
                     assigned_solution_id=solution.solution_id
                 )
-                
-                # Double-check no duplicate assignment exists
-                exists = (
-                    db.query(StudentAssignedReview)
-                    .filter(
-                        StudentAssignedReview.student_id == student_id,
-                        StudentAssignedReview.assigned_solution_id == solution.solution_id
-                    )
-                    .first()
-                )
-
-                if exists:
-                    continue
-                
                 db.add(assignment)
                 total_assignments += 1
     
