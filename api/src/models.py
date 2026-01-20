@@ -12,6 +12,8 @@ from sqlalchemy import Boolean, Column, Integer, String, Text, ForeignKey, Enum,
 from sqlalchemy.dialects.postgresql import ENUM as PG_ENUM
 from sqlalchemy.orm import relationship
 from typing import Optional
+from sqlalchemy import UniqueConstraint
+
 
 
 from database import Base
@@ -220,7 +222,10 @@ class StudentAssignedReview(Base):
     Represents the assignment of a student to review another student's solution.
     """
     __tablename__ = "student_assigned_review"
-    __table_args__ = {'schema': SCHEMA_NAME}
+    __table_args__ = (
+        UniqueConstraint("student_id", "assigned_solution_id", name="uq_student_assigned_review_pair"),
+        {'schema': SCHEMA_NAME}
+    )
 
     student_assigned_review_id = Column(Integer, primary_key=True)
     student_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student.student_id"), nullable=False)

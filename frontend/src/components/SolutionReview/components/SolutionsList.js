@@ -74,17 +74,25 @@ const SolutionsList = ({
                 {!isLeftPanelCollapsed ? (
                     <Row gutter={[24, 24]}>
                         {solutions.map((solution, index) => {
-                            const studentNumber = index + 1;
+                            const isSelected = selectedSolution?.id === solution.id;
+                            const isVoted = solution.hasVoted;
+
                             return (
                                 <Col span={12} key={solution.id}>
                                     <Card
-                                        className={`solution-card solution-item ${selectedSolution?.id === solution.id ? 'selected' : ''}`}
-                                        hoverable
-                                        onClick={() => onSolutionClick(solution.id)}
+                                        className={`solution-card solution-item ${isSelected ? 'selected' : ''} ${isVoted ? 'voted' : ''}`}
+                                        hoverable={!isVoted}
+                                        onClick={() => !isVoted && onSolutionClick(solution.id)}
                                     >
                                         <div className="solution-card-content">
-                                            <Text strong className="participant-id solution-label">{solution.participantId}</Text>
-                                            <span className="submission-timestamp" style={{ display: 'none' }}>Just now</span>
+                                            <Text strong className="participant-id solution-label">
+                                                {solution.participantId}
+                                            </Text>
+
+                                            <span className="submission-timestamp" style={{ display: 'none' }}>
+                                                Just now
+                                            </span>
+
                                             <Button
                                                 id={`view-details-${solution.id}`}
                                                 className="view-details-button"
@@ -94,14 +102,16 @@ const SolutionsList = ({
                                                     e.stopPropagation();
                                                     onSolutionClick(solution.id);
                                                 }}
-                                            >
-                                                View Details
+                                                >
+                                                {solution.hasVoted ? `Edit Vote (${solution.votedType})` : 'View Details'}
                                             </Button>
+
                                         </div>
                                     </Card>
                                 </Col>
                             );
                         })}
+
                     </Row>
                 ) : (
                     <div className="solutions-compact-list" role="list" aria-label="Solutions list">
@@ -109,6 +119,8 @@ const SolutionsList = ({
                             {solutions.map((solution, index) => {
                                 const studentNumber = index + 1;
                                 const isSelected = selectedSolution?.id === solution.id;
+                                const isVoted = solution.hasVoted;
+
                                 return (
                                     <Button
                                         key={solution.id}
@@ -116,9 +128,10 @@ const SolutionsList = ({
                                         type={isSelected ? 'primary' : 'default'}
                                         block
                                         onClick={() => onSolutionClick(solution.id)}
-                                    >
-                                        {solution.participantId}
+                                        >
+                                        {solution.hasVoted ? `${solution.participantId} (Edit)` : solution.participantId}
                                     </Button>
+
                                 );
                             })}
                         </Space>
