@@ -57,7 +57,8 @@ if GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET and GOOGLE_OAUTH_REDIRE
         client_secret=GOOGLE_OAUTH_CLIENT_SECRET,
         server_metadata_url=GOOGLE_OAUTH_DISCOVERY_URL,
         client_kwargs={
-            'scope': 'openid email profile'
+            'scope': 'openid email profile',
+            'timeout': 10.0  # 10 second timeout for OAuth requests
         }
     )
 else:
@@ -104,11 +105,23 @@ async def initiate_oauth(request: Request):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="OAuth configuration error. Please contact the administrator."
         )
-    except (httpx.ConnectError, httpx.TimeoutException, httpx.NetworkError) as e:
+    except (httpx.ConnectError, httpx.TimeoutException, httpx.NetworkError, httpx.ConnectTimeout) as e:
         logger.error(f"Network error connecting to OAuth provider: {e}", exc_info=True)
+        
+        # Check if we're in development mode
+        is_dev = os.getenv("ENVIRONMENT", "development") == "development"
+        
+        if is_dev:
+            error_detail = (
+                "Unable to connect to Google OAuth service. This is common in development environments. "\
+                "Please use the 'Dev Login' buttons on the login page instead, or check your network connection."
+            )
+        else:
+            error_detail = "Unable to connect to authentication service. Please check your network connection and try again."
+        
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="Unable to connect to authentication service. Please check your network connection and try again."
+            detail=error_detail
         )
     except OAuthProviderError as e:
         logger.error(f"OAuth provider error during initiation: {e}", exc_info=True)
