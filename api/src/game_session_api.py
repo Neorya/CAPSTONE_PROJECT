@@ -163,22 +163,28 @@ async def create_game_session(
     ) -> GameSessionResponse:
 
     if len(game_session_data.match_id) <= 0:
-         raise HTTPException(
+
+        print("Error: at least one match setting is required")
+        raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Request error, at least one match setting is required"
         )
 
 
     teacher = db.query(Teacher).filter(Teacher.teacher_id == game_session_data.creator_id).first()
+    print(teacher)
+    print(game_session_data.creator_id)
     if not teacher:
+        print("Error: teacher not found")
         raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Request error"
         )
     
     matches = db.query(Match).filter(Match.match_id.in_(game_session_data.match_id)).all()
     
     if len(matches) != len(game_session_data.match_id):
+        print("Error: match not found")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Request error"

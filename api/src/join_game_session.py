@@ -181,7 +181,7 @@ async def has_student_joined_game(
     On success, it returns True if the student has joined the game session, otherwise False
     """
     
-    if not db.query(Student).filter(Student.student_id == student_id).first():
+    if not db.query(Student).filter(Student.user_id == student_id).first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found")
 
     if not db.query(GameSession).filter(GameSession.game_id == game_id).first():

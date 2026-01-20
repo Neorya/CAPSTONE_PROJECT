@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { Typography } from "antd";
 import {
@@ -12,29 +12,29 @@ import {
 } from "@ant-design/icons";
 import { getUserProfile } from "../../services/userService";
 import "./HomePage.css";
+import { jwtDecode } from "jwt-decode";
 
 const { Title, Paragraph } = Typography;
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const [userRole, setUserRole] = useState(null);
-  const [loading, setLoading] = useState(true);
-
+  const [profile, setProfile] = useState(null);
   useEffect(() => {
-    const fetchRole = async () => {
+    const fetchProfile = async () => {
       try {
-        const profile = await getUserProfile();
-        setUserRole(profile.role);
+
+        const token = localStorage.getItem('token');
+        if (token) {
+          const decoded = jwtDecode(token);
+          setProfile(decoded);
+        }
       } catch (err) {
-        console.error("Failed to fetch user role:", err);
-      } finally {
-        setLoading(false);
+        console.log("err: ", err);
       }
     };
-    fetchRole();
+    fetchProfile();
   }, []);
-
-  const bentoItems = [
+  let bentoItems = [
     {
       id: "create-match",
       title: "Create New Match",
@@ -99,6 +99,9 @@ const HomePage = () => {
       roles: ["teacher", "student"]
     }
   ];
+  if (profile && profile.role === "student") {
+    bentoItems = bentoItems.slice(4, 7);
+  }
 
   // Filter items based on user role
   const filteredItems = userRole

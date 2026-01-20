@@ -3,7 +3,7 @@ import { message } from 'antd';
 import { getLeaderboard } from '../../services/leaderboardService';
 import HallOfFameView from './HallOfFameView';
 import './HallOfFame.css';
-
+import { getUserProfile } from '../../services/userService';
 
 /**
  * HallOfFameContainer
@@ -20,10 +20,7 @@ const HallOfFameContainer = () => {
     const [totalStudents, setTotalStudents] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [currentUserRank, setCurrentUserRank] = useState(null);
-    const [currentStudentId, setCurrentStudentId] = useState(() => {
-        const studentId = localStorage.getItem('student_id');
-        return studentId ? parseInt(studentId) : null;
-    });
+    const [currentStudentId, setCurrentStudentId] = useState(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const pageSize = DEFAULT_PAGE_SIZE;
 
@@ -37,7 +34,10 @@ const HallOfFameContainer = () => {
             setLeaderboardData(data.leaderboard);
             setTotalStudents(data.total_students);
             setTotalPages(data.total_pages);
+            console.log(data);
             setCurrentUserRank(data.current_user_rank);
+            const dataProf = await getUserProfile();
+            setCurrentStudentId(dataProf.user_id);
         } catch (error) {
             message.error(`Failed to load leaderboard: ${error.message}`);
         } finally {
@@ -46,6 +46,7 @@ const HallOfFameContainer = () => {
     }, [currentStudentId, pageSize]);
 
     useEffect(() => {
+
         fetchLeaderboard(currentPage);
     }, [currentPage, fetchLeaderboard]);
 
