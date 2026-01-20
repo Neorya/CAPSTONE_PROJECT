@@ -182,3 +182,161 @@
     color: #9ca3af;
   }
 }
+
+/* Active Game Banner - Minimalist Redesign */
+.active-game-banner {
+  margin-bottom: 2rem;
+  animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.active-game-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.active-game-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #10b981;
+  /* Green accent bar */
+}
+
+.active-game-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+  transform: translateY(-1px);
+  border-color: #d1d5db;
+}
+
+.active-game-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.game-icon-wrapper {
+  color: #10b981;
+  font-size: 2.5rem;
+  background: #ecfdf5;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.game-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.game-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.phase-badge {
+  background: #f3f4f6;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  color: #374151;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.time-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.time-value {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 600;
+  color: #059669;
+  /* Darker green for numbers */
+}
+
+.active-game-actions {
+  display: flex;
+  align-items: center;
+}
+
+.continue-game-btn {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.continue-game-btn:hover {
+  background: #059669;
+}
+
+
+/* Ensure the tag is relatively positioned to the card */
+.bento-card {
+  position: relative;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .active-game-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  .active-game-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Button, Card, Tooltip, Typography, message, Spin } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { checkGameSessionStatus } from '../../services/gameSessionService';
@@ -9,10 +9,11 @@ const { Title, Text } = Typography;
 const Lobby = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [checking, setChecking] = useState(false);
-  
-  // Get gameId from location state passed from JoinGameSession
-  const gameId = location.state?.gameId;
+
+  // Get gameId from location state OR URL query params (fallback for when state is lost)
+  const gameId = location.state?.gameId || searchParams.get('gameId');
 
   useEffect(() => {
     if (!gameId) {
@@ -30,7 +31,7 @@ const Lobby = () => {
         setChecking(true);
         const status = await checkGameSessionStatus(gameId);
         console.log('Lobby: Game status:', status);
-        
+
         if (status.has_started) {
           // Game has started, redirect to phase one
           clearInterval(pollInterval);

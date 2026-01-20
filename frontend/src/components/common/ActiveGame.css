@@ -1,0 +1,162 @@
+/* Shared styles for Active Game components */
+
+/* Active Game Banner - Minimalist */
+.active-game-banner.minimalist {
+    margin-bottom: 2rem;
+    animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.active-game-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05),
+        0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.active-game-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: #10b981;
+}
+
+.active-game-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.game-icon-wrapper {
+    color: #10b981;
+    font-size: 2.5rem;
+    background: #ecfdf5;
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: left;
+}
+
+.game-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.game-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.phase-badge {
+    background: #f3f4f6;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+    color: #374151;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+.time-value {
+    font-family: "Courier New", Courier, monospace;
+    font-weight: 600;
+    color: #059669;
+}
+
+/* Bento Card Timer & Active State (Used in HomePage) */
+.card-timer {
+    margin-top: 8px;
+    font-family: "Courier New", Courier, monospace;
+    font-weight: 700;
+    color: #059669;
+    font-size: 0.9rem;
+    background: #ecfdf5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.active-session-card {
+    border-color: #10b981 !important;
+    /* background: #f0fff4 !important; */
+    /* Removed green background */
+}
+
+.active-session-card:hover {
+    border-color: #059669 !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Custom internal tag that follows card hover transforms */
+.internal-status-tag {
+    position: absolute;
+    top: 10px;
+    right: 0;
+    /* Align to right edge */
+    background: #10b981;
+    color: white;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 4px 0 0 4px;
+    z-index: 10;
+    box-shadow: -2px 2px 4px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .active-game-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .active-game-header {
+        width: 100%;
+    }
+
+    .active-game-actions {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+    }
+}
