@@ -18,36 +18,36 @@ const PreStartGameSession = () => {
     const handleStartSession = async () => {
         const ok = await startSession();   // WAIT for backend
         if (!ok) return;
-      
+
         navigate(`/start-game-session/${gameId}`);
     };
 
 
     const formatDateTime = (value) => {
         if (!value) return "-";
-      
+
         const d = new Date(value);
         if (Number.isNaN(d.getTime())) return String(value);
-      
+
         return d.toLocaleString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
+            year: "numeric",
+            month: "short",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
         });
     };
-      
-      
+
+
     const formatMinutes = (mins) => {
         if (mins === null || mins === undefined) return "-";
         return `${mins} min`;
     };
-      
-      
-      
-      
-    
+
+
+
+
+
     return (
         <div className="pre-start-session-container">
             <Card className="session-card">
@@ -55,15 +55,15 @@ const PreStartGameSession = () => {
                     <AlertNotification
                         type="error"
                         message={error}
-                        onClose={() => {}}
+                        onClose={() => { }}
                     />
                 )}
                 <div className="header-section">
                     <div className="header-top">
                         <Tooltip title="Back to Home">
-                            <Button 
+                            <Button
                                 id="back-to-home-button"
-                                icon={<ArrowLeftOutlined />} 
+                                icon={<ArrowLeftOutlined />}
                                 onClick={() => navigate('/home')}
                                 shape="circle"
                                 size="large"
@@ -75,7 +75,7 @@ const PreStartGameSession = () => {
                             <Title level={2} style={{ margin: 0 }}>
                                 Start {session.name} Game Session
                             </Title>
-                            </div>
+                        </div>
                         <div style={{ width: 40 }}></div> {/* Spacer for centering */}
                     </div>
                 </div>
@@ -119,30 +119,30 @@ const PreStartGameSession = () => {
 
                     <div className="session-details">
                         <div className="detail-row">
-                        <Text type="secondary">Scheduled start</Text>
-                        <Text strong>{formatDateTime(session.start_date)}</Text>
+                            <Text type="secondary">Scheduled start</Text>
+                            <Text strong>{formatDateTime(session.start_date)}</Text>
                         </div>
 
                         <div className="detail-row">
-                        <Text type="secondary">Phase 1 duration</Text>
-                        <Text strong>{formatMinutes(session.duration_phase1)}</Text>
+                            <Text type="secondary">Phase 1 duration</Text>
+                            <Text strong>{formatMinutes(session.duration_phase1)}</Text>
                         </div>
 
                         <div className="detail-row">
-                        <Text type="secondary">Phase 2 duration</Text>
-                        <Text strong>{formatMinutes(session.duration_phase2)}</Text>
+                            <Text type="secondary">Phase 2 duration</Text>
+                            <Text strong>{formatMinutes(session.duration_phase2)}</Text>
                         </div>
                     </div>
                 </div>
 
 
-                <Button 
-                    type="primary" 
-                    size="large" 
-                    block 
+                <Button
+                    type="primary"
+                    size="large"
+                    block
                     onClick={handleStartSession}
                     className="start-button"
-                    id = "start_game_button"
+                    id="start_game_button"
                     style={{ marginTop: '20px', height: '50px', fontSize: '18px' }}
                 >
                     Start session

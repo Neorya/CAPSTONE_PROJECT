@@ -5,7 +5,7 @@ import { getGameSessionDetails, startGameSession } from '../../../services/gameS
 
 
 export const usePreStartGameSession = () => {
-  
+
   const { id } = useParams();
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,8 +13,9 @@ export const usePreStartGameSession = () => {
 
   const fetchSession = useCallback(async () => {
     try {
-      
+
       const data = await getGameSessionDetails(id);
+      console.log("data: ", data);
       setSession(data);
     } catch (err) {
       setError(err.message);
@@ -32,7 +33,7 @@ export const usePreStartGameSession = () => {
       return false;
     }
   }, [id]);
-  
+
 
   useEffect(() => {
     if (id) {
@@ -42,9 +43,9 @@ export const usePreStartGameSession = () => {
 
   // Poll for new students every 5 seconds
   useEffect(() => {
-      if (!id) return;
-      const interval = setInterval(fetchSession, 5000);
-      return () => clearInterval(interval);
+    if (!id) return;
+    const interval = setInterval(fetchSession, 5000);
+    return () => clearInterval(interval);
   }, [id, fetchSession]);
 
   return {

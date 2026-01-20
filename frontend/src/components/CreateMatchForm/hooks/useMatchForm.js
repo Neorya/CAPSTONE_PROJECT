@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createMatch } from '../../../services/matchService';
 import { DEFAULT_CREATOR_ID, REQUIRED_FIELDS, ERROR_MESSAGES } from '../constants';
 import { isNetworkError } from '../../../utils/errorUtils';
+import { getUserProfile } from '../../../services/userService';
 
 /**
  * Custom hook for managing match form state and submission
@@ -61,12 +62,12 @@ export const useMatchForm = (form, showAlert) => {
     }
 
     setIsSubmitting(true);
-
+    const data = await getUserProfile();
     try {
       const matchData = {
         title: values.title,
         match_set_id: selectedMatchSetting,
-        creator_id: values.creator_id || DEFAULT_CREATOR_ID,
+        creator_id: data.user_id,
         difficulty_level: values.difficulty_level,
         review_number: values.review_number,
         duration_phase1: values.duration_phase1,
@@ -82,7 +83,7 @@ export const useMatchForm = (form, showAlert) => {
 
     } catch (error) {
       let errorMessage;
-      
+
       if (isNetworkError(error)) {
         errorMessage = 'Unable to connect to server. Please check your connection and ensure the backend is running.';
       } else if (error.message) {

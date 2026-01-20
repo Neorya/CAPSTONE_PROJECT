@@ -10,7 +10,7 @@ import {
   ERROR_MESSAGES,
   SUCCESS_MESSAGES,
 } from '../constants';
-
+import { getUserProfile } from '../../../services/userService';
 /**
  * Custom hook for managing game sessions
  * Handles fetching, cloning, deleting, and updating game sessions
@@ -29,7 +29,8 @@ export const useGameSessions = (showAlert, showSuccess) => {
   const fetchSessions = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await getGameSessionsByCreator(CURRENT_TEACHER_ID);
+      const teacher = await getUserProfile();
+      const data = await getGameSessionsByCreator(teacher.user_id);
       const sortedSessions = data.sort((a, b) => b.game_id - a.game_id);
       setSessions(sortedSessions);
     } catch (err) {

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button, Card, Typography, Table, message, Checkbox, Tooltip, Input, DatePicker } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import "./GameSessionCreation.css";
-
+import { getUserProfile } from '../../services/userService';
 import { getMatches } from "../../services/matchService.js";
 import { createGameSession } from "../../services/gameSessionService.js";
 
@@ -21,9 +21,9 @@ const GameSessionCreation = () => {
   const [creating, setCreating] = useState(false);      // state for creation of game session
   const [sessionName, setSessionName] = useState("");
   const [startDate, setStartDate] = useState(null);
-  const [firstPhase,setFirstPhase ] = useState(null);
-  const [secondPhase,setSecondPhase ] = useState(null);
-  
+  const [firstPhase, setFirstPhase] = useState(null);
+  const [secondPhase, setSecondPhase] = useState(null);
+
   // Validation error states
   const [sessionNameError, setSessionNameError] = useState("");
   const [startDateError, setStartDateError] = useState("");
@@ -131,7 +131,8 @@ const GameSessionCreation = () => {
 
     try {
       setCreating(true);
-      const creatorId = 1;         // TODO: replace with actual user ID when authentication is implemented
+      const data = await getUserProfile();
+      const creatorId = data.user_id;
       await createGameSession(selectedRows, creatorId, sessionName.trim(), startDate.toDate().toISOString(), firstPhase, secondPhase);
       message.success("The game session has been created successfully!");
       // Reset form after successful creation
@@ -197,7 +198,7 @@ const GameSessionCreation = () => {
         {/* Session Details Section */}
         <div className="session-details-section">
           <Title level={5} className="section-title">Session Details</Title>
-          
+
           <div className="session-form-fields">
             <div className="form-field">
               <label htmlFor="session-name" className="field-label">
@@ -236,7 +237,7 @@ const GameSessionCreation = () => {
               {startDateError && (
                 <span className="field-error">{startDateError}</span>
               )}
-              
+
             </div>
             <div className="form-field">
               <label htmlFor="duration_firstphase" className="field-label">
@@ -248,8 +249,8 @@ const GameSessionCreation = () => {
                 value={firstPhase}
                 onChange={handleFirstPhaseChange}
                 size="large"
-                type = "number"
-                status={sessionNameError ? "error" : ""}  
+                type="number"
+                status={sessionNameError ? "error" : ""}
               />
             </div>
             <div className="form-field">
@@ -263,7 +264,7 @@ const GameSessionCreation = () => {
                 onChange={handleSecondPhaseChange}
                 size="large"
                 status={sessionNameError ? "error" : ""}
-                type = "number"
+                type="number"
               />
             </div>
           </div>
@@ -287,9 +288,9 @@ const GameSessionCreation = () => {
           />
 
           <div className="create-button-wrapper" id="create-game-session-button">
-            <Button 
-              type="primary" 
-              onClick={handleCreateSession} 
+            <Button
+              type="primary"
+              onClick={handleCreateSession}
               loading={creating}
               disabled={!isFormValid() || creating}
             >

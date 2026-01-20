@@ -53,9 +53,9 @@ const StartGameSession = () => {
                 <div className="header-section">
                     <div className="header-top">
                         <Tooltip title="Back to Home">
-                            <Button 
+                            <Button
                                 id="back-to-home-button"
-                                icon={<ArrowLeftOutlined />} 
+                                icon={<ArrowLeftOutlined />}
                                 onClick={() => navigate('/home')}
                                 shape="circle"
                                 size="large"

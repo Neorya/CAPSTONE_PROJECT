@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import { Typography } from "antd";
 import {
@@ -11,13 +11,29 @@ import {
   TrophyOutlined
 } from "@ant-design/icons";
 import "./HomePage.css";
+import { jwtDecode } from "jwt-decode";
 
 const { Title, Paragraph } = Typography;
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const [profile, setProfile] = useState(null);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
 
-  const bentoItems = [
+        const token = localStorage.getItem('token');
+        if (token) {
+          const decoded = jwtDecode(token);
+          setProfile(decoded);
+        }
+      } catch (err) {
+        console.log("err: ", err);
+      }
+    };
+    fetchProfile();
+  }, []);
+  let bentoItems = [
     {
       id: "create-match",
       title: "Create New Match",
@@ -75,6 +91,9 @@ const HomePage = () => {
       accent: "#eab308"
     }
   ];
+  if (profile && profile.role === "student") {
+    bentoItems = bentoItems.slice(4, 7);
+  }
 
   return (
     <div className="home-container">

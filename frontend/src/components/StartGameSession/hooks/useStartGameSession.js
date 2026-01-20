@@ -14,7 +14,7 @@ export const useStartGameSession = () => {
   const fetchSession = useCallback(async () => {
     try {
       if (!session) setLoading(true);
-      
+
       const data = await getGameSessionDetails(id);
       console.log("data: ", data);
       setSession(data);
@@ -26,6 +26,7 @@ export const useStartGameSession = () => {
   }, [id, session]);
 
   useEffect(() => {
+    console.log("id: ", id);
     if (id) {
       fetchSession();
     }
@@ -33,14 +34,14 @@ export const useStartGameSession = () => {
 
   useEffect(() => {
     if (!session) return;
-  
+
     const startDate = new Date(session.actual_start_date).getTime();
     const phase1End = startDate + session.duration_phase1 * 60 * 1000;
     const phase2End = phase1End + session.duration_phase2 * 60 * 1000;
-  
+
     const tick = () => {
       const now = Date.now();
-      
+
       if (now < phase1End) {
         // Still in phase 1
         setCurrentPhase(1);
@@ -67,13 +68,13 @@ export const useStartGameSession = () => {
         // navigate('/hall-of-fame');
       }
     };
-  
+
     tick();
-  
+
     const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
   }, [session]);
-  
+
 
   return {
     session,

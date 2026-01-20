@@ -24,7 +24,7 @@ export const useSolutionReview = () => {
             try {
                 const timing = await getPhaseTwoTiming(gameId);
                 let remainingSeconds = timing.remaining_seconds;
-                
+
                 setTimerInitialized(true);
 
                 const updateTimer = () => {
@@ -75,14 +75,14 @@ export const useSolutionReview = () => {
                 participantId: sol.pseudonym
             }));
             setSolutions(mapSolutions);
-        } catch(err) {
+        } catch (err) {
             console.error("Error loading solutions:", err);
         }
     }, [gameId]);
 
     useEffect(() => {
         loadSolutions();
-    }, [loadSolutions]); 
+    }, [loadSolutions]);
 
     const selectSolution = (solutionId) => {
         const solution = solutions.find(s => s.id === solutionId);
@@ -91,7 +91,7 @@ export const useSolutionReview = () => {
 
     const submitVote = async (solutionId, voteType, testCase = null, note = "") => {
         const solution = solutions.find(s => s.id === solutionId);
-        if (testCase === null ) testCase = { input: "", expectedOutput: ""};
+        if (testCase === null) testCase = { input: "", expectedOutput: "" };
         await postStudentVote(solution.id, voteType, testCase.input, testCase.expectedOutput, note);
 
         // Update votes map
