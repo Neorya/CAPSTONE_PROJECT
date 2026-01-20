@@ -298,12 +298,39 @@ async def logout(
 from fastapi.security import OAuth2PasswordBearer
 from typing import Annotated
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token", auto_error=False)
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+# Testing mode flag - when enabled, authentication is bypassed for automated tests
+# SECURITY: This should NEVER be enabled in production environments
+# NOTE: This flag is evaluated once at module load time. Changes to the environment
+# variable after application startup will not take effect until the application restarts.
+API_TESTING_MODE = os.getenv("API_TESTING_MODE", "false").lower() == "true"
+
+# Log testing mode status once at module load time to avoid log spam
+if API_TESTING_MODE:
+    logger.warning("⚠️ API_TESTING_MODE enabled - authentication will be bypassed for all requests")
+
+async def get_current_user(token: Annotated[str | None, Depends(oauth2_scheme)]):
     """
     Dependency to validate access token and return user info.
+    In testing mode, returns a mock user to bypass authentication.
     """
+    # Testing mode bypass - only for automated tests
+    if API_TESTING_MODE:
+        return {
+            "sub": "1",  # Mock user ID
+            "email": "test@example.com",
+            "role": "teacher"  # Default to teacher role for full access
+        }
+    
+    # Normal authentication flow
+    if token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
     try:
         payload = AuthService.validate_access_token(token)
         return payload
@@ -313,6 +340,20 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+async def require_teacher(current_user: Annotated[dict, Depends(get_current_user)]) -> dict:
+    """
+    Dependency that ensures the current user is a teacher.
+    Raises 403 Forbidden if the user is not a teacher.
+    """
+    role = current_user.get("role", "")
+    if role != "teacher":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only teachers can perform this action"
+        )
+    return current_user
 
 
 @router.get(
@@ -383,3 +424,84 @@ async def check_role_change(
     except Exception as e:
         logger.error(f"Unexpected error during role change check: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.post(
+    "/dev-login",
+    response_model=TokenResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Dev mode login (TESTING ONLY)",
+    description="Login as a test user without OAuth. Only works in development mode."
+)
+async def dev_mode_login(
+    role: str,
+    response: Response,
+    db: Session = Depends(get_db)
+) -> TokenResponse:
+    """
+    Dev mode login endpoint for testing.
+    Allows quick login as student or teacher without OAuth flow.
+    
+    SECURITY: This endpoint should only be enabled in development!
+    """
+    # Check if we're in development mode
+    is_dev = os.getenv("ENVIRONMENT", "development") == "development"
+    if not is_dev:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Dev mode login is only available in development environment"
+        )
+    
+    # Validate role
+    if role not in ["student", "teacher"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Role must be 'student' or 'teacher'"
+        )
+    
+    try:
+        # Get the dev user from database
+        from authentication.repositories.user_repository import UserRepository
+        
+        email = f"dev.{role}@test.com"
+        user = UserRepository.get_by_email(db, email)
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Dev {role} user not found in database"
+            )
+        
+        # Issue tokens
+        access_token = AuthService.issue_access_token(user)
+        refresh_token, _ = AuthService.issue_refresh_token(user.id, db)
+        
+        logger.info(f"Dev mode login: {role} ({user.email})")
+        
+        # Set refresh token in cookie
+        refresh_token_max_age = REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            max_age=refresh_token_max_age,
+            httponly=True,
+            secure=False,  # Dev mode
+            samesite="lax",
+            path="/auth"
+        )
+        
+        return TokenResponse(
+            access_token=access_token,
+            refresh_token=None,  # Sent via cookie
+            token_type="Bearer",
+            expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error during dev mode login: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Dev mode login failed"
+        )
+

@@ -10,6 +10,7 @@ import {
   AppstoreOutlined,
   TrophyOutlined
 } from "@ant-design/icons";
+import { getUserProfile } from "../../services/userService";
 import "./HomePage.css";
 import { jwtDecode } from "jwt-decode";
 
@@ -40,7 +41,8 @@ const HomePage = () => {
       description: "Set up a new match with settings, difficulty, and duration",
       icon: <PlusOutlined />,
       route: "/create-match",
-      accent: "#3b82f6"
+      accent: "#3b82f6",
+      roles: ["teacher"]
     },
     {
       id: "match-settings",
@@ -48,7 +50,8 @@ const HomePage = () => {
       description: "Browse and manage all available match settings",
       icon: <SettingOutlined />,
       route: "/match-settings",
-      accent: "#10b981"
+      accent: "#10b981",
+      roles: ["teacher"]
     },
     {
       id: "create-session",
@@ -56,7 +59,8 @@ const HomePage = () => {
       description: "Create a new game session for students to join",
       icon: <PlayCircleOutlined />,
       route: "/create-game-session",
-      accent: "#f59e0b"
+      accent: "#f59e0b",
+      roles: ["teacher"]
     },
     {
       id: "view-sessions",
@@ -64,7 +68,8 @@ const HomePage = () => {
       description: "Browse, clone, delete, view, or modify your created game sessions",
       icon: <UnorderedListOutlined />,
       route: "/game-sessions",
-      accent: "#8b5cf6"
+      accent: "#8b5cf6",
+      roles: ["teacher"]
     },
     {
       id: "join-session",
@@ -72,7 +77,8 @@ const HomePage = () => {
       description: "Join or list future and past game sessions",
       icon: <TeamOutlined />,
       route: "/join-game-session",
-      accent: "#ec4899"
+      accent: "#ec4899",
+      roles: ["student"]
     },
     {
       id: "lobby",
@@ -80,7 +86,8 @@ const HomePage = () => {
       description: "View and manage your current game lobby",
       icon: <AppstoreOutlined />,
       route: "/lobby",
-      accent: "#06b6d4"
+      accent: "#06b6d4",
+      roles: ["student"]
     },
     {
       id: "hall-of-fame",
@@ -88,11 +95,32 @@ const HomePage = () => {
       description: "View the leaderboard and top performers",
       icon: <TrophyOutlined />,
       route: "/hall-of-fame",
-      accent: "#eab308"
+      accent: "#eab308",
+      roles: ["teacher", "student"]
     }
   ];
   if (profile && profile.role === "student") {
     bentoItems = bentoItems.slice(4, 7);
+  }
+
+  // Filter items based on user role
+  const filteredItems = userRole
+    ? bentoItems.filter(item => item.roles.includes(userRole))
+    : [];
+
+  if (loading) {
+    return (
+      <div className="home-container">
+        <div className="home-header">
+          <Title level={1} className="home-title">
+            Welcome to Codify
+          </Title>
+          <Paragraph className="home-subtitle">
+            Loading...
+          </Paragraph>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -107,7 +135,7 @@ const HomePage = () => {
       </div>
 
       <div className="bento-grid">
-        {bentoItems.map((item) => (
+        {filteredItems.map((item) => (
           <div
             key={item.id}
             className="bento-card"
