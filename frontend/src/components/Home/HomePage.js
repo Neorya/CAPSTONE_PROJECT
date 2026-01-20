@@ -103,26 +103,6 @@ const HomePage = () => {
     bentoItems = bentoItems.slice(4, 7);
   }
 
-  // Filter items based on user role
-  const filteredItems = userRole
-    ? bentoItems.filter(item => item.roles.includes(userRole))
-    : [];
-
-  if (loading) {
-    return (
-      <div className="home-container">
-        <div className="home-header">
-          <Title level={1} className="home-title">
-            Welcome to Codify
-          </Title>
-          <Paragraph className="home-subtitle">
-            Loading...
-          </Paragraph>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="home-container">
       <div className="home-header">
@@ -135,7 +115,7 @@ const HomePage = () => {
       </div>
 
       <div className="bento-grid">
-        {filteredItems.map((item) => (
+        {bentoItems.map((item) => (
           <div
             key={item.id}
             className="bento-card"
