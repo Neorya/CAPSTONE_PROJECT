@@ -114,3 +114,15 @@ export async function getMatchDetails(gameId) {
     }
     return response.json();
 }
+
+export async function getStudentGameStatus() {
+    const response = await fetch(`${BASE_URL}/student-game-status`, {
+        headers: getHeaders()
+    });
+    if (!response.ok) {
+        const error = new Error("Failed to fetch student game status");
+        error.status = response.status;
+        throw error;
+    }
+    return response.json();
+}

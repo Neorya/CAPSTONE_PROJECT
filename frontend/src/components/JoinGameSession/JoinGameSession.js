@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Card, Tooltip, Typography, message, Spin, Empty } from "antd";
-import { ArrowLeftOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, PlayCircleOutlined, RightCircleOutlined } from "@ant-design/icons";
 import { jwtDecode } from "jwt-decode";
 import GameSessionCard from "./components/GameSessionCard";
 import {
@@ -9,6 +9,9 @@ import {
   getAvailableGame,
   hasStudentAlreadyJoinedSession,
 } from "../../services/joinGameSessionService";
+import useActiveGame from "../../hooks/useActiveGame";
+import "../common/ActiveGame.css";
+import "./JoinGameSession.css";
 
 const { Title, Text } = Typography;
 
@@ -51,6 +54,9 @@ const JoinGameSession = () => {
   // check if student has already joined the game session
   const [studentAlreadyJoined, setStudentAlreadyJoined] = useState(false);
 
+  // Active game logic
+  const { activeGame, timeLeft } = useActiveGame();
+
   // determine join state for button configuration
   const joinState = (() => {
     if (joining) return "joining";
@@ -61,7 +67,7 @@ const JoinGameSession = () => {
   // Function to fetch available game session
   const fetchGameSession = useCallback(async () => {
     if (!studentId) return;
-    
+
     try {
       const session = await getAvailableGame();
 
@@ -146,6 +152,61 @@ const JoinGameSession = () => {
         <div className="subheader">
           <Text type="secondary">Compete with your classmates!</Text>
         </div>
+
+        {activeGame && (
+          <div id="active-game-reentry-banner" className="active-game-banner minimalist" style={{ marginTop: '20px', marginBottom: '20px' }}>
+            <div className="active-game-card">
+              <div className="active-game-header">
+                <div className="game-icon-wrapper">
+                  <PlayCircleOutlined />
+                </div>
+                <div className="game-details">
+                  <h3 id="active-game-reentry-name" className="game-name">{activeGame.game_name || "Active Session"}</h3>
+                  <div className="game-meta">
+                    <span id="active-game-reentry-phase" className="phase-badge">
+                      {activeGame.current_phase === "lobby" && "Lobby"}
+                      {activeGame.current_phase === "phase_one" && "Phase 1: Coding"}
+                      {activeGame.current_phase === "phase_two" && "Phase 2: Review"}
+                    </span>
+                    {timeLeft > 0 && (
+                      <span className="time-display">
+                        <span id="active-game-reentry-timer" className="time-value">
+                          {Math.floor(timeLeft / 60)}m {(timeLeft % 60).toString().padStart(2, "0")}s left
+                        </span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="active-game-actions">
+                <Button
+                  id="active-game-reentry-button"
+                  type="primary"
+                  icon={<RightCircleOutlined />}
+                  onClick={() => {
+                    const routes = {
+                      lobby: `/lobby?gameId=${activeGame.game_id}`,
+                      phase_one: `/phase-one?gameId=${activeGame.game_id}`,
+                      phase_two: `/voting?gameId=${activeGame.game_id}`
+                    };
+                    const targetRoute = routes[activeGame.current_phase];
+
+                    if (targetRoute) {
+                      navigate(targetRoute);
+                    } else {
+                      message.error("Unable to continue session: Unknown game phase");
+                      navigate(`/lobby?gameId=${activeGame.game_id}`);
+                    }
+                  }}
+                  style={{ backgroundColor: '#10b981', borderColor: '#10b981' }}
+                >
+                  Continue Session
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div>
           {initializing ? (

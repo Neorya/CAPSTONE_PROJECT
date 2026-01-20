@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
-import { Typography } from "antd";
+import { Typography, message } from "antd";
 import {
   PlusOutlined,
   SettingOutlined,
@@ -12,29 +12,27 @@ import {
 } from "@ant-design/icons";
 import { getUserProfile } from "../../services/userService";
 import "./HomePage.css";
-import { jwtDecode } from "jwt-decode";
+import "../common/ActiveGame.css";
+import useActiveGame from "../../hooks/useActiveGame";
 
 const { Title, Paragraph } = Typography;
 
 const HomePage = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
+  const { activeGame, timeLeft } = useActiveGame();
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-
-        const token = localStorage.getItem('token');
-        if (token) {
-          const decoded = jwtDecode(token);
-          setProfile(decoded);
-        }
+        const profile = await getUserProfile();
+        setProfile(profile);
       } catch (err) {
         console.log("err: ", err);
       }
     };
     fetchProfile();
   }, []);
-  let bentoItems = [
+  const bentoItems = [
     {
       id: "create-match",
       title: "Create New Match",
@@ -99,9 +97,10 @@ const HomePage = () => {
       roles: ["teacher", "student"]
     }
   ];
-  if (profile && profile.role === "student") {
-    bentoItems = bentoItems.slice(4, 7);
-  }
+
+  const filteredItems = profile?.role
+    ? bentoItems.filter((item) => item.roles.includes(profile.role))
+    : bentoItems;
 
   return (
     <div className="home-container">
@@ -115,37 +114,78 @@ const HomePage = () => {
       </div>
 
       <div className="bento-grid">
-        {bentoItems.map((item) => (
-          <div
-            key={item.id}
-            className="bento-card"
-            onClick={() => navigate(item.route)}
-          >
-            <div className="bento-card-inner">
-              <div className="bento-header">
-                <div
-                  className="bento-icon"
-                  style={{
-                    backgroundColor: `${item.accent}15`,
-                    color: item.accent
-                  }}
-                >
-                  {item.icon}
-                </div>
-                <h3 className="bento-title">{item.title}</h3>
-              </div>
-              <div className="bento-text">
-                <p className="bento-description">{item.description}</p>
-              </div>
-            </div>
+        {filteredItems.map((item) => {
+          const isActiveLobby = item.id === "lobby" && activeGame;
+          return (
             <div
-              className="bento-accent-bar"
-              style={{ backgroundColor: item.accent }}
-            />
-          </div>
-        ))}
+              key={item.id}
+              id={`bento-card-${item.id}`}
+              className={`bento-card ${isActiveLobby ? 'active-session-card' : ''}`}
+              onClick={() => {
+                if (isActiveLobby) {
+                  const routes = {
+                    lobby: `/lobby?gameId=${activeGame.game_id}`,
+                    phase_one: `/phase-one?gameId=${activeGame.game_id}`,
+                    phase_two: `/voting?gameId=${activeGame.game_id}`
+                  };
+                  const targetRoute = routes[activeGame.current_phase];
+
+                  if (targetRoute) {
+                    navigate(targetRoute);
+                  } else {
+                    message.error("Unable to continue session: Unknown game phase");
+                    // Fallback to lobby
+                    navigate(`/lobby?gameId=${activeGame.game_id}`);
+                  }
+                } else {
+                  navigate(item.route);
+                }
+              }}
+            >
+              {/* Internal tag that follows card hover transforms */}
+              {isActiveLobby && (
+                <div id="active-session-tag" className="internal-status-tag">
+                  IN PROGRESS
+                </div>
+              )}
+
+              <div className="bento-card-inner">
+                <div className="bento-header">
+                  <div
+                    className="bento-icon"
+                    style={{
+                      backgroundColor: `${item.accent}15`,
+                      color: item.accent
+                    }}
+                  >
+                    {isActiveLobby ? <PlayCircleOutlined /> : item.icon}
+                  </div>
+                  <h3 className="bento-title">
+                    {isActiveLobby ? "Active Session" : item.title}
+                  </h3>
+                </div>
+                <div className="bento-text">
+                  <p id={isActiveLobby ? "active-session-description" : undefined} className="bento-description">
+                    {isActiveLobby
+                      ? `Continue: ${activeGame.game_name || 'Current Game'}`
+                      : item.description}
+                  </p>
+                  {isActiveLobby && timeLeft > 0 && (
+                    <div id="active-session-timer" className="card-timer">
+                      {Math.floor(timeLeft / 60)}m {(timeLeft % 60).toString().padStart(2, "0")}s left
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div
+                className="bento-accent-bar"
+                style={{ backgroundColor: isActiveLobby ? "#10b981" : item.accent }}
+              />
+            </div>
+          );
+        })}
       </div>
-    </div >
+    </div>
   );
 };
 

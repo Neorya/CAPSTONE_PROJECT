@@ -90,6 +90,13 @@ class CustomTestResponse(BaseModel):
     compiled: bool
     test_results: List[TestResultDetail] = []
 
+class StudentGameStatusResponse(BaseModel):
+    game_id: Optional[int] = None
+    game_name: Optional[str] = None
+    current_phase: str  # "lobby", "phase_one", "phase_two", "ended", or "none"
+    remaining_seconds: int = 0
+    has_active_game: bool
+
 
 
 @router.get("/tests", response_model=List[TestResponse])
@@ -516,6 +523,101 @@ def run_custom_tests(
         compiled=True,
         test_results=test_results
     )
+
+
+@router.get("/student-game-status", response_model=StudentGameStatusResponse)
+def get_student_game_status(
+    current_user: Annotated[dict, Depends(get_current_user)],
+    db: Session = Depends(get_db),
+):
+    """
+    Get the current game status for a student.
+    Returns which phase the student should be in (lobby, phase_one, phase_two, ended, or none).
+    Used for re-entry navigation when students navigate away from active games.
+    """
+    student_id = int(current_user["sub"])
+    
+    # Find the most recent game session the student has joined, based on game start time
+    join_entry = (
+        db.query(StudentJoinGame)
+        .join(GameSession, StudentJoinGame.game_id == GameSession.game_id)
+        .filter(StudentJoinGame.student_id == student_id)
+        .order_by(GameSession.actual_start_date.desc(), StudentJoinGame.game_id.desc())
+        .first()
+    )
+    
+    if not join_entry:
+        return StudentGameStatusResponse(
+            has_active_game=False,
+            current_phase="none"
+        )
+    
+    game_id = join_entry.game_id
+    
+    # Get the game session details
+    game_session = db.query(GameSession).filter(GameSession.game_id == game_id).first()
+    
+    if not game_session:
+        return StudentGameStatusResponse(
+            has_active_game=False,
+            current_phase="none"
+        )
+    
+    # If game hasn't started yet, student should be in lobby
+    if game_session.actual_start_date is None:
+        return StudentGameStatusResponse(
+            game_id=game_id,
+            game_name=game_session.name,
+            has_active_game=True,
+            current_phase="lobby",
+            remaining_seconds=0
+        )
+    
+    # Calculate elapsed time since game started
+    start_dt = game_session.actual_start_date
+    if start_dt.tzinfo is None or start_dt.tzinfo.utcoffset(start_dt) is None:
+        start_dt = start_dt.replace(tzinfo=timezone.utc)
+    
+    now = datetime.now(timezone.utc).timestamp()
+    start_timestamp = start_dt.timestamp()
+    elapsed_seconds = now - start_timestamp
+    
+    # Phase 1 duration in seconds
+    phase1_duration_seconds = game_session.duration_phase1 * 60
+    # Phase 2 duration in seconds
+    phase2_duration_seconds = game_session.duration_phase2 * 60
+    
+    # Determine current phase based on elapsed time
+    if elapsed_seconds < phase1_duration_seconds:
+        # Still in phase 1
+        remaining_seconds = int(phase1_duration_seconds - elapsed_seconds)
+        return StudentGameStatusResponse(
+            game_id=game_id,
+            game_name=game_session.name,
+            has_active_game=True,
+            current_phase="phase_one",
+            remaining_seconds=max(0, remaining_seconds)
+        )
+    elif elapsed_seconds < (phase1_duration_seconds + phase2_duration_seconds):
+        # In phase 2
+        phase2_elapsed = elapsed_seconds - phase1_duration_seconds
+        remaining_seconds = int(phase2_duration_seconds - phase2_elapsed)
+        return StudentGameStatusResponse(
+            game_id=game_id,
+            game_name=game_session.name,
+            has_active_game=True,
+            current_phase="phase_two",
+            remaining_seconds=max(0, remaining_seconds)
+        )
+    else:
+        # Game has ended
+        return StudentGameStatusResponse(
+            game_id=game_id,
+            game_name=game_session.name,
+            has_active_game=False,
+            current_phase="ended",
+            remaining_seconds=0
+        )
 
 
 @router.get("/match_details", response_model=MatchDetailsResponse)
