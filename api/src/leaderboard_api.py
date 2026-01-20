@@ -163,8 +163,7 @@ def _assign_ranks(student_scores: List[Tuple[int, str, float]]) -> List[Leaderbo
     """
     leaderboard = []
     current_rank = 1
-    
-    for i, (student_id, username, score) in enumerate(student_scores):
+    for i, (student_id, username,  score) in enumerate(student_scores):
         # If this is not the first student and score is different from previous, update rank
         if i > 0 and score < student_scores[i - 1][2]:
             current_rank = i + 1
@@ -262,11 +261,17 @@ def get_leaderboard(
     
     try:
         # Calculate scores for all students using optimized query
-        student_scores = _calculate_all_student_scores_optimized(db)
-        
-        # Assign ranks
+        #student_scores = _calculate_all_student_scores_optimized(db)
+        student_scores = db.query(
+            Student.student_id,
+            Student.first_name + " " +Student.last_name,
+            Student.score
+        ).order_by(desc(Student.score)).all()
+
+
         full_leaderboard = _assign_ranks(student_scores)
-        
+
+
         # Calculate pagination
         total_students = len(full_leaderboard)
         total_pages = (total_students + page_size - 1) // page_size  # Ceiling division

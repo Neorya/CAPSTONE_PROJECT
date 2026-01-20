@@ -164,6 +164,7 @@ class Student(Base):
     first_name      = Column(String(100), nullable=False)
     last_name       = Column(String(100), nullable=False)
     score           = Column(Integer    , default=0, nullable=False)
+    user_id         = Column(Integer    , nullable=False)
 
 class Login(Base):
     __tablename__   = "login"
