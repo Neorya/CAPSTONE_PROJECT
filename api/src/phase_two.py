@@ -151,7 +151,7 @@ def _ensure_reviews_assigned(game_id: int, db: Session) -> int:
             db.query(StudentSolution)
             .filter(
                 StudentSolution.match_for_game_id == mfg.match_for_game_id,
-                StudentSolution.has_passed == True
+                StudentSolution.has_passed.is_(True)
             )
             .all()
         )
