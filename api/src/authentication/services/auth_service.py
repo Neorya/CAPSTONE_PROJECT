@@ -107,17 +107,25 @@ class AuthService:
             user = UserRepository.create(db, user_data.dict())
             
             # Also create a Student record with matching ID for legacy API compatibility
+            # Also create a Student record with matching ID for legacy API compatibility
             if user.role == UserRoleEnum.student:
-                student = Student(
-                    student_id=user.id,
-                    email=user.email,
-                    first_name=user.first_name,
-                    last_name=user.last_name,
-                    score=0
-                )
-                db.add(student)
-                db.commit()
-                logger.info(f"Created Student record for user {user.id}")
+                # Check if student record already exists (e.g. created by DB trigger)
+                existing_student = db.query(Student).filter(Student.student_id == user.id).first()
+                
+                if not existing_student:
+                    student = Student(
+                        student_id=user.id,
+                        email=user.email,
+                        first_name=user.first_name,
+                        last_name=user.last_name,
+                        score=0,
+                        user_id=user.id
+                    )
+                    db.add(student)
+                    db.commit()
+                    logger.info(f"Created Student record for user {user.id}")
+                else:
+                    logger.info(f"Student record for user {user.id} already exists (likely via DB trigger)")
 
         access_token = AuthService.issue_access_token(user)
         refresh_token, _ = AuthService.issue_refresh_token(user.id, db)

@@ -395,3 +395,11 @@ VALUES
 ('Pointers Basics - Section B', 9, 31, 8, 3);
 
 
+-- INSERT DEV TEST USERS (For Testing Mode)
+-- These users are required for the "Dev Login" functionality in the authentication service
+-- They are automatically distributed to student/teacher tables by the 'trigger_distribute_user' trigger
+
+INSERT INTO capstone_app.users (google_sub, email, first_name, last_name, role, score, profile_url)
+VALUES 
+('dev_student_sub_123', 'dev.student@test.com', 'Dev', 'Student', 'student', 0, NULL),
+('dev_teacher_sub_456', 'dev.teacher@test.com', 'Dev', 'Teacher', 'teacher', 0, NULL);
