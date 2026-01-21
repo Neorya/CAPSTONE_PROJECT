@@ -55,6 +55,7 @@ class MatchSetting(Base):
     description = Column(Text, nullable=False)
     is_ready = Column(Boolean, nullable=False, default=False)
     reference_solution = Column(Text, nullable=False)
+    total_points = Column(Integer, nullable=False, default=100)
     creator_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.teacher.teacher_id"))
     
     # Relationship: This setting belongs to one teacher
