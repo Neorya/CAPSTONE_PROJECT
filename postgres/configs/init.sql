@@ -403,3 +403,12 @@ INSERT INTO capstone_app.users (google_sub, email, first_name, last_name, role, 
 VALUES 
 ('dev_student_sub_123', 'dev.student@test.com', 'Dev', 'Student', 'student', 0, NULL),
 ('dev_teacher_sub_456', 'dev.teacher@test.com', 'Dev', 'Teacher', 'teacher', 0, NULL);
+
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id)
+VALUES
+('5', '25', 'public', 1),
+('0', '0', 'private', 1),
+('2', '4', 'private', 1),
+('-3', '9', 'private', 1),
+('10', '100', 'private', 1);
+
