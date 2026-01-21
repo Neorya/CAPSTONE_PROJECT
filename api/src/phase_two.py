@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 import os
+from sqlalchemy.exc import IntegrityError
 
 from database import get_db
 from models import (
@@ -180,7 +181,12 @@ def _ensure_reviews_assigned(game_id: int, db: Session) -> int:
                 total_assignments += 1
     
     if total_assignments > 0:
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+            return 0
+
     
     return total_assignments
 
@@ -295,8 +301,7 @@ def submit_vote(
         .filter(StudentReviewVote.student_assigned_review_id == request.student_assigned_review_id)
         .first()
     )
-    if existing_vote:
-        raise HTTPException(status_code=400, detail="You have already voted on this review")
+
 
     vote_type_str = request.vote.lower()
     if vote_type_str not in ["correct", "incorrect", "skip"]:
@@ -357,23 +362,41 @@ def submit_vote(
     vote_enum = VoteType(vote_type_str)
 
   
-    new_vote = StudentReviewVote(
-        student_assigned_review_id=request.student_assigned_review_id,
-        vote=vote_enum,
-        proof_test_in=request.proof_test_in if vote_type_str == "incorrect" else None,
-        proof_test_out=request.proof_test_out if vote_type_str == "incorrect" else None,
-        valid=valid,
-        note=request.note
-    )
-    db.add(new_vote)
-    db.commit()
-    db.refresh(new_vote)
+    if existing_vote:
+        # Update existing vote (edit)
+        existing_vote.vote = vote_enum
+        existing_vote.proof_test_in = request.proof_test_in if vote_type_str == "incorrect" else None
+        existing_vote.proof_test_out = request.proof_test_out if vote_type_str == "incorrect" else None
+        existing_vote.valid = valid
+        existing_vote.note = request.note
+        db.commit()
+        db.refresh(existing_vote)
 
-    return VoteResponse(
-        review_vote_id=new_vote.review_vote_id,
-        message="Vote submitted successfully",
-        valid=valid
-    )
+        return VoteResponse(
+            review_vote_id=existing_vote.review_vote_id,
+            message="Vote updated successfully",
+            valid=valid
+        )
+    else:
+        # Create new vote (first time)
+        new_vote = StudentReviewVote(
+            student_assigned_review_id=request.student_assigned_review_id,
+            vote=vote_enum,
+            proof_test_in=request.proof_test_in if vote_type_str == "incorrect" else None,
+            proof_test_out=request.proof_test_out if vote_type_str == "incorrect" else None,
+            valid=valid,
+            note=request.note
+        )
+        db.add(new_vote)
+        db.commit()
+        db.refresh(new_vote)
+
+        return VoteResponse(
+            review_vote_id=new_vote.review_vote_id,
+            message="Vote submitted successfully",
+            valid=valid
+        )
+
 
 def _validate_incorrect_vote(
     student_code: str,

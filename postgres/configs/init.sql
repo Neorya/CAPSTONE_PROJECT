@@ -205,8 +205,10 @@ DROP TABLE IF EXISTS capstone_app.student_assigned_review;
 CREATE TABLE capstone_app.student_assigned_review (
     student_assigned_review_id SERIAL PRIMARY KEY,
     student_id INTEGER REFERENCES capstone_app.student(student_id) NOT NULL,
-    assigned_solution_id INTEGER REFERENCES capstone_app.student_solutions(solution_id) NOT NULL
+    assigned_solution_id INTEGER REFERENCES capstone_app.student_solutions(solution_id) NOT NULL,
+    CONSTRAINT uq_student_assigned_review_pair UNIQUE (student_id, assigned_solution_id)
 );
+
 
 CREATE TYPE vote AS ENUM ('correct', 'incorrect', 'skip');
 
@@ -219,8 +221,11 @@ CREATE TABLE capstone_app.student_review_vote (
     proof_test_in VARCHAR(500) DEFAULT NULL,
     proof_test_out VARCHAR(500) DEFAULT NULL,
     valid BOOLEAN DEFAULT NULL,
-    note TEXT DEFAULT NULL
+    note TEXT DEFAULT NULL,
+    CONSTRAINT uq_student_review_vote_assignment UNIQUE (student_assigned_review_id)
 );
+
+
 
 
 

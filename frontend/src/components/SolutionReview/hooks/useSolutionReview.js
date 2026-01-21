@@ -87,7 +87,9 @@ export const useSolutionReview = () => {
             let mapSolutions = (fetchedSolutions || []).map(sol => ({
                 id: sol.student_assigned_review_id,
                 code: sol.code,
-                participantId: sol.pseudonym
+                participantId: sol.pseudonym,
+                hasVoted: false,
+                votedType: null
             }));
             setSolutions(mapSolutions);
         } catch (err) {
@@ -109,23 +111,32 @@ export const useSolutionReview = () => {
         if (testCase === null) testCase = { input: "", expectedOutput: "" };
         await postStudentVote(solution.id, voteType, testCase.input, testCase.expectedOutput, note);
 
-        // Update votes map
+        // record the vote
         setVotes(prev => ({
             ...prev,
-            [solutionId]: { type: voteType, testCase }
+            [solutionId]: { type: voteType, testCase, note }
         }));
-        // Remove from solutions list (can't re-review)
-        setSolutions(prev => prev.filter(s => s.id !== solutionId));
-
-        // Clear selection
+        
+        // keep it in the list; just mark it voted
+        setSolutions(prev =>
+            prev.map(s =>
+                s.id === solutionId
+                    ? { ...s, hasVoted: true, votedType: voteType }
+                    : s
+            )
+        );
+        
+        // keep or clear selection (either is fine). clearing is ok:
         setSelectedSolution(null);
-
+        
         return true;
+        
     };
 
     const getVoteStatus = (solutionId) => {
-        return votes[solutionId]?.type || null;
+        return votes[solutionId] || null;
     };
+    
 
     return {
         solutions,

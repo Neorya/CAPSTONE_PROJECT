@@ -17,7 +17,8 @@ const SolutionReview = () => {
         remainingTime,
         isPhaseEnded,
         selectSolution,
-        submitVote
+        submitVote,
+        getVoteStatus
     } = useSolutionReview(); // Pass gameId as needed
     // Local UI state
     const [voteType, setVoteType] = useState(null);
@@ -29,8 +30,29 @@ const SolutionReview = () => {
     // Event Handlers
     const handleSolutionClick = (solutionId) => {
         selectSolution(solutionId);
-        resetForm();
+    
+        const existing = getVoteStatus(solutionId);
+    
+        // If no previous vote, start fresh
+        if (!existing) {
+            resetForm();
+            return;
+        }
+    
+        // Prefill form for editing
+        setVoteType(existing.type);
+    
+        if (existing.type === 'incorrect') {
+            setTestInput(existing.testCase?.input || '');
+            setExpectedOutput(existing.testCase?.expectedOutput || '');
+        } else {
+            setTestInput('');
+            setExpectedOutput('');
+        }
+    
+        setNotes(existing.note || '');
     };
+    
 
     const handleVoteChange = (e) => {
         setVoteType(e.target.value);
