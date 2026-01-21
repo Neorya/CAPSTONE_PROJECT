@@ -70,6 +70,7 @@ CREATE TABLE capstone_app.match_setting (
     description TEXT NOT NULL,
     is_ready BOOLEAN NOT NULL DEFAULT FALSE,
     reference_solution VARCHAR(1000), -- this is the code solution
+    total_points INTEGER NOT NULL DEFAULT 100, -- configurable score per exercise
     
     creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id)
 );
