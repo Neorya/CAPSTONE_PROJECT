@@ -49,6 +49,7 @@ export const useAlgorithmMatchPhaseOne = () => {
     });
     const [timeLeft, setTimeLeft] = useState(null); // null until loaded from backend
     const [timerInitialized, setTimerInitialized] = useState(false);
+    const [phaseOneEndTime, setPhaseOneEndTime] = useState(null); // Target end time in milliseconds
     const [publicTests, setPublicTests] = useState([]);
     const [customTests, setCustomTests] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -63,15 +64,25 @@ export const useAlgorithmMatchPhaseOne = () => {
     const [problemDescription, setProblemDescription] = useState("Given an array of integers, find the sum of its elements.");
 
 
+
     useEffect(() => {
-        // Only start countdown if timer has been initialized with a value
-        if (timeLeft === null) return;
-        
-        const timer = setInterval(() => {
-            setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
-        }, 1000);
+        // Only start countdown if we have the target end time
+        if (phaseOneEndTime === null) return;
+
+        const updateTimer = () => {
+            const now = Date.now();
+            const remaining = Math.max(0, Math.floor((phaseOneEndTime - now) / 1000));
+            setTimeLeft(remaining);
+        };
+
+        // Update immediately
+        updateTimer();
+
+        // Then update every second
+        const timer = setInterval(updateTimer, 1000);
         return () => clearInterval(timer);
-    }, [timeLeft]); // Re-run whenever timeLeft changes
+    }, [phaseOneEndTime]); // Re-run only when target end time changes
+
 
     // Redirect to phase two when time runs out
     useEffect(() => {
@@ -98,13 +109,19 @@ export const useAlgorithmMatchPhaseOne = () => {
 
             if (matchDetails.title) setProblemTitle(matchDetails.title);
             if (matchDetails.description) setProblemDescription(matchDetails.description);
-            
-            // Set the remaining time from the backend
-            if (matchDetails.remaining_seconds !== undefined) {
-                setTimeLeft(matchDetails.remaining_seconds);
+
+
+            // Calculate the target end time from actual_start_date and duration_phase1
+            if (matchDetails.actual_start_date && matchDetails.duration_phase1 !== undefined) {
+                const startTime = new Date(matchDetails.actual_start_date).getTime();
+                const durationMs = matchDetails.duration_phase1 * 60 * 1000; // Convert minutes to milliseconds
+                const endTime = startTime + durationMs;
+
+                setPhaseOneEndTime(endTime);
                 setTimerInitialized(true);
-                console.log('PhaseOne: Setting time left to:', matchDetails.remaining_seconds, 'seconds');
+                console.log('PhaseOne: Phase will end at:', new Date(endTime).toISOString());
             }
+
 
             const testsData = await getTests(studentId, gameId);
             console.log('PhaseOne: Tests loaded:', testsData);

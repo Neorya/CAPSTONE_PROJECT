@@ -13,42 +13,26 @@ export const useSolutionReview = () => {
     const [remainingTime, setRemainingTime] = useState(null);
     const [isPhaseEnded, setIsPhaseEnded] = useState(false);
     const [timerInitialized, setTimerInitialized] = useState(false);
+    const [phaseTwoEndTime, setPhaseTwoEndTime] = useState(null); // Target end time in milliseconds
 
     // Fetch timing from backend and set up countdown
     useEffect(() => {
         if (!gameId) return;
 
-        let interval = null;
-
         const initTimer = async () => {
             try {
                 const timing = await getPhaseTwoTiming(gameId);
-                let remainingSeconds = timing.remaining_seconds;
 
-                setTimerInitialized(true);
+                // Calculate the target end time from phase2_start_time and duration_phase2
+                if (timing.phase2_start_time && timing.duration_phase2 !== undefined) {
+                    const startTime = new Date(timing.phase2_start_time).getTime();
+                    const durationMs = timing.duration_phase2 * 60 * 1000; // Convert minutes to milliseconds
+                    const endTime = startTime + durationMs;
 
-                const updateTimer = () => {
-                    if (remainingSeconds <= 0) {
-                        setRemainingTime('00:00');
-                        setIsPhaseEnded(true);
-                        if (interval) clearInterval(interval);
-                        // Redirect to results page after phase 2 ends
-                        setTimeout(() => {
-                            navigate(`/game-results?gameId=${gameId}`);
-                        }, 2000);
-                        return;
-                    }
-
-                    const minutes = Math.floor(remainingSeconds / 60);
-                    const seconds = remainingSeconds % 60;
-                    setRemainingTime(
-                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-                    );
-                    remainingSeconds--;
-                };
-
-                updateTimer();
-                interval = setInterval(updateTimer, 1000);
+                    setPhaseTwoEndTime(endTime);
+                    setTimerInitialized(true);
+                    console.log('PhaseTwo: Phase will end at:', new Date(endTime).toISOString());
+                }
             } catch (err) {
                 console.error("Error fetching phase 2 timing:", err);
                 // Fallback to default timer if backend fails
@@ -58,11 +42,42 @@ export const useSolutionReview = () => {
         };
 
         initTimer();
+    }, [gameId]);
 
-        return () => {
-            if (interval) clearInterval(interval);
+    // Update timer every second based on target end time
+    useEffect(() => {
+        if (phaseTwoEndTime === null) return;
+
+        const updateTimer = () => {
+            const now = Date.now();
+            const remainingMs = Math.max(0, phaseTwoEndTime - now);
+            const remainingSeconds = Math.floor(remainingMs / 1000);
+
+            if (remainingSeconds <= 0) {
+                setRemainingTime('00:00');
+                setIsPhaseEnded(true);
+                // Redirect to results page after phase 2 ends
+                setTimeout(() => {
+                    navigate(`/game-results?gameId=${gameId}`);
+                }, 2000);
+                return;
+            }
+
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+            setRemainingTime(
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+            );
         };
-    }, [gameId, navigate]);
+
+        // Update immediately
+        updateTimer();
+
+        // Then update every second
+        const interval = setInterval(updateTimer, 1000);
+
+        return () => clearInterval(interval);
+    }, [phaseTwoEndTime, gameId, navigate]);
 
     const loadSolutions = useCallback(async () => {
         if (!gameId) return;
