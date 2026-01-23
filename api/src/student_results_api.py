@@ -254,66 +254,71 @@ def get_solution_test_results(
         StudentSolutionTest.solution_id == solution_id
     ).all()
     
-    # Extract all teacher_test_ids and student_test_ids to fetch in batch (fix N+1 query)
-    teacher_test_ids = [tr.teacher_test_id for tr in test_results]
-    student_test_ids = [tr.student_test_id for tr in test_results]
+    # Extract IDs to batch fetch
+    teacher_test_ids = [tr.teacher_test_id for tr in test_results if tr.teacher_test_id is not None]
+    student_test_ids = [tr.student_test_id for tr in test_results if tr.student_test_id is not None]
     
-    # Fetch all teacher tests and student tests in single queries
-    teacher_tests = db.query(Test).filter(Test.test_id.in_(teacher_test_ids)).all()
-    student_tests = db.query(StudentTest).filter(StudentTest.test_id.in_(student_test_ids)).all()
+    # Fetch all referenced tests
+    teacher_tests = []
+    if teacher_test_ids:
+        teacher_tests = db.query(Test).filter(Test.test_id.in_(teacher_test_ids)).all()
+        
+    student_tests = []
+    if student_test_ids:
+        student_tests = db.query(StudentTest).filter(StudentTest.test_id.in_(student_test_ids)).all()
     
     # Create lookup dictionaries for O(1) access
     teacher_test_map = {t.test_id: t for t in teacher_tests}
     student_test_map = {t.test_id: t for t in student_tests}
     
     for test_result in test_results:
-        # Each row contains both a teacher_test_id and student_test_id
-        # The test_output is the actual output from running the code
-        # We compare against the teacher test's expected output
-        
-        teacher_test = teacher_test_map.get(test_result.teacher_test_id)
-        student_test = student_test_map.get(test_result.student_test_id)
-        
-        if not teacher_test or not student_test:
-            continue
-        
-        total_count += 1
-        
-        # Determine if test passed by comparing actual output to teacher's expected output
-        status_str = _get_test_status(
-            test_result.test_output,
-            teacher_test.test_out
-        )
-        
-        if status_str == "Passed":
-            passed_count += 1
-        
-        # Determine the provider: if student_test was created by another student, it's a student test
-        # Otherwise, it's a teacher test
-        # Check if the student_test belongs to the current student or another student
-        is_student_provided = student_test.student_id != solution.student_id
-        
-        if is_student_provided:
-            # This is a student-provided test (from peer review)
-            test_results_data.append(TestResultResponse(
-                test_id=student_test.test_id,
-                test_type="student",
-                provider="student",
-                scope=None,  # Student tests don't have public/private scope
-                test_input=student_test.test_in,
-                expected_output=student_test.test_out,
-                actual_output=test_result.test_output,
-                status=status_str
-            ))
-        else:
-            # This is a teacher test
-            test_results_data.append(TestResultResponse(
+        # Check if it is a teacher test result or a student test result
+        if test_result.teacher_test_id is not None:
+             teacher_test = teacher_test_map.get(test_result.teacher_test_id)
+             if not teacher_test:
+                 continue
+                 
+             total_count += 1
+             
+             status_str = _get_test_status(
+                test_result.test_output,
+                teacher_test.test_out
+             )
+             if status_str == "Passed":
+                 passed_count += 1
+                 
+             test_results_data.append(TestResultResponse(
                 test_id=teacher_test.test_id,
                 test_type="teacher",
                 provider="teacher",
                 scope=teacher_test.scope.value,
                 test_input=teacher_test.test_in,
                 expected_output=teacher_test.test_out,
+                actual_output=test_result.test_output,
+                status=status_str
+            ))
+            
+        elif test_result.student_test_id is not None:
+             student_test = student_test_map.get(test_result.student_test_id)
+             if not student_test:
+                 continue
+            
+             total_count += 1
+             
+             status_str = _get_test_status(
+                test_result.test_output,
+                student_test.test_out
+             )
+             if status_str == "Passed":
+                 passed_count += 1
+
+             test_results_data.append(TestResultResponse(
+                test_id=student_test.test_id,
+                test_type="student",
+                provider="student",
+                scope=None,
+                test_input=student_test.test_in,
+                expected_output=student_test.test_out,
                 actual_output=test_result.test_output,
                 status=status_str
             ))
@@ -458,21 +463,35 @@ def get_student_game_score(
         
         # Fetch all teacher tests for these results in one query (fix N+1 query)
         if test_results:
-            teacher_test_ids = [tr.teacher_test_id for tr in test_results]
+            teacher_test_ids = [tr.teacher_test_id for tr in test_results if tr.teacher_test_id is not None]
             teacher_tests = db.query(Test).filter(Test.test_id.in_(teacher_test_ids)).all()
             teacher_test_map = {t.test_id: t for t in teacher_tests}
+
+            student_test_ids = [tr.student_test_id for tr in test_results if tr.student_test_id is not None]
+            student_tests = db.query(StudentTest).filter(StudentTest.test_id.in_(student_test_ids)).all()
+            student_test_map = {t.test_id: t for t in student_tests}
             
             # Count passed tests
             for test_result in test_results:
-                teacher_test = teacher_test_map.get(test_result.teacher_test_id)
+                status_str = "Failed"
                 
-                if teacher_test:
-                    status_str = _get_test_status(
-                        test_result.test_output,
-                        teacher_test.test_out
-                    )
-                    if status_str == "Passed":
-                        passed_tests += 1
+                if test_result.teacher_test_id is not None:
+                    teacher_test = teacher_test_map.get(test_result.teacher_test_id)
+                    if teacher_test:
+                        status_str = _get_test_status(
+                            test_result.test_output,
+                            teacher_test.test_out
+                        )
+                elif test_result.student_test_id is not None:
+                    student_test = student_test_map.get(test_result.student_test_id)
+                    if student_test:
+                        status_str = _get_test_status(
+                            test_result.test_output,
+                            student_test.test_out
+                        )
+                
+                if status_str == "Passed":
+                    passed_tests += 1
         
         # Calculate implementation score (50% of total, max 50 points)
         implementation_score = _calculate_implementation_score(passed_tests, total_tests)
