@@ -1,5 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
+import { Button } from 'antd';
+import { HomeOutlined } from '@ant-design/icons';
 import SolutionCodeBlock from './components/SolutionCodeBlock';
 import ScoreDisplay from './components/ScoreDisplay';
 import TestResultsSection from './components/TestResultsSection';
@@ -18,6 +21,12 @@ const SolutionResultsView = ({
     privateTeacherTests,
     studentTests,
 }) => {
+    const navigate = useNavigate();
+
+    const handleReturnHome = () => {
+        navigate('/');
+    };
+
     return (
         <div className="solution-results-container" id="solution-results-container">
             {/* Header */}
@@ -75,7 +84,20 @@ const SolutionResultsView = ({
                             sectionId="student-provided-tests"
                         />
                     )}
+
                 </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                <Button
+                    type="primary"
+                    size="large"
+                    icon={<HomeOutlined />}
+                    onClick={handleReturnHome}
+                    id="return-home-button"
+                    style={{ height: '50px', marginTop: '40px' }}
+                >
+                    Return to Home
+                </Button>
             </div>
         </div>
     );
