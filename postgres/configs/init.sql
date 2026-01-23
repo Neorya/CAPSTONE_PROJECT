@@ -69,8 +69,13 @@ CREATE TABLE capstone_app.match_setting (
     title VARCHAR(150) NOT NULL UNIQUE,
     description TEXT NOT NULL,
     is_ready BOOLEAN NOT NULL DEFAULT FALSE,
-    reference_solution VARCHAR(1000), -- this is the code solution
-    total_points INTEGER NOT NULL DEFAULT 100, -- configurable score per exercise
+    reference_solution TEXT NOT NULL, 
+    student_code TEXT, 
+    function_name VARCHAR(100), 
+    function_type VARCHAR(50) DEFAULT 'output', 
+    function_inputs TEXT, 
+    language VARCHAR(20) NOT NULL DEFAULT 'cpp',
+    total_points INTEGER NOT NULL DEFAULT 100, 
     
     creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id)
 );

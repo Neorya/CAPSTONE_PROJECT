@@ -38,12 +38,14 @@ class Teacher(Base):
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
     
-    email = Column(String(150), unique=True, nullable=False) 
+    email = Column(String(150), unique=True, nullable=False)
+    user_id = Column(Integer, nullable=False)  # Reference to users table
 
     # Relationships: A teacher can create many...
     match_settings = relationship("MatchSetting", back_populates="creator")
     matches = relationship("Match", back_populates="creator")
     game_sessions = relationship("GameSession", back_populates="creator")
+
 
 class MatchSetting(Base):
     """
@@ -57,6 +59,11 @@ class MatchSetting(Base):
     description = Column(Text, nullable=False)
     is_ready = Column(Boolean, nullable=False, default=False)
     reference_solution = Column(Text, nullable=False)
+    student_code = Column(Text, nullable=True)  # Template code for students
+    function_name = Column(String(100), nullable=True)
+    function_type = Column(String(50), nullable=True, default="output")
+    function_inputs = Column(Text, nullable=True)  # JSON array
+    language = Column(String(20), nullable=False, default="cpp")
     total_points = Column(Integer, nullable=False, default=100)
     creator_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.teacher.teacher_id"))
     
@@ -64,6 +71,7 @@ class MatchSetting(Base):
     creator = relationship("Teacher", back_populates="match_settings")
     matches = relationship("Match", back_populates="match_setting")
     tests = relationship("Test", back_populates="match_setting", cascade="all, delete-orphan")
+
 
 
 class Test(Base):

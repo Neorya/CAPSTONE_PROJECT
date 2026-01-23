@@ -4,6 +4,7 @@ import { ConfigProvider } from 'antd';
 import HomePage from './components/Home';
 import { CreateMatchForm } from './components/CreateMatchForm';
 import { MatchSettingsList } from './components/MatchSettings';
+import CreateMatchSetting from './components/CreateMatchSetting';
 import { GameSessionCreation } from './components/GameSessionCreation';
 import { GameSessionList } from './components/GameSessionList';
 import { StartGameSession } from './components/StartGameSession';
@@ -98,6 +99,26 @@ function App() {
                 <ProtectedRoute>
                   <AppLayout>
                     <MatchSettingsList />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/match-settings/create"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <CreateMatchSetting />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/match-settings/:id/edit"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <CreateMatchSetting />
                   </AppLayout>
                 </ProtectedRoute>
               }
@@ -202,21 +223,21 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route 
-              path="/phase-one" 
+            <Route
+              path="/phase-one"
               element={
                 <ProtectedRoute>
                   <AlgorithmMatchPhaseOne />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/voting" 
+            <Route
+              path="/voting"
               element={
                 <ProtectedRoute>
                   <SolutionReview />
                 </ProtectedRoute>
-              } 
+              }
             />
             {/* Catch-all route - redirects to root */}
             <Route path="*" element={<Navigate to="/" replace />} />
