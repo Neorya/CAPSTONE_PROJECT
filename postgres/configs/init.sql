@@ -178,12 +178,12 @@ CREATE TABLE capstone_app.student_solutions (
 DROP TABLE IF EXISTS capstone_app.student_solution_tests;
 
 CREATE TABLE capstone_app.student_solution_tests (
-  teacher_test_id INTEGER REFERENCES capstone_app.tests(test_id) NOT NULL,
-  student_test_id INTEGER REFERENCES capstone_app.student_tests(test_id) NOT NULL,
+  student_solution_test_id SERIAL PRIMARY KEY,
+  teacher_test_id INTEGER REFERENCES capstone_app.tests(test_id) DEFAULT NULL,
+  student_test_id INTEGER REFERENCES capstone_app.student_tests(test_id) DEFAULT NULL,
   solution_id INTEGER REFERENCES capstone_app.student_solutions(solution_id) NOT NULL,
   test_output TEXT NOT NULL,
-  PRIMARY KEY (teacher_test_id, student_test_id, solution_id),
-  CONSTRAINT uc_solution_id_test_id UNIQUE (solution_id, student_test_id, teacher_test_id)
+  CONSTRAINT uc_solution_test_result UNIQUE (solution_id, teacher_test_id, student_test_id)
 );
 
 --- The creation of table for relationship between students and game session: (User Story 5)

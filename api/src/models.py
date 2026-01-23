@@ -121,9 +121,10 @@ class StudentSolutionTest(Base):
         {'schema': SCHEMA_NAME}
     )
 
-    teacher_test_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.tests.test_id"), primary_key=True, nullable=False)
-    student_test_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student_tests.test_id"), primary_key=True, nullable=False)
-    solution_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student_solutions.solution_id"), primary_key=True, nullable=False)
+    student_solution_test_id = Column(Integer, primary_key=True)                            # New PK
+    teacher_test_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.tests.test_id"), nullable=True) # Nullable
+    student_test_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student_tests.test_id"), nullable=True) # Nullable
+    solution_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student_solutions.solution_id"), nullable=False)
     test_output = Column(Text, nullable=False)
 
 

@@ -19,6 +19,7 @@ from models import (
 )
 from authentication.routes.auth_routes import get_current_user
 from code_runner import compile_cpp, run_cpp_executable
+from models import StudentSolutionTest
 
 router = APIRouter(prefix="/api/phase-one", tags=["phase-one"])
 
@@ -336,6 +337,9 @@ def submit_solution(
     passed_public_tests = 0
     total_public_tests = 0
     
+    
+    execution_results_to_save = []
+    
     try:
         for test in tests:
             result = run_cpp_executable(exe_path, test.test_in or "")
@@ -366,6 +370,7 @@ def submit_solution(
             if status != "pass":
                 all_passed = False
             
+            # Prepare result for frontend response
             if is_public:
                 test_results.append(TestResultDetail(
                     test_id=test.test_id,
@@ -373,6 +378,15 @@ def submit_solution(
                     message=message,
                     actual_output=actual_out if status != "timeout" and status != "runtime_error" else None
                 ))
+            
+            output_to_save = actual_out
+            if status != "pass" and status != "fail" and message:
+                 pass
+
+            execution_results_to_save.append({
+                "teacher_test_id": test.test_id,
+                "test_output": actual_out
+            })
             
     finally:
         if os.path.exists(exe_path):
@@ -383,6 +397,10 @@ def submit_solution(
 
     solution_id = None
     final_message = "Solution ran successfully."
+
+    
+    should_save = False
+    solution_obj = None
 
     if not encountered_error:
         # Check if a solution already exists
@@ -401,19 +419,16 @@ def submit_solution(
         else:
             solution_has_passed = False
             
-        should_save = False
-        
         if existing_solution:
             # If exists, check if It is improved or equaled
             current_best = existing_solution.passed_test or 0
+            # Allow equal score to update (e.g. code refactoring)
             if passed_test_count >= current_best:
                 should_save = True
                 existing_solution.code = request.code
                 existing_solution.has_passed = solution_has_passed
                 existing_solution.passed_test = passed_test_count
-                db.commit()
-                db.refresh(existing_solution)
-                solution_id = existing_solution.solution_id
+                solution_obj = existing_solution
                 final_message = "Solution updated (score improved or matched)."
             else:
                 final_message = f"Solution not saved: Score ({passed_test_count}) is lower than best ({current_best})."
@@ -428,11 +443,32 @@ def submit_solution(
                 student_id=request.student_id
             )
             db.add(new_solution)
-            db.commit()
-            db.refresh(new_solution)
+            # Need flush to get solution_id
+            db.flush() 
+            solution_obj = new_solution
             solution_id = new_solution.solution_id
             final_message = "Solution submitted successfully."
             
+        if should_save and solution_obj:
+        
+        
+            db.query(StudentSolutionTest).filter(
+                StudentSolutionTest.solution_id == solution_obj.solution_id
+            ).delete()
+            
+            for res in execution_results_to_save:
+                new_test_result = StudentSolutionTest(
+                    solution_id=solution_obj.solution_id,
+                    teacher_test_id=res["teacher_test_id"],
+                    test_output=res["test_output"],
+                    student_test_id=None
+                )
+                db.add(new_test_result)
+            
+            db.commit()
+            db.refresh(solution_obj)
+            solution_id = solution_obj.solution_id
+
     else:
         final_message = "Solution not saved due to runtime errors."
     
