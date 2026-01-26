@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from pydantic import BaseModel, Field
 
 from models import (
@@ -14,6 +15,10 @@ from models import (
     StudentAssignedReview,
     StudentSolution,
     StudentSolutionTest,
+    StudentJoinGame,
+    MatchesForGame,
+    Match,
+    Test,
     VoteType,
     SCHEMA_NAME
 )
@@ -105,7 +110,7 @@ def assign_badge(request: AssignBadgeRequest, db: Session = Depends(get_db)):
 def _award_badge_if_not_exists(db: Session, student_id: int, badge_name: str, game_session_id: Optional[int] = None):
     badge = db.query(Badge).filter(Badge.name == badge_name).first()
     if not badge:
-        return # Should probably log this error
+        return  # Should probably log this error
     
     exists = db.query(StudentBadge).filter(
         StudentBadge.student_id == student_id,
@@ -113,12 +118,130 @@ def _award_badge_if_not_exists(db: Session, student_id: int, badge_name: str, ga
     ).first()
     
     if not exists:
-        db.add(StudentBadge(
-            student_id=student_id,
-            badge_id=badge.badge_id,
-            game_session_id=game_session_id,
-            earned_at=datetime.now(timezone.utc)
-        ))
+        try:
+            new_badge = StudentBadge(
+                student_id=student_id,
+                badge_id=badge.badge_id,
+                game_session_id=game_session_id,
+                earned_at=datetime.now(timezone.utc)
+            )
+            db.add(new_badge)
+            db.flush()  # Flush immediately to catch duplicates early
+        except IntegrityError:
+            db.rollback()  # Rollback the failed insert, badge already exists
+
+
+def _count_perfect_sessions(db: Session, student_id: int) -> int:
+    """
+    Count the number of game sessions where the student passed all teacher's tests.
+    A session is "perfect" if the student's passed_test count equals the total
+    number of teacher tests (public + private) for the match.
+    Note: Each student plays only ONE match per game session.
+    """
+    # Get all sessions the student participated in with their assigned match
+    student_sessions = db.query(StudentJoinGame.game_id, StudentJoinGame.assigned_match_id).filter(
+        StudentJoinGame.student_id == student_id,
+        StudentJoinGame.assigned_match_id.isnot(None)
+    ).all()
+    
+    perfect_count = 0
+    
+    for game_id, match_id in student_sessions:
+        # Find the match_for_game_id for this match in this game session
+        match_for_game = db.query(MatchesForGame.match_for_game_id).filter(
+            MatchesForGame.match_id == match_id,
+            MatchesForGame.game_id == game_id
+        ).first()
+        
+        if not match_for_game:
+            continue
+        
+        # Get the match to find its match_set_id
+        match = db.query(Match).filter(Match.match_id == match_id).first()
+        if not match:
+            continue
+        
+        # Count total teacher tests (public + private) for this match_setting
+        total_tests = db.query(func.count(Test.test_id)).filter(
+            Test.match_set_id == match.match_set_id
+        ).scalar() or 0
+        
+        if total_tests == 0:
+            continue
+        
+        # Get the student's solution and check if passed_test equals total tests
+        solution = db.query(StudentSolution).filter(
+            StudentSolution.student_id == student_id,
+            StudentSolution.match_for_game_id == match_for_game.match_for_game_id
+        ).first()
+        
+        if solution and solution.passed_test >= total_tests:
+            perfect_count += 1
+    
+    return perfect_count
+
+
+def _count_flawless_sessions(db: Session, student_id: int) -> int:
+    """
+    Count the number of game sessions where the student finished perfectly without any mistakes.
+    A session is "flawless" if:
+    1. The student passed all teacher's tests (passed_test equals total tests)
+    2. Their solution received no valid "incorrect" votes from reviewers
+    Note: Each student plays only ONE match per game session.
+    """
+    # Get all sessions the student participated in with their assigned match
+    student_sessions = db.query(StudentJoinGame.game_id, StudentJoinGame.assigned_match_id).filter(
+        StudentJoinGame.student_id == student_id,
+        StudentJoinGame.assigned_match_id.isnot(None)
+    ).all()
+    
+    flawless_count = 0
+    
+    for game_id, match_id in student_sessions:
+        # Find the match_for_game_id for this match in this game session
+        match_for_game = db.query(MatchesForGame.match_for_game_id).filter(
+            MatchesForGame.match_id == match_id,
+            MatchesForGame.game_id == game_id
+        ).first()
+        
+        if not match_for_game:
+            continue
+        
+        # Get the match to find its match_set_id
+        match = db.query(Match).filter(Match.match_id == match_id).first()
+        if not match:
+            continue
+        
+        # Count total teacher tests (public + private) for this match_setting
+        total_tests = db.query(func.count(Test.test_id)).filter(
+            Test.match_set_id == match.match_set_id
+        ).scalar() or 0
+        
+        if total_tests == 0:
+            continue
+        
+        # Get the student's solution and check if passed_test equals total tests
+        solution = db.query(StudentSolution).filter(
+            StudentSolution.student_id == student_id,
+            StudentSolution.match_for_game_id == match_for_game.match_for_game_id
+        ).first()
+        
+        if not solution or solution.passed_test < total_tests:
+            continue
+        
+        # Check if the student's solution received any valid "incorrect" votes
+        # This means reviewers found bugs in their code
+        incorrect_vote = db.query(StudentReviewVote).join(StudentAssignedReview).filter(
+            StudentAssignedReview.assigned_solution_id == solution.solution_id,
+            StudentReviewVote.vote == VoteType.incorrect,
+            StudentReviewVote.valid == True
+        ).first()
+        
+        if not incorrect_vote:
+            flawless_count += 1
+    
+    return flawless_count
+
 
 @router.post("/evaluate/{game_session_id}")
 def evaluate_badges(game_session_id: int, db: Session = Depends(get_db)):
@@ -126,17 +249,7 @@ def evaluate_badges(game_session_id: int, db: Session = Depends(get_db)):
     Evaluate and assign badges for all students in a game session.
     Idempotent: checks if badge already exists before assigning.
     """
-    # 1. Hall of Fame (Top-N)
-    # Re-use leaderboard logic but filter for THIS session? 
-    # The requirement says "Run the api of the hall of fame at the end of the game session".
-    # But leaderboard API calculates GLOBAL scores.
-    # PROMPT: "Run the api of the hall of fame at the end of the game session and select the students that came into the top-n list."
-    # If it implies "Session Ranking", we need to calculate scores just for this session.
-    # If it implies "Global Ranking", we use the global leaderboard.
-    # Given "Hall of fame" usually implies global, but "at the end of the game session" implies local context.
-    # However, "Top-10", "Top-5" badges names are "Rising Star", etc.
-    # Let's assume GLOBAL leaderboard position for now, as Hall of Fame usually refers to the global list.
-    
+    # 1. Hall of Fame (Top-N) - Based on GLOBAL leaderboard position
     scores = _calculate_all_student_scores_optimized(db)
     ranked_students = _assign_ranks(scores)
     
@@ -154,7 +267,7 @@ def evaluate_badges(game_session_id: int, db: Session = Depends(get_db)):
             _award_badge_if_not_exists(db, student_id, "Rising Star", game_session_id)
 
     # 2. Bug Hunter (Cumulative failing tests found)
-    # We need to sum up all valid 'incorrect' votes (which means found a bug) for each student.
+    # Count valid 'incorrect' votes (which means reviewer found a bug in someone else's code)
     bug_counts = db.query(
         StudentAssignedReview.student_id,
         func.count(StudentReviewVote.vote)
@@ -165,13 +278,19 @@ def evaluate_badges(game_session_id: int, db: Session = Depends(get_db)):
     ).group_by(StudentAssignedReview.student_id).all()
     
     for student_id, count in bug_counts:
-        if count >= 100: _award_badge_if_not_exists(db, student_id, "Bug Whisperer")
-        if count >= 50: _award_badge_if_not_exists(db, student_id, "Bug Exterminator")
-        if count >= 20: _award_badge_if_not_exists(db, student_id, "Bug Slayer")
-        if count >= 10: _award_badge_if_not_exists(db, student_id, "Bug Tracker")
-        if count >= 5: _award_badge_if_not_exists(db, student_id, "Bug Hunter")
+        if count >= 100:
+            _award_badge_if_not_exists(db, student_id, "Bug Whisperer")
+        if count >= 50:
+            _award_badge_if_not_exists(db, student_id, "Bug Exterminator")
+        if count >= 20:
+            _award_badge_if_not_exists(db, student_id, "Bug Slayer")
+        if count >= 10:
+            _award_badge_if_not_exists(db, student_id, "Bug Tracker")
+        if count >= 5:
+            _award_badge_if_not_exists(db, student_id, "Bug Hunter")
 
     # 3. Review Master (Cumulative Up-voting correct answers)
+    # Count valid 'correct' votes (reviewer correctly identified working code)
     review_counts = db.query(
         StudentAssignedReview.student_id,
         func.count(StudentReviewVote.vote)
@@ -182,83 +301,53 @@ def evaluate_badges(game_session_id: int, db: Session = Depends(get_db)):
     ).group_by(StudentAssignedReview.student_id).all()
     
     for student_id, count in review_counts:
-        if count >= 100: _award_badge_if_not_exists(db, student_id, "Peer Review Master")
-        if count >= 50: _award_badge_if_not_exists(db, student_id, "Truth Seeker")
-        if count >= 20: _award_badge_if_not_exists(db, student_id, "Insightful Reviewer")
-        if count >= 10: _award_badge_if_not_exists(db, student_id, "Quality Checker")
-        if count >= 5: _award_badge_if_not_exists(db, student_id, "Sharp Eye")
+        if count >= 100:
+            _award_badge_if_not_exists(db, student_id, "Peer Review Master")
+        if count >= 50:
+            _award_badge_if_not_exists(db, student_id, "Truth Seeker")
+        if count >= 20:
+            _award_badge_if_not_exists(db, student_id, "Insightful Reviewer")
+        if count >= 10:
+            _award_badge_if_not_exists(db, student_id, "Quality Checker")
+        if count >= 5:
+            _award_badge_if_not_exists(db, student_id, "Sharp Eye")
 
-    # 4. Teacher's Tests (Passing all teacher's tests)
-    # Meaning: In a single session, did the student pass ALL teacher tests for ALL matches they participated in?
-    # This seems complex. "Passing all the teacher’s tests (private, public); 1 -> First Pass... (sessions)"
-    # PROMPT: "Passing all the teacher’s tests... The sequence of the numbers: 1, 5, 10..."
-    # So we count N sessions where they passed everything.
-    
-    # Logic: For THIS session (game_session_id), check if each student passed all teacher tests.
-    
-    # Get all students in this session
-    # For each student, get all matches in this session they joined.
-    # For each match, check if they found a solution that passed ALL teacher tests.
-    
-    # Simplification: "Passing all the teacher's tests" -> Solution.has_passed == True?
-    # Actually, `has_passed` usually means passed reference implementation? Or passed tests?
-    # Let's check `StudentSolution` model. `has_passed` and `passed_test` (integer).
-    # If `has_passed` is True, it implies they passed the required tests.
-    # Let's assume if they have a solution with `has_passed=True` for EVERY match in the session, they get a "Perfect Session" count increment.
-    
-    # We need to count how many "Perfect Sessions" a student has.
-    # This is expensive to calculate on the fly for history.
-    # BUT, we are evaluating THIS session.
-    # If this session is perfect, we increment a counter? Or we just count all perfect sessions from history.
-    
-    # Let's count perfect sessions from history for all students involved in this session.
-    # A session is perfect for a student if:
-    #   For all matches assigned to them in that session, they have at least one solution with has_passed=True.
-    
-    # Getting all sessions a student participated in:
-    # `StudentJoinGame` -> game_id.
-    
-    # This query allows us to find "Perfect Sessions" counts.
-    # Doing this in Python for now to be safe, though SQL is better.
-    
+    # 4. Teacher's Tests & 5. Flawless Finish
     # Get all students in the current session
-    # For now, let's just create a simplified query:
+    students_in_session = db.query(StudentJoinGame.student_id).filter(
+        StudentJoinGame.game_id == game_session_id
+    ).distinct().all()
+    student_ids = [s[0] for s in students_in_session]
     
-    # For each student in the DB (or just in this session to optimize):
-    #   count perfect_game_sessions
-    #   award badges based on count.
-    
-    # Queries needed:
-    # 1. Get all students in current session.
-    # 2. For each, calculate "Perfect Sessions".
-    
-    # OPTIMIZATION: Only calculate for students in `game_session_id`.
-    pass # Implementation detail below
-    
-    
-    # 5. Flawless Finish (No mistakes)
-    # "If you finish the game session perfectly without any mistakes (teacher’s tests or students’ tests)"
-    # This implies NO failed submissions? Or NO failed tests in the final submission?
-    # "without any mistakes" -> likely means every submission they made was correct on the first try? 
-    # Or just that their final result is perfect?
-    # "teacher's tests or students' tests" -> this sounds like Phase 2 reviews too?
-    # Let's interpret "Flawless" as: In a session, found 100% correct solution (passed all tests) AND reviews were all correct?
-    # OR maybe "No failed attempts"?
-    # Given the complexity, let's look at the badge names: "Flawless Start", "Clean Run".
-    # I will interpret this as: The student has a solution with `has_passed=True` for all matches, AND they never had a failed test run? 
-    # That's very hard.
-    # Let's stick to "Perfect Score" in that session = Flawless?
-    # "Perfectly" usually means 100/100 points?
-    # Let's go with "Max Score" achieved in the session without any "incorrect" penalties.
-    
-    # Given the ambiguity and time constraints, I will implement "Teacher's Tests" badges (based on `has_passed` count) and "Reviews" badges.
-    # "Flawless" might be skipped or simplified to "Score >= 100%"?
-    
-    # Let's implement Teacher's Tests count logic:
-    # Count sessions where (Matches Assigned == Matches Passed).
-    
-    # We need to iterate over all students in the current game session.
-    # ...
+    # For each student, calculate their "Perfect Sessions" count (Teacher's Tests)
+    # and "Flawless Sessions" count
+    for student_id in student_ids:
+        perfect_sessions_count = _count_perfect_sessions(db, student_id)
+        flawless_sessions_count = _count_flawless_sessions(db, student_id)
+        
+        # Award Teacher's Tests badges (1, 5, 10, 15, 20)
+        if perfect_sessions_count >= 20:
+            _award_badge_if_not_exists(db, student_id, "Teachers Champion", game_session_id)
+        if perfect_sessions_count >= 15:
+            _award_badge_if_not_exists(db, student_id, "Test Master", game_session_id)
+        if perfect_sessions_count >= 10:
+            _award_badge_if_not_exists(db, student_id, "Reliable Solver", game_session_id)
+        if perfect_sessions_count >= 5:
+            _award_badge_if_not_exists(db, student_id, "Consistent Performer", game_session_id)
+        if perfect_sessions_count >= 1:
+            _award_badge_if_not_exists(db, student_id, "First Pass", game_session_id)
+        
+        # Award Flawless Finish badges (1, 5, 10, 15, 20)
+        if flawless_sessions_count >= 20:
+            _award_badge_if_not_exists(db, student_id, "Untouchable", game_session_id)
+        if flawless_sessions_count >= 15:
+            _award_badge_if_not_exists(db, student_id, "Perfectionist", game_session_id)
+        if flawless_sessions_count >= 10:
+            _award_badge_if_not_exists(db, student_id, "Precision Player", game_session_id)
+        if flawless_sessions_count >= 5:
+            _award_badge_if_not_exists(db, student_id, "Clean Run", game_session_id)
+        if flawless_sessions_count >= 1:
+            _award_badge_if_not_exists(db, student_id, "Flawless Start", game_session_id)
     
     db.commit()
     return {"message": "Badges evaluated"}
