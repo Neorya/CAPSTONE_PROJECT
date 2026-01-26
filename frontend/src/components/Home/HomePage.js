@@ -8,7 +8,8 @@ import {
   UnorderedListOutlined,
   TeamOutlined,
   AppstoreOutlined,
-  TrophyOutlined
+  TrophyOutlined,
+  SafetyCertificateOutlined
 } from "@ant-design/icons";
 import { getUserProfile } from "../../services/userService";
 import "./HomePage.css";
@@ -95,6 +96,15 @@ const HomePage = () => {
       route: "/hall-of-fame",
       accent: "#eab308",
       roles: ["teacher", "student"]
+    },
+    {
+      id: "admin-dashboard",
+      title: "Admin Dashboard",
+      description: "Manage users, roles, and system settings",
+      icon: <SafetyCertificateOutlined />,
+      route: "/admin-dashboard",
+      accent: "#ef4444",
+      roles: ["admin"]
     }
   ];
 
