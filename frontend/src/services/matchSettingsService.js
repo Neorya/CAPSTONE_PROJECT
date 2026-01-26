@@ -111,18 +111,37 @@ export async function cloneMatchSetting(matchSetId) {
  * @param {Object} data - { reference_solution, language, tests }
  * @returns {Promise<Object>} Validation results
  */
+/**
+ * Try/validate code against tests without saving
+ * @param {Object} data - { reference_solution, language, tests }
+ * @returns {Promise<Object>} Validation results
+ */
 export async function tryMatchSetting(data) {
   const url = new URL("/api/match-settings/try", API_BASE_URL);
-  const res = await apiFetch(url.toString(), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(error.detail || "Failed to validate code");
+
+  try {
+    const res = await apiFetch(url.toString(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) {
+      if (res.status === 500) {
+        throw new Error("Server error: The code evaluation service might be unavailable.");
+      }
+
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Validation failed: ${res.statusText}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    if (error.message.includes('Failed to fetch')) {
+      throw new Error("Network error: Unable to connect to the server.");
+    }
+    throw error;
   }
-  return res.json();
 }
 
 /**

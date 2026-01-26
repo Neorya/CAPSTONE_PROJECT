@@ -331,9 +331,10 @@ async def get_current_user(token: Annotated[str | None, Depends(oauth2_scheme)])
     # Testing mode bypass - only for automated tests
     if API_TESTING_MODE:
         return {
-            "sub": "1",  # Mock user ID
-            "email": "test@example.com",
-            "role": "teacher"  # Default to teacher role for full access
+            "sub": "dev_teacher_sub_456",  # Mock user ID
+            "id": 42,     # Database ID for Dev Teacher (40 initial + 2 dev users)
+            "email": "dev.teacher@test.com",
+            "role": "teacher"
         }
     
     # Normal authentication flow

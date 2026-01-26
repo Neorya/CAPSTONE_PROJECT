@@ -122,6 +122,7 @@ router = APIRouter(prefix="/api", tags=["match-settings"])
 # Helper Functions
 # ============================================================================
 
+
 def get_teacher_id(current_user: dict, db: Session) -> int:
     """Extract teacher_id from current user"""
     if current_user.get("role") != "teacher":
@@ -130,7 +131,12 @@ def get_teacher_id(current_user: dict, db: Session) -> int:
             detail="Only teachers can manage match settings"
         )
     
-    teacher = db.query(Teacher).filter(Teacher.user_id == current_user["id"]).first()
+    # JWT payload uses 'sub' for user ID (as string), while testing mode might provide 'id'
+    user_id = current_user.get("id")
+    if user_id is None:
+        user_id = int(current_user["sub"])
+    
+    teacher = db.query(Teacher).filter(Teacher.user_id == user_id).first()
     if not teacher:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

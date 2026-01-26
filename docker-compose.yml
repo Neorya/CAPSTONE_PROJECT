@@ -1,8 +1,10 @@
 networks:
   backend:
 
+
 volumes:
   postgres_data:
+
 
 services:
   db:
@@ -38,7 +40,7 @@ services:
       - apparmor=unconfined
     volumes:
       - ./api/src:/app
-      - ./api/nsjail.cfg:/app/nsjail.cfg
+
     ports:
       - "8000:8000"
     environment:
