@@ -13,6 +13,7 @@ from authentication.routes.auth_routes import router as auth_router
 from phase_one import router as phase_one_router
 from phase_two import router as phase_two_router
 from user_api import router as user_router
+from badges_api import router as badges_router
 from authentication.config import validate_required_env_vars
 
 app = FastAPI()
@@ -47,6 +48,7 @@ app.include_router(auth_router)
 app.include_router(phase_one_router)
 app.include_router(phase_two_router)
 app.include_router(user_router)
+app.include_router(badges_router)
 
 
 @app.get("/")
