@@ -56,6 +56,7 @@ class StudentTestRead(BaseModel):
 class MatchDetailsResponse(BaseModel):
     title: str
     description: str
+    student_code: Optional[str] = None  # Template code for students
     duration_phase1: int  # Duration in minutes
     actual_start_date: Optional[str] = None  # ISO format datetime string
     remaining_seconds: int  # Remaining seconds for phase 1
@@ -716,6 +717,7 @@ def get_match_details(
     return MatchDetailsResponse(
         title=match_entry.title,
         description=match_entry.match_setting.description,
+        student_code=match_entry.match_setting.student_code,
         duration_phase1=game_session.duration_phase1,
         actual_start_date=game_session.actual_start_date.isoformat() if game_session.actual_start_date else None,
         remaining_seconds=remaining_seconds
