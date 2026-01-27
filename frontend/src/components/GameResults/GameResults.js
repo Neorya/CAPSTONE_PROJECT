@@ -3,19 +3,20 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Spin, message } from 'antd';
 import { jwtDecode } from 'jwt-decode';
 import { getStudentSolutionId, calculateSessionScores } from '../../services/solutionResultsService';
+import { evaluateBadges } from '../../services/badgeService';
 import './GameResults.css';
 
 /**
  * GameResults Component
  * Handles redirecting students to their solution results after Phase 2 ends.
- * Triggers score calculation and then redirects to solution-results page.
+ * Fetches the student's solution ID for the game and redirects to solution-results page.
  */
 const GameResults = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [statusMessage, setStatusMessage] = useState('Calculating scores...');
+    const [statusMessage, setStatusMessage] = useState('Initializing results...');
 
     const gameId = searchParams.get('gameId');
 
@@ -41,11 +42,18 @@ const GameResults = () => {
 
                 //  trigger score calculation for the game session
                 setStatusMessage('Calculating final scores...');
+                
                 try {
                     await calculateSessionScores(gameId);
                 } catch (scoreErr) {
                     
                     console.warn('Score calculation warning:', scoreErr);
+                }
+                
+                try {
+                    await evaluateBadges(gameId);
+                } catch (badgeErr) {
+                    console.error('Badge evaluation failed', badgeErr);
                 }
 
                 // Then fetch the student's solution ID for this game

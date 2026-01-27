@@ -8,7 +8,7 @@ Provides endpoints for:
 Related User Story: Display test results with pass/fail indicators and calculate student scores
 """
 
-from typing import List, Optional, Dict, Annotated
+from typing import List, Optional, Dict, Annotated, Tuple
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
@@ -786,6 +786,83 @@ class StudentSessionScoreResponse(BaseModel):
     session_score: Optional[float] = Field(None, description="Session score (null if not yet calculated)")
     is_calculated: bool = Field(..., description="Whether the score has been calculated")
 
+
+# ============================================================================
+# Endpoint: Get All Session Scores for a Game
+# ============================================================================
+
+
+def get_game_session_scores_list(db: Session, game_id: int) -> List[Tuple[int, str, float]]:
+    """
+    Internal helper to get list of (student_id, username, score) for a game session.
+    """
+    # Verify game session exists
+    game = db.query(GameSession).filter(GameSession.game_id == game_id).first()
+    if not game:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Game session with ID {game_id} not found"
+        )
+    
+    # Get all students in the game session with their scores
+    student_joins = db.query(StudentJoinGame).filter(
+        StudentJoinGame.game_id == game_id
+    ).all()
+    
+    if not student_joins:
+        return []
+    
+    # Build list of tuples
+    results = []
+    for student_join in student_joins:
+        student = db.query(Student).filter(Student.student_id == student_join.student_id).first()
+        if student:
+            score = float(student_join.session_score) if student_join.session_score is not None else 0.0
+            username = f"{student.first_name} {student.last_name}"
+            results.append((student.student_id, username, score))
+    
+    # Sort by score descending
+    results.sort(key=lambda x: x[2], reverse=True)
+    
+    return results
+
+@router.get(
+    "/scores/game/{game_id}",
+    response_model=List[Tuple[int, str, float]],
+    status_code=status.HTTP_200_OK,
+    summary="Get all session scores for a game session",
+    description="""
+    Retrieves all calculated session scores for a specific game session.
+    Returns a list of tuples (student_id, username, score), sorted by score descending.
+    Note: 'username' is the student's full name.
+    """
+)
+def get_all_game_session_scores(
+    current_user: Annotated[dict, Depends(get_current_user)],
+    game_id: int,
+    db: Session = Depends(get_db)
+) -> List[Tuple[int, str, float]]:
+    """
+    Get all session scores for a specific game session.
+    
+    Args:
+        current_user: Authenticated user from JWT token
+        game_id: ID of the game session
+        db: Database session
+    
+    Returns:
+        List of tuples (student_id, username, score)
+    
+    Raises:
+        HTTPException: If game session not found
+    """
+    return get_game_session_scores_list(db, game_id)
+
+
+
+# ============================================================================
+# Endpoint 6: Get Student's Session Score
+# ============================================================================
 
 @router.get(
     "/session-score/student/{student_id}/game/{game_id}",

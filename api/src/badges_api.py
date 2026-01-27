@@ -23,7 +23,8 @@ from models import (
     SCHEMA_NAME
 )
 from database import get_db
-from leaderboard_api import _calculate_all_student_scores_optimized, _assign_ranks
+from leaderboard_api import _assign_ranks
+from student_results_api import get_game_session_scores_list
 
 router = APIRouter(
     prefix="/api/badges",
@@ -250,7 +251,7 @@ def evaluate_badges(game_session_id: int, db: Session = Depends(get_db)):
     Idempotent: checks if badge already exists before assigning.
     """
     # 1. Hall of Fame (Top-N) - Based on GLOBAL leaderboard position
-    scores = _calculate_all_student_scores_optimized(db)
+    scores = get_game_session_scores_list(db, game_session_id)
     ranked_students = _assign_ranks(scores)
     
     for entry in ranked_students:

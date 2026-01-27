@@ -20,17 +20,7 @@ from collections import defaultdict
 
 # Import ORM models
 from models import (
-    Student,
-    StudentSolution,
-    StudentSolutionTest,
-    Test,
-    MatchSetting,
-    Match,
-    MatchesForGame,
-    StudentAssignedReview,
-    StudentReviewVote,
-    VoteType,
-    StudentJoinGame,
+    Student
 )
 
 from database import get_db
