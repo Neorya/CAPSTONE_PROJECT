@@ -109,7 +109,7 @@ async def demote_to_student(
         )
         db.add(new_student)
     else:
-         if hasattr(student, 'user_id') and not student.user_id:
+        if hasattr(student, 'user_id') and not student.user_id:
             student.user_id = user.id
             
     db.commit()
