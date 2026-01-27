@@ -16,6 +16,8 @@ from models import (
     Match,
     MatchSetting,
     Test,
+    StudentTest,
+    StudentSolutionTest,
     GameSession,
 )
 from authentication.routes.auth_routes import get_current_user
@@ -346,7 +348,7 @@ def submit_vote(
     valid = None
 
     if vote_type_str == "incorrect":
-        valid = _validate_incorrect_vote(
+        valid, student_actual_output = _validate_incorrect_vote(
             student_code=solution.code,
             reference_code=match_setting.reference_solution,
             test_in=request.proof_test_in,
@@ -371,6 +373,17 @@ def submit_vote(
         existing_vote.note = request.note
         db.commit()
         db.refresh(existing_vote)
+        
+        # If valid incorrect vote, ensure test is persisted
+        if vote_type_str == "incorrect" and valid:
+             _persist_proof_test(
+                 db=db,
+                 student_id=student_id,
+                 solution=solution,
+                 test_in=request.proof_test_in,
+                 test_out=request.proof_test_out,
+                 actual_output=student_actual_output
+             )
 
         return VoteResponse(
             review_vote_id=existing_vote.review_vote_id,
@@ -391,6 +404,17 @@ def submit_vote(
         db.commit()
         db.refresh(new_vote)
 
+        # If valid incorrect vote, persist test
+        if vote_type_str == "incorrect" and valid:
+             _persist_proof_test(
+                 db=db,
+                 student_id=student_id,
+                 solution=solution,
+                 test_in=request.proof_test_in,
+                 test_out=request.proof_test_out,
+                 actual_output=student_actual_output
+             )
+
         return VoteResponse(
             review_vote_id=new_vote.review_vote_id,
             message="Vote submitted successfully",
@@ -398,32 +422,76 @@ def submit_vote(
         )
 
 
+def _persist_proof_test(
+    db: Session, 
+    student_id: int, 
+    solution: StudentSolution, 
+    test_in: str, 
+    test_out: str, 
+    actual_output: str
+):
+    """
+    Persist the proof test as a StudentTest and record the result in StudentSolutionTest.
+    This makes it visible in the solution results.
+    """
+    #  Create StudentTest (linked to the reviewer)
+    
+    
+    new_test = StudentTest(
+        test_in=test_in,
+        test_out=test_out,
+        match_for_game_id=solution.match_for_game_id,
+        student_id=student_id
+    )
+    db.add(new_test)
+    db.flush() # Get test_id
+    
+    
+    sol_test = StudentSolutionTest(
+        solution_id=solution.solution_id,
+        teacher_test_id=None,
+        student_test_id=new_test.test_id,
+        test_output=actual_output
+    )
+    db.add(sol_test)
+    db.commit()
+
+
 def _validate_incorrect_vote(
     student_code: str,
     reference_code: str,
     test_in: str,
     test_out: str
-) -> bool:
+) -> tuple[bool, str]:
     """
     Validate an 'incorrect' vote by running the proof test on both solutions.
     
-    Returns True if:
-    - The test FAILS on the student's solution, AND
+    Returns (True, actual_output) if:
+    - The test FAILS on the student's solution (returns student's actual output), AND
     - The test PASSES on the reference solution
     
     This proves the student's code has a bug that the reference solution doesn't have.
     """
     # Compile and run test on student solution
     student_exe, student_compile_error = compile_cpp(student_code)
+    student_actual_output = ""
+    
     if student_exe is None:
         # Student code doesn't compile - test fails on student code
         student_test_passes = False
+        student_actual_output = f"Compilation Error: {student_compile_error}"
     else:
         try:
             student_result = run_cpp_executable(student_exe, test_in)
             student_output = (student_result.get("stdout") or "").strip()
+            student_actual_output = student_output
             expected_output = test_out.strip()
-            student_test_passes = (student_result["status"] == "success" and student_output == expected_output)
+            
+            if student_result["status"] != "success":
+                student_test_passes = False
+                student_actual_output = student_result.get("stderr") or "Runtime Error"
+            else:
+                student_test_passes = (student_output == expected_output)
         finally:
             if os.path.exists(student_exe):
                 try:
@@ -435,7 +503,7 @@ def _validate_incorrect_vote(
     ref_exe, ref_compile_error = compile_cpp(reference_code)
     if ref_exe is None:
         # Reference code doesn't compile - something is wrong with reference
-        return False
+        return False, ""
     
     try:
         ref_result = run_cpp_executable(ref_exe, test_in)
@@ -449,7 +517,8 @@ def _validate_incorrect_vote(
             except:
                 pass
 
-    return (not student_test_passes) and ref_test_passes
+    is_valid = (not student_test_passes) and ref_test_passes
+    return is_valid, student_actual_output
 
 
 def _validate_correct_vote(

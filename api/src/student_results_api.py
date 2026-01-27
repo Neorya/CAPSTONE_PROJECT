@@ -8,11 +8,14 @@ Provides endpoints for:
 Related User Story: Display test results with pass/fail indicators and calculate student scores
 """
 
-from typing import List, Optional
+from typing import List, Optional, Dict, Annotated
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
 from pydantic import BaseModel, Field
+from collections import defaultdict
+
+from authentication.routes.auth_routes import get_current_user
 
 # Import ORM models
 from models import (
@@ -20,11 +23,15 @@ from models import (
     GameSession,
     Match,
     MatchesForGame,
+    MatchSetting,
     StudentJoinGame,
     Test,
     StudentTest,
     StudentSolution,
-    StudentSolutionTest
+    StudentSolutionTest,
+    StudentAssignedReview,
+    StudentReviewVote,
+    VoteType
 )
 
 from database import get_db
@@ -62,72 +69,17 @@ class SolutionTestResultsResponse(BaseModel):
     passed_tests: int = Field(..., description="Number of tests passed")
     failed_tests: int = Field(..., description="Number of tests failed")
     score_display: str = Field(..., description="Score display (e.g., '8/10 tests passed')")
-    implementation_score_percentage: float = Field(..., description="Implementation score as percentage (0-100)")
+    session_score: Optional[float] = Field(None, description="Total session score including implementation and reviews (null if not yet calculated)")
+    max_score: float = Field(..., description="Maximum possible score for this match")
     test_results: List[TestResultResponse] = Field(..., description="List of all test results")
 
 
-class StudentScoreBreakdown(BaseModel):
-    """
-    Detailed score breakdown for a student in a specific match.
-    """
-    match_id: int = Field(..., description="ID of the match")
-    match_title: str = Field(..., description="Title of the match")
-    implementation_score: float = Field(..., description="Score from implementation (0-50)")
-    review_score: float = Field(..., description="Score from reviews (0-50, placeholder for future)")
-    total_score: float = Field(..., description="Total score for this match (0-100)")
-    tests_passed: int = Field(..., description="Number of tests passed")
-    total_tests: int = Field(..., description="Total number of tests")
-
-
-class StudentGameScoreResponse(BaseModel):
-    """
-    Response model for a student's score in a game session.
-    """
-    student_id: int = Field(..., description="ID of the student")
-    student_name: str = Field(..., description="Full name of the student")
-    email: str = Field(..., description="Student's email")
-    game_id: int = Field(..., description="ID of the game session")
-    game_name: str = Field(..., description="Name of the game session")
-    overall_score: float = Field(..., description="Overall score across all matches")
-    matches: List[StudentScoreBreakdown] = Field(..., description="Score breakdown per match")
-
-
-class GameSessionScoresResponse(BaseModel):
-    """
-    Response model for all students' scores in a game session.
-    """
-    game_id: int = Field(..., description="ID of the game session")
-    game_name: str = Field(..., description="Name of the game session")
-    total_students: int = Field(..., description="Number of students in the game session")
-    students_scores: List[StudentGameScoreResponse] = Field(..., description="List of all students' scores")
 
 
 # ============================================================================
 # Helper Functions
 # ============================================================================
 
-def _calculate_implementation_score(passed_tests: int, total_tests: int) -> float:
-    """
-    Calculate implementation score based on passed tests.
-    
-    Implementation accounts for 50% of total score.
-    Each failed test costs 1/N of the implementation score (50 points).
-    
-    Args:
-        passed_tests: Number of tests passed
-        total_tests: Total number of tests
-    
-    Returns:
-        Implementation score out of 50
-    """
-    if total_tests == 0:
-        return 0.0
-    
-    # Each test is worth (50 / total_tests) points
-    score_per_test = 50.0 / total_tests
-    implementation_score = passed_tests * score_per_test
-    
-    return round(implementation_score, 2)
 
 
 def _get_test_status(actual_output: str, expected_output: Optional[str]) -> str:
@@ -150,6 +102,217 @@ def _get_test_status(actual_output: str, expected_output: Optional[str]) -> str:
         return "Passed"
     else:
         return "Failed"
+
+
+def _calculate_student_session_score(db: Session, student_id: int, game_id: int) -> float:
+    """
+    Calculate the total score for a student in a specific game session.
+    
+    Uses the same scoring logic as the leaderboard:
+    - 50% Implementation: (total_points * 0.5) * (passed_tests / total_tests)
+    - 50% Reviews:
+        - Correct "incorrect" vote (found error): +2 * base_review_points
+        - Correct "correct" vote (confirmed solution): +1 * base_review_points
+        - Wrong vote: -1 * base_review_points (penalty)
+        - Skip: 0 points
+    
+    where base_review_points = (total_points * 0.5) / review_count
+    
+    Scores are capped at minimum 0 (no negative total scores).
+    
+    Args:
+        db: Database session
+        student_id: ID of the student
+        game_id: ID of the game session
+    
+    Returns:
+        Total score for this student in this game session (rounded to 2 decimal places)
+    """
+    total_score = 0.0
+    
+    # Get all matches_for_game for this game session
+    matches_for_game_ids = db.query(MatchesForGame.match_for_game_id).filter(
+        MatchesForGame.game_id == game_id
+    ).all()
+    match_for_game_id_list = [m[0] for m in matches_for_game_ids]
+    
+    if not match_for_game_id_list:
+        return 0.0
+    
+    # ===== IMPLEMENTATION SCORE (50%) =====
+    # Fetch student solution directly
+    solution_data = db.query(
+        StudentSolution.solution_id,
+        StudentSolution.match_for_game_id,
+        StudentSolution.passed_test,
+        MatchSetting.total_points,
+        MatchSetting.match_set_id
+    ).join(
+        MatchesForGame,
+        MatchesForGame.match_for_game_id == StudentSolution.match_for_game_id
+    ).join(
+        Match,
+        Match.match_id == MatchesForGame.match_id
+    ).join(
+        MatchSetting,
+        MatchSetting.match_set_id == Match.match_set_id
+    ).filter(
+        StudentSolution.student_id == student_id,
+        StudentSolution.match_for_game_id.in_(match_for_game_id_list)
+    ).first()
+
+    if not solution_data:
+        return 0.0
+    
+    # Get total number of tests for this match setting
+    total_tests = db.query(func.count(Test.test_id)).filter(
+        Test.match_set_id == solution_data.match_set_id
+    ).scalar()
+    
+    # Implementation score = 50% of total_points * (passed/total)
+    if total_tests > 0:
+        p_tests = solution_data.passed_test if solution_data.passed_test is not None else 0
+        implementation_score = (solution_data.total_points * 0.5) * (p_tests / total_tests)
+        total_score += implementation_score
+    
+    # ===== REVIEW SCORE (50%) =====
+    # Fetch review vote results for this student in this game session, including passed_test count of the assigned solution
+    review_data = db.query(
+        StudentReviewVote.vote,
+        StudentReviewVote.valid,
+        StudentSolution.passed_test,
+        MatchSetting.match_set_id,
+        MatchSetting.total_points
+    ).join(
+        StudentAssignedReview,
+        StudentAssignedReview.student_assigned_review_id == StudentReviewVote.student_assigned_review_id
+    ).join(
+        StudentSolution,
+        StudentSolution.solution_id == StudentAssignedReview.assigned_solution_id
+    ).join(
+        MatchesForGame,
+        MatchesForGame.match_for_game_id == StudentSolution.match_for_game_id
+    ).join(
+        Match,
+        Match.match_id == MatchesForGame.match_id
+    ).join(
+        MatchSetting,
+        MatchSetting.match_set_id == Match.match_set_id
+    ).filter(
+        StudentAssignedReview.student_id == student_id,
+        StudentSolution.match_for_game_id.in_(match_for_game_id_list)
+    ).all()
+    
+    # Calculate weights based on review pool
+    # According to requirements:
+    # 1. Identify Ground Truth: Correct (passed==total) vs Buggy (passed<total)
+    # 2. Weights: Correct=1, Buggy=2
+    # 3. Unit Value = (Points / Sum(Weights))
+    
+    if review_data:
+        # Constraint: Student reviews solutions related to the same match_setting.
+        # We can safely take the context from the first review.
+        first_review = review_data[0]
+        match_set_id = first_review.match_set_id
+        current_total_points = first_review.total_points
+        
+        # Get total tests for this match_set (needed to determine if solution is correct/buggy)
+        total_tests = db.query(func.count(Test.test_id)).filter(
+            Test.match_set_id == match_set_id
+        ).scalar()
+        
+        # Calculate Weights
+        n_correct_sol = 0
+        n_buggy_sol = 0
+        
+        for r in review_data:
+            passed = r.passed_test if r.passed_test is not None else 0
+            # Solution is correct if it passed all tests
+            is_correct_sol = (passed == total_tests) and (total_tests > 0)
+            
+            if is_correct_sol:
+                n_correct_sol += 1
+            else:
+                n_buggy_sol += 1
+                
+        total_weight = (n_correct_sol * 1) + (n_buggy_sol * 2)
+        review_points_pool = current_total_points * 0.5
+        
+        unit_value = 0.0
+        if total_weight > 0:
+            unit_value = review_points_pool / total_weight
+            
+        # Apply Scores
+        for r in review_data:
+            if r.vote == VoteType.skip:
+                continue
+                
+            passed = r.passed_test if r.passed_test is not None else 0
+            is_correct_sol = (passed == total_tests) and (total_tests > 0)
+            
+            if r.valid is True:
+                if is_correct_sol:
+                    # Correct review of Correct Solution -> weight 1
+                    total_score += 1 * unit_value
+                else:
+                    # Correct review of Buggy Solution -> weight 2
+                    total_score += 2 * unit_value
+            elif r.valid is False:
+                 # Invalid review -> Penalty -1 * unit_value
+                 total_score += -1 * unit_value
+    
+    # Cap minimum score at 0
+    return round(max(0.0, min(total_score, solution_data.total_points)), 2)
+
+
+def _calculate_and_save_session_scores(db: Session, game_id: int, force_recalculate: bool = False) -> tuple[Dict[int, float], bool]:
+    """
+    Calculate and save scores for all students in a game session.
+    
+    This should be called after Phase 2 ends to persist scores in the database.
+    Optimized to skip calculation if scores are already calculated (idempotent).
+    
+    Uses database-level locking (SELECT FOR UPDATE) to prevent race conditions
+    when multiple students hit this endpoint simultaneously.
+    
+    Args:
+        db: Database session
+        game_id: ID of the game session
+        force_recalculate: If True, recalculate even if scores already exist
+    
+    Returns:
+        Tuple of (Dictionary mapping student_id to their session score, was_already_calculated)
+    """
+    # FOR UPDATE prevents race condition when multiple
+    student_joins = db.query(StudentJoinGame).filter(
+        StudentJoinGame.game_id == game_id
+    ).with_for_update().all()
+    
+    if not student_joins:
+        return {}, False
+    
+    already_calculated = any(sj.session_score is not None for sj in student_joins)
+    
+    if already_calculated and not force_recalculate:
+        db.commit()
+        scores = {sj.student_id: float(sj.session_score) if sj.session_score is not None else 0.0 
+                  for sj in student_joins}
+        return scores, True
+    
+    scores: Dict[int, float] = {}
+    
+    for student_join in student_joins:
+        score = _calculate_student_session_score(db, student_join.student_id, game_id)
+        student_join.session_score = score
+        scores[student_join.student_id] = score
+        
+        student = db.query(Student).filter(Student.student_id == student_join.student_id).first()
+        if student:
+            student.score += int(round(score))
+    
+    db.commit()  # Releases the lock
+    
+    return scores, False
 
 
 # ============================================================================
@@ -184,6 +347,7 @@ router = APIRouter(
     """
 )
 def get_solution_test_results(
+    current_user: Annotated[dict, Depends(get_current_user)],
     solution_id: int,
     db: Session = Depends(get_db)
 ) -> SolutionTestResultsResponse:
@@ -191,6 +355,7 @@ def get_solution_test_results(
     Get all test results for a specific student solution.
     
     Args:
+        current_user: Authenticated user from JWT token
         solution_id: ID of the student solution
         db: Database session
     
@@ -198,8 +363,9 @@ def get_solution_test_results(
         SolutionTestResultsResponse with all test results and score information
     
     Raises:
-        HTTPException: If solution not found
+        HTTPException: If solution not found or user not authorized
     """
+    authenticated_student_id = int(current_user["sub"])
     
     # Get the student solution
     solution = db.query(StudentSolution).filter(
@@ -210,6 +376,13 @@ def get_solution_test_results(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Student solution with ID {solution_id} not found"
+        )
+    
+    # Verify the authenticated user owns this solution
+    if solution.student_id != authenticated_student_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to view this solution"
         )
     
     # Get student information
@@ -244,6 +417,16 @@ def get_solution_test_results(
             detail=f"Match with ID {match_for_game.match_id} not found"
         )
     
+    match_setting = db.query(MatchSetting).filter(
+        MatchSetting.match_set_id == match.match_set_id
+    ).first()
+
+    if not match_setting:
+         raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Match Setting with ID {match.match_set_id} not found"
+        )
+
     # Get all test results for this solution
     test_results_data = []
     passed_count = 0
@@ -254,40 +437,38 @@ def get_solution_test_results(
         StudentSolutionTest.solution_id == solution_id
     ).all()
     
-    # Extract IDs to batch fetch
+    # Extract IDs
     teacher_test_ids = [tr.teacher_test_id for tr in test_results if tr.teacher_test_id is not None]
     student_test_ids = [tr.student_test_id for tr in test_results if tr.student_test_id is not None]
     
-    # Fetch all referenced tests
-    teacher_tests = []
-    if teacher_test_ids:
-        teacher_tests = db.query(Test).filter(Test.test_id.in_(teacher_test_ids)).all()
-        
-    student_tests = []
-    if student_test_ids:
-        student_tests = db.query(StudentTest).filter(StudentTest.test_id.in_(student_test_ids)).all()
+    # Fetch tests
+    teacher_tests = db.query(Test).filter(Test.test_id.in_(teacher_test_ids)).all()
+    student_tests = db.query(StudentTest).filter(StudentTest.test_id.in_(student_test_ids)).all()
     
-    # Create lookup dictionaries for O(1) access
+    # Create lookup dictionaries
     teacher_test_map = {t.test_id: t for t in teacher_tests}
     student_test_map = {t.test_id: t for t in student_tests}
     
     for test_result in test_results:
-        # Check if it is a teacher test result or a student test result
+        # Determine if this is a teacher test or student test result
         if test_result.teacher_test_id is not None:
-             teacher_test = teacher_test_map.get(test_result.teacher_test_id)
-             if not teacher_test:
-                 continue
-                 
-             total_count += 1
-             
-             status_str = _get_test_status(
+            # Handle Teacher Test
+            teacher_test = teacher_test_map.get(test_result.teacher_test_id)
+            if not teacher_test:
+                continue
+                
+            total_count += 1
+            
+            # Compare actual output with expected
+            status_str = _get_test_status(
                 test_result.test_output,
                 teacher_test.test_out
-             )
-             if status_str == "Passed":
-                 passed_count += 1
-                 
-             test_results_data.append(TestResultResponse(
+            )
+            
+            if status_str == "Passed":
+                passed_count += 1
+                
+            test_results_data.append(TestResultResponse(
                 test_id=teacher_test.test_id,
                 test_type="teacher",
                 provider="teacher",
@@ -299,20 +480,19 @@ def get_solution_test_results(
             ))
             
         elif test_result.student_test_id is not None:
-             student_test = student_test_map.get(test_result.student_test_id)
-             if not student_test:
-                 continue
+            # Handle Student Test
+            student_test = student_test_map.get(test_result.student_test_id)
+            if not student_test:
+                continue
             
-             total_count += 1
-             
-             status_str = _get_test_status(
+            
+            # Compare actual output
+            status_str = _get_test_status(
                 test_result.test_output,
                 student_test.test_out
-             )
-             if status_str == "Passed":
-                 passed_count += 1
-
-             test_results_data.append(TestResultResponse(
+            )
+            
+            test_results_data.append(TestResultResponse(
                 test_id=student_test.test_id,
                 test_type="student",
                 provider="student",
@@ -321,12 +501,21 @@ def get_solution_test_results(
                 expected_output=student_test.test_out,
                 actual_output=test_result.test_output,
                 status=status_str
-            ))
-    
+            ))    
     
     # Calculate scores
+             
     failed_count = total_count - passed_count
-    implementation_score_pct = (passed_count / total_count * 100) if total_count > 0 else 0
+    
+    # Get session_score from StudentJoinGame table (calculated after Phase 2 ends)
+    student_join = db.query(StudentJoinGame).filter(
+        and_(
+            StudentJoinGame.student_id == solution.student_id,
+            StudentJoinGame.game_id == match_for_game.game_id
+        )
+    ).first()
+    
+    session_score = student_join.session_score if student_join else None
     
     return SolutionTestResultsResponse(
         solution_id=solution.solution_id,
@@ -340,266 +529,13 @@ def get_solution_test_results(
         passed_tests=passed_count,
         failed_tests=failed_count,
         score_display=f"{passed_count}/{total_count} tests passed",
-        implementation_score_percentage=round(implementation_score_pct, 2),
+        session_score=session_score,
+        max_score=match_setting.total_points,
         test_results=test_results_data
     )
 
 
-# ============================================================================
-# Endpoint 2: Get Student Score for Game Session
-# ============================================================================
 
-@router.get(
-    "/score/student/{student_id}/game/{game_id}",
-    response_model=StudentGameScoreResponse,
-    status_code=status.HTTP_200_OK,
-    summary="Get a student's score for a game session",
-    description="""
-    Retrieves the complete score breakdown for a specific student in a game session.
-    
-    Includes:
-    - Overall score across all matches in the game session
-    - Individual match scores with implementation and review breakdowns
-    - Number of tests passed for each match
-    
-    Note: Review scores are placeholders (0) for future implementation.
-    """
-)
-def get_student_game_score(
-    student_id: int,
-    game_id: int,
-    db: Session = Depends(get_db)
-) -> StudentGameScoreResponse:
-    """
-    Get score breakdown for a specific student in a game session.
-    
-    Args:
-        student_id: ID of the student
-        game_id: ID of the game session
-        db: Database session
-    
-    Returns:
-        StudentGameScoreResponse with complete score breakdown
-    
-    Raises:
-        HTTPException: If student or game session not found, or student not in game
-    """
-    
-    # Verify student exists
-    student = db.query(Student).filter(Student.student_id == student_id).first()
-    if not student:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Student with ID {student_id} not found"
-        )
-    
-    # Verify game session exists
-    game = db.query(GameSession).filter(GameSession.game_id == game_id).first()
-    if not game:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Game session with ID {game_id} not found"
-        )
-    
-    # Verify student is in the game session
-    student_join = db.query(StudentJoinGame).filter(
-        and_(
-            StudentJoinGame.student_id == student_id,
-            StudentJoinGame.game_id == game_id
-        )
-    ).first()
-    
-    if not student_join:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Student {student_id} is not enrolled in game session {game_id}"
-        )
-    
-    # Get all matches for this game
-    matches_for_game = db.query(MatchesForGame).filter(
-        MatchesForGame.game_id == game_id
-    ).all()
-    
-    match_scores = []
-    overall_score = 0.0
-    
-    for match_for_game in matches_for_game:
-        # Get match details
-        match = db.query(Match).filter(
-            Match.match_id == match_for_game.match_id
-        ).first()
-        
-        if not match:
-            continue
-        
-        # Get student's solution for this match
-        solution = db.query(StudentSolution).filter(
-            and_(
-                StudentSolution.student_id == student_id,
-                StudentSolution.match_for_game_id == match_for_game.match_for_game_id
-            )
-        ).first()
-        
-        if not solution:
-            # Student hasn't submitted a solution for this match
-            match_scores.append(StudentScoreBreakdown(
-                match_id=match.match_id,
-                match_title=match.title,
-                implementation_score=0.0,
-                review_score=0.0,  # Placeholder for future
-                total_score=0.0,
-                tests_passed=0,
-                total_tests=0
-            ))
-            continue
-        
-        # Get test results for this solution
-        test_results = db.query(StudentSolutionTest).filter(
-            StudentSolutionTest.solution_id == solution.solution_id
-        ).all()
-        
-        total_tests = len(test_results)
-        passed_tests = 0
-        
-        # Fetch all teacher tests for these results in one query (fix N+1 query)
-        if test_results:
-            teacher_test_ids = [tr.teacher_test_id for tr in test_results if tr.teacher_test_id is not None]
-            teacher_tests = db.query(Test).filter(Test.test_id.in_(teacher_test_ids)).all()
-            teacher_test_map = {t.test_id: t for t in teacher_tests}
-
-            student_test_ids = [tr.student_test_id for tr in test_results if tr.student_test_id is not None]
-            student_tests = db.query(StudentTest).filter(StudentTest.test_id.in_(student_test_ids)).all()
-            student_test_map = {t.test_id: t for t in student_tests}
-            
-            # Count passed tests
-            for test_result in test_results:
-                status_str = "Failed"
-                
-                if test_result.teacher_test_id is not None:
-                    teacher_test = teacher_test_map.get(test_result.teacher_test_id)
-                    if teacher_test:
-                        status_str = _get_test_status(
-                            test_result.test_output,
-                            teacher_test.test_out
-                        )
-                elif test_result.student_test_id is not None:
-                    student_test = student_test_map.get(test_result.student_test_id)
-                    if student_test:
-                        status_str = _get_test_status(
-                            test_result.test_output,
-                            student_test.test_out
-                        )
-                
-                if status_str == "Passed":
-                    passed_tests += 1
-        
-        # Calculate implementation score (50% of total, max 50 points)
-        implementation_score = _calculate_implementation_score(passed_tests, total_tests)
-        
-        # Review score placeholder (will be implemented in future)
-        review_score = 0.0
-        
-        # Total score for this match
-        match_total_score = implementation_score + review_score
-        
-        match_scores.append(StudentScoreBreakdown(
-            match_id=match.match_id,
-            match_title=match.title,
-            implementation_score=implementation_score,
-            review_score=review_score,
-            total_score=match_total_score,
-            tests_passed=passed_tests,
-            total_tests=total_tests
-        ))
-        
-        overall_score += match_total_score
-    
-    return StudentGameScoreResponse(
-        student_id=student.student_id,
-        student_name=f"{student.first_name} {student.last_name}",
-        email=student.email,
-        game_id=game.game_id,
-        game_name=game.name,
-        overall_score=round(overall_score, 2),
-        matches=match_scores
-    )
-
-
-# ============================================================================
-# Endpoint 3: Get All Students' Scores for a Game Session
-# ============================================================================
-
-@router.get(
-    "/score/game/{game_id}",
-    response_model=GameSessionScoresResponse,
-    status_code=status.HTTP_200_OK,
-    summary="Get all students' scores for a game session",
-    description="""
-    Retrieves scores for all students participating in a game session.
-    
-    Provides a complete overview of:
-    - All students enrolled in the game session
-    - Each student's overall score and per-match breakdown
-    - Implementation and review scores (review scores are placeholders for future)
-    
-    Useful for teachers to see the leaderboard and overall performance.
-    """
-)
-def get_game_session_scores(
-    game_id: int,
-    db: Session = Depends(get_db)
-) -> GameSessionScoresResponse:
-    """
-    Get scores for all students in a game session.
-    
-    Args:
-        game_id: ID of the game session
-        db: Database session
-    
-    Returns:
-        GameSessionScoresResponse with all students' scores
-    
-    Raises:
-        HTTPException: If game session not found
-    """
-    
-    # Verify game session exists
-    game = db.query(GameSession).filter(GameSession.game_id == game_id).first()
-    if not game:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Game session with ID {game_id} not found"
-        )
-    
-    # Get all students in this game session
-    student_joins = db.query(StudentJoinGame).filter(
-        StudentJoinGame.game_id == game_id
-    ).all()
-    
-    students_scores = []
-    
-    for student_join in student_joins:
-        # Use the existing endpoint logic to get each student's score
-        try:
-            student_score = get_student_game_score(
-                student_id=student_join.student_id,
-                game_id=game_id,
-                db=db
-            )
-            students_scores.append(student_score)
-        except HTTPException:
-            # Skip students that cause errors
-            continue
-    
-    # Sort students by overall score (descending)
-    students_scores.sort(key=lambda x: x.overall_score, reverse=True)
-    
-    return GameSessionScoresResponse(
-        game_id=game.game_id,
-        game_name=game.name,
-        total_students=len(students_scores),
-        students_scores=students_scores
-    )
 
 
 # ============================================================================
@@ -629,6 +565,7 @@ class StudentSolutionIdResponse(BaseModel):
     """
 )
 def get_student_solution_id(
+    current_user: Annotated[dict, Depends(get_current_user)],
     student_id: int,
     game_id: int,
     db: Session = Depends(get_db)
@@ -637,6 +574,7 @@ def get_student_solution_id(
     Get the solution ID for a specific student in a game session.
     
     Args:
+        current_user: Authenticated user from JWT token
         student_id: ID of the student
         game_id: ID of the game session
         db: Database session
@@ -645,8 +583,16 @@ def get_student_solution_id(
         StudentSolutionIdResponse with solution ID if exists
     
     Raises:
-        HTTPException: If student or game session not found, or student not in game
+        HTTPException: If student or game session not found, student not in game, or not authorized
     """
+    authenticated_student_id = int(current_user["sub"])
+    
+    # Verify the authenticated user is requesting their own data
+    if student_id != authenticated_student_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to access another student's solution"
+        )
     
     # Verify student exists
     student = db.query(Student).filter(Student.student_id == student_id).first()
@@ -715,4 +661,207 @@ def get_student_solution_id(
         game_id=game_id,
         solution_id=solution.solution_id,
         has_solution=True
+    )
+
+
+# ============================================================================
+# Endpoint 5: Calculate and Save Session Scores
+# ============================================================================
+
+class SessionScoreEntry(BaseModel):
+    """
+    Response model for a student's session score entry.
+    """
+    student_id: int = Field(..., description="ID of the student")
+    student_name: str = Field(..., description="Full name of the student")
+    session_score: float = Field(..., description="Calculated session score")
+
+
+class CalculateSessionScoresResponse(BaseModel):
+    """
+    Response model for calculating session scores.
+    """
+    game_id: int = Field(..., description="ID of the game session")
+    game_name: str = Field(..., description="Name of the game session")
+    message: str = Field(..., description="Status message")
+    already_calculated: bool = Field(..., description="Whether scores were already calculated (skipped recalculation)")
+    total_students: int = Field(..., description="Number of students scored")
+    scores: List[SessionScoreEntry] = Field(..., description="List of student scores")
+
+
+@router.post(
+    "/calculate-scores/game/{game_id}",
+    response_model=CalculateSessionScoresResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Calculate and save scores for all students in a game session",
+    description="""
+    Calculates the final scores for all students in a game session and saves them
+    to the database. This should be called after Phase 2 ends.
+    
+    Score calculation includes:
+    - 50% Implementation: Based on tests passed
+    - 50% Reviews: Based on review accuracy (correct error detection = 2x, correct confirm = 1x, wrong = -1x penalty)
+    
+    The calculated scores are saved to the student_join_game table and can be
+    used by the leaderboard for efficient score aggregation.
+    """
+)
+def calculate_and_save_game_session_scores(
+    current_user: Annotated[dict, Depends(get_current_user)],
+    game_id: int,
+    db: Session = Depends(get_db)
+) -> CalculateSessionScoresResponse:
+    """
+    Calculate and save scores for all students in a game session.
+    
+    Args:
+        current_user: Authenticated user from JWT token
+        game_id: ID of the game session
+        db: Database session
+    
+    Returns:
+        CalculateSessionScoresResponse with all calculated scores
+    
+    Raises:
+        HTTPException: If game session not found
+    """
+    # Authentication is required, but any authenticated user can trigger score calculation
+    # This is called when Phase 2 ends and students navigate to results
+    
+    # Verify game session exists
+    game = db.query(GameSession).filter(GameSession.game_id == game_id).first()
+    if not game:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Game session with ID {game_id} not found"
+        )
+    
+    try:
+        # Calculate and save all scores (skips if already calculated)
+        scores, already_calculated = _calculate_and_save_session_scores(db, game_id)
+        
+        # Get student names for response
+        score_entries = []
+        for student_id, score in scores.items():
+            student = db.query(Student).filter(Student.student_id == student_id).first()
+            if student:
+                score_entries.append(SessionScoreEntry(
+                    student_id=student_id,
+                    student_name=f"{student.first_name} {student.last_name}",
+                    session_score=score
+                ))
+        
+        # Sort by score descending
+        score_entries.sort(key=lambda x: x.session_score, reverse=True)
+        
+        message = "Scores already calculated (skipped)" if already_calculated else "Scores calculated and saved successfully"
+        
+        return CalculateSessionScoresResponse(
+            game_id=game_id,
+            game_name=game.name,
+            message=message,
+            already_calculated=already_calculated,
+            total_students=len(score_entries),
+            scores=score_entries
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to calculate scores: {str(e)}"
+        )
+
+
+# ============================================================================
+# Endpoint 6: Get Student's Session Score
+# ============================================================================
+
+class StudentSessionScoreResponse(BaseModel):
+    """
+    Response model for a student's session score.
+    """
+    student_id: int = Field(..., description="ID of the student")
+    student_name: str = Field(..., description="Full name of the student")
+    game_id: int = Field(..., description="ID of the game session")
+    game_name: str = Field(..., description="Name of the game session")
+    session_score: Optional[float] = Field(None, description="Session score (null if not yet calculated)")
+    is_calculated: bool = Field(..., description="Whether the score has been calculated")
+
+
+@router.get(
+    "/session-score/student/{student_id}/game/{game_id}",
+    response_model=StudentSessionScoreResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get a student's session score for a game",
+    description="""
+    Retrieves the calculated session score for a specific student in a game session.
+    Returns the score if it has been calculated, otherwise is_calculated is false.
+    """
+)
+def get_student_session_score(
+    current_user: Annotated[dict, Depends(get_current_user)],
+    student_id: int,
+    game_id: int,
+    db: Session = Depends(get_db)
+) -> StudentSessionScoreResponse:
+    """
+    Get the session score for a specific student in a game session.
+    
+    Args:
+        current_user: Authenticated user from JWT token
+        student_id: ID of the student
+        game_id: ID of the game session
+        db: Database session
+    
+    Returns:
+        StudentSessionScoreResponse with session score if calculated
+    
+    Raises:
+        HTTPException: If not authorized to view this student's score
+    """
+    authenticated_student_id = int(current_user["sub"])
+    
+    # Verify the authenticated user is requesting their own data
+    if student_id != authenticated_student_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to access another student's score"
+        )
+    
+    # Verify student exists
+    student = db.query(Student).filter(Student.student_id == student_id).first()
+    if not student:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Student with ID {student_id} not found"
+        )
+    
+    # Verify game session exists
+    game = db.query(GameSession).filter(GameSession.game_id == game_id).first()
+    if not game:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Game session with ID {game_id} not found"
+        )
+    
+    # Get the student_join_game record
+    student_join = db.query(StudentJoinGame).filter(
+        and_(
+            StudentJoinGame.student_id == student_id,
+            StudentJoinGame.game_id == game_id
+        )
+    ).first()
+    
+    if not student_join:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Student {student_id} is not enrolled in game session {game_id}"
+        )
+    
+    return StudentSessionScoreResponse(
+        student_id=student_id,
+        student_name=f"{student.first_name} {student.last_name}",
+        game_id=game_id,
+        game_name=game.name,
+        session_score=student_join.session_score,
+        is_calculated=student_join.session_score is not None
     )
