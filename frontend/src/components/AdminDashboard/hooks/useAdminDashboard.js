@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { message } from 'antd';
 import { getUsers, promoteUserToTeacher, demoteUserToStudent } from '../../../services/adminService';
+import { useNavigate } from 'react-router-dom';
 
 export const useAdminDashboard = () => {
+    const navigate = useNavigate();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchText, setSearchText] = useState('');
@@ -16,6 +18,7 @@ export const useAdminDashboard = () => {
         } catch (error) {
             console.error(error);
             message.error(error.message || "Error loading users");
+            navigate('/login');
         } finally {
             setLoading(false);
         }
