@@ -466,10 +466,10 @@ async def dev_mode_login(
         )
     
     # Validate role
-    if role not in ["student", "teacher"]:
+    if role not in ["student", "teacher", "admin"]:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Role must be 'student' or 'teacher'"
+            detail="Role must be 'student', 'teacher', or 'admin'"
         )
     
     try:
