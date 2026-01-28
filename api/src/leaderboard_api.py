@@ -20,16 +20,7 @@ from collections import defaultdict
 
 # Import ORM models
 from models import (
-    Student,
-    StudentSolution,
-    StudentSolutionTest,
-    Test,
-    MatchSetting,
-    Match,
-    MatchesForGame,
-    StudentAssignedReview,
-    StudentReviewVote,
-    VoteType,
+    Student
 )
 
 from database import get_db
@@ -70,195 +61,37 @@ class LeaderboardResponse(BaseModel):
     current_user_rank: Optional[CurrentUserRank] = Field(None, description="Current user's rank info (if student_id provided)")
 
 
-# ============================================================================
-# Helper Functions - Optimized for Performance
-# ============================================================================
 
-def _calculate_all_student_scores_optimized(db: Session) -> List[Tuple[int, str, float]]:
+def _get_all_student_scores_from_db(db: Session) -> List[Tuple[int, str, float]]:
     """
-    Calculate total scores for all students using optimized bulk queries.
+    Get total scores for all students by summing pre-calculated session_scores
+    from the student_join_game table.
     
-    SCORING RULES (per match):
-    - 50% Implementation: (total_points * 0.5) * (passed_tests / total_tests)
-    - 50% Reviews:
-        - Correct "incorrect" vote (found error): +2 * base_review_points
-        - Correct "correct" vote (confirmed solution): +1 * base_review_points
-        - Wrong vote: -1 * base_review_points (penalty)
-        - Skip: 0 points
-    
-    where base_review_points = (total_points * 0.5) / review_count
-    
-    Scores are capped at minimum 0 (no negative total scores).
+    This is much more efficient than recalculating all scores on each request.
+    Session scores should be calculated and saved after Phase 2 ends for each game.
     
     Args:
         db: Database session
     
     Returns:
-        List of tuples (student_id, username, score) sorted by score descending
+        List of tuples (student_id, username, total_score) sorted by score descending
     """
     
-    # Step 1: Fetch all students
+    
+    # Query students with their global score (now stored directly in student table)
     students = db.query(
         Student.student_id,
         Student.first_name,
-        Student.last_name
+        Student.last_name,
+        Student.score
     ).all()
     
-    student_map = {
-        s.student_id: f"{s.first_name} {s.last_name}" 
+    student_scores = [
+        (s.student_id, f"{s.first_name} {s.last_name}", float(s.score))
         for s in students
-    }
+    ]
     
-    # Step 2: Fetch ALL solution test results with match setting info
-    # Includes: student_id, solution_id, match_for_game_id, test result, total_points
-    solution_data = db.query(
-        StudentSolution.student_id,
-        StudentSolution.solution_id,
-        StudentSolution.match_for_game_id,
-        StudentSolutionTest.test_output,
-        Test.test_out,
-        MatchSetting.total_points
-    ).join(
-        StudentSolutionTest,
-        StudentSolutionTest.solution_id == StudentSolution.solution_id
-    ).join(
-        Test,
-        Test.test_id == StudentSolutionTest.teacher_test_id
-    ).join(
-        MatchesForGame,
-        MatchesForGame.match_for_game_id == StudentSolution.match_for_game_id
-    ).join(
-        Match,
-        Match.match_id == MatchesForGame.match_id
-    ).join(
-        MatchSetting,
-        MatchSetting.match_set_id == Match.match_set_id
-    ).all()
-    
-    # Step 3: Fetch ALL review vote results
-    # Structure: reviewer gets points based on their vote accuracy
-    review_data = db.query(
-        StudentAssignedReview.student_id.label('reviewer_id'),
-        StudentReviewVote.vote,
-        StudentReviewVote.valid,
-        StudentSolution.match_for_game_id,
-        MatchSetting.total_points
-    ).join(
-        StudentReviewVote,
-        StudentReviewVote.student_assigned_review_id == StudentAssignedReview.student_assigned_review_id
-    ).join(
-        StudentSolution,
-        StudentSolution.solution_id == StudentAssignedReview.assigned_solution_id
-    ).join(
-        MatchesForGame,
-        MatchesForGame.match_for_game_id == StudentSolution.match_for_game_id
-    ).join(
-        Match,
-        Match.match_id == MatchesForGame.match_id
-    ).join(
-        MatchSetting,
-        MatchSetting.match_set_id == Match.match_set_id
-    ).all()
-    
-    # Step 4: Get review counts per match_for_game_id for base point calculation
-    # Count how many reviews each student is assigned per match
-    review_counts = db.query(
-        StudentAssignedReview.student_id,
-        StudentSolution.match_for_game_id,
-        func.count(StudentAssignedReview.student_assigned_review_id).label('review_count')
-    ).join(
-        StudentSolution,
-        StudentSolution.solution_id == StudentAssignedReview.assigned_solution_id
-    ).group_by(
-        StudentAssignedReview.student_id,
-        StudentSolution.match_for_game_id
-    ).all()
-    
-    # Create review count lookup: {(student_id, match_for_game_id): count}
-    review_count_map = {
-        (r.student_id, r.match_for_game_id): r.review_count
-        for r in review_counts
-    }
-    
-    # Step 5: Aggregate solution test results by student -> match_for_game -> tests
-    # Structure: {student_id: {match_for_game_id: {"tests": [...], "total_points": int}}}
-    student_implementation_data = defaultdict(lambda: defaultdict(lambda: {"tests": [], "total_points": 100}))
-    
-    for student_id, solution_id, match_for_game_id, test_output, expected_output, total_points in solution_data:
-        student_implementation_data[student_id][match_for_game_id]["tests"].append(
-            (test_output, expected_output)
-        )
-        student_implementation_data[student_id][match_for_game_id]["total_points"] = total_points
-    
-    # Step 6: Aggregate review results by reviewer
-    # Structure: {reviewer_id: [(vote, valid, match_for_game_id, total_points), ...]}
-    student_review_data = defaultdict(list)
-    
-    for reviewer_id, vote, valid, match_for_game_id, total_points in review_data:
-        student_review_data[reviewer_id].append((vote, valid, match_for_game_id, total_points))
-    
-    # Step 7: Calculate final scores for each student
-    student_scores = []
-    
-    for student_id, username in student_map.items():
-        total_score = 0.0
-        
-        # ===== IMPLEMENTATION SCORE (50%) =====
-        implementation_data = student_implementation_data.get(student_id, {})
-        
-        for match_for_game_id, data in implementation_data.items():
-            tests = data["tests"]
-            total_points = data["total_points"]
-            
-            if not tests:
-                continue
-            
-            # Count passed tests
-            passed_tests = sum(
-                1 for test_output, expected_output in tests
-                if _get_test_status(test_output, expected_output) == "Passed"
-            )
-            total_tests = len(tests)
-            
-            # Implementation score = 50% of total_points * (passed/total)
-            if total_tests > 0:
-                implementation_score = (total_points * 0.5) * (passed_tests / total_tests)
-                total_score += implementation_score
-        
-        # ===== REVIEW SCORE (50%) =====
-        reviews = student_review_data.get(student_id, [])
-        
-        for vote, valid, match_for_game_id, total_points in reviews:
-            # Get review count for this student in this match
-            review_count = review_count_map.get((student_id, match_for_game_id), 1)
-            
-            # Base review points = 50% of total_points / number of reviews
-            base_review_points = (total_points * 0.5) / max(review_count, 1)
-            
-            # Skip vote = 0 points
-            if vote == VoteType.skip:
-                continue
-            
-            # Valid review
-            if valid is True:
-                if vote == VoteType.incorrect:
-                    # Found a bug = 2x points (harder to find)
-                    total_score += 2 * base_review_points
-                elif vote == VoteType.correct:
-                    # Confirmed correct = 1x points
-                    total_score += base_review_points
-            
-            # Invalid review = penalty
-            elif valid is False:
-                total_score -= base_review_points
-            
-            # valid is None = not yet validated, no points
-        
-        # Cap minimum score at 0 (no negative total scores)
-        final_score = max(0.0, total_score)
-        student_scores.append((student_id, username, round(final_score, 2)))
-    
-    # Sort by score descending, then by student_id ascending (for consistent ordering of ties)
+    # Sort by score descending, then by student_id ascending
     student_scores.sort(key=lambda x: (-x[2], x[0]))
     
     return student_scores
@@ -373,9 +206,7 @@ def get_leaderboard(
     """
     
     try:
-        # Calculate scores for all students using optimized query
-        # Includes both implementation (50%) and review (50%) scores
-        student_scores = _calculate_all_student_scores_optimized(db)
+        student_scores = _get_all_student_scores_from_db(db)
 
         full_leaderboard = _assign_ranks(student_scores)
 

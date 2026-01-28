@@ -8,7 +8,7 @@ from datetime import datetime as dt
 from typing import List
 
 from pydantic import BaseModel, Field
-from sqlalchemy import Boolean, Column, Integer, String, Text, ForeignKey, Enum, DateTime
+from sqlalchemy import Boolean, Column, Integer, String, Text, ForeignKey, Enum, DateTime, Numeric
 from sqlalchemy.dialects.postgresql import ENUM as PG_ENUM
 from sqlalchemy.orm import relationship
 from typing import Optional
@@ -122,10 +122,10 @@ class StudentSolutionTest(Base):
         {'schema': SCHEMA_NAME}
     )
 
-    student_solution_test_id = Column(Integer, primary_key=True)                            # New PK
-    teacher_test_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.tests.test_id"), nullable=True) # Nullable
-    student_test_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student_tests.test_id"), nullable=True) # Nullable
+    student_solution_test_id = Column(Integer, primary_key=True, autoincrement=True)
     solution_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student_solutions.solution_id"), nullable=False)
+    teacher_test_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.tests.test_id"), nullable=True)
+    student_test_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student_tests.test_id"), nullable=True)
     test_output = Column(Text, nullable=False)
 
 
@@ -188,6 +188,7 @@ class StudentJoinGame(Base):
     game_id       = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.game_session.game_id"))
 
     assigned_match_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.match.match_id"), nullable=True)
+    session_score = Column(Numeric(10, 2), nullable=True)  # Score for this game session (calculated after Phase 2)
 
 class MatchJoinGame(Base):
     __tablename__ = "match_for_game"
@@ -258,6 +259,42 @@ class StudentReviewVote(Base):
 
     # Relationship
     assigned_review = relationship("StudentAssignedReview")
+
+
+class Badge(Base):
+    """
+    SQLAlchemy model for the 'badge' table.
+    """
+    __tablename__ = "badge"
+    __table_args__ = {'schema': SCHEMA_NAME}
+
+    badge_id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False, unique=True)
+    description = Column(Text, nullable=False)
+    icon_path = Column(String(255), nullable=True)
+    criteria_type = Column(String(50), nullable=False)
+
+    
+class StudentBadge(Base):
+    """
+    SQLAlchemy model for the 'student_badge' table.
+    """
+    __tablename__ = "student_badge"
+    __table_args__ = (
+        UniqueConstraint("student_id", "badge_id", name="uq_student_badge_unique"),
+        {'schema': SCHEMA_NAME}
+    )
+
+    student_badge_id = Column(Integer, primary_key=True)
+    student_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student.student_id"), nullable=False)
+    badge_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.badge.badge_id"), nullable=False)
+    earned_at = Column(DateTime(timezone=True), default=dt.now)
+    game_session_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.game_session.game_id"), nullable=True)
+
+    # Relationships
+    badge = relationship("Badge")
+    student = relationship("Student")
+
 
 # ============================================================================
 # Pydantic Models for Game Session Management API (User Story 3)

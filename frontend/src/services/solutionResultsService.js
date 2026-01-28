@@ -23,23 +23,6 @@ export const getSolutionTestResults = async (solutionId) => {
     return response.json();
 };
 
-/**
- * Get score breakdown for a student in a game session
- * @param {number} studentId - ID of the student
- * @param {number} gameId - ID of the game session
- * @returns {Promise<Object>} Student's score breakdown across all matches
- */
-export const getStudentGameScore = async (studentId, gameId) => {
-    const url = `${API_BASE_URL}/api/student-results/score/student/${studentId}/game/${gameId}`;
-    const response = await apiFetch(url);
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Failed to fetch student score: ${response.statusText}`);
-    }
-
-    return response.json();
-};
 
 /**
  * Get the student's solution ID for a specific game session
@@ -54,6 +37,43 @@ export const getStudentSolutionId = async (studentId, gameId) => {
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.detail || `Failed to fetch solution ID: ${response.statusText}`);
+    }
+
+    return response.json();
+};
+
+/**
+ * Calculate and save session scores for all students in a game session
+ * @param {number} gameId - ID of the game session
+ * @returns {Promise<Object>} Calculated scores for all students
+ */
+export const calculateSessionScores = async (gameId) => {
+    const url = `${API_BASE_URL}/api/student-results/calculate-scores/game/${gameId}`;
+    const response = await apiFetch(url, {
+        method: 'POST',
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Failed to calculate scores: ${response.statusText}`);
+    }
+
+    return response.json();
+};
+
+/**
+ * Get a student's session score for a game
+ * @param {number} studentId - ID of the student
+ * @param {number} gameId - ID of the game session
+ * @returns {Promise<Object>} Student's session score
+ */
+export const getStudentSessionScore = async (studentId, gameId) => {
+    const url = `${API_BASE_URL}/api/student-results/session-score/student/${studentId}/game/${gameId}`;
+    const response = await apiFetch(url);
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Failed to fetch session score: ${response.statusText}`);
     }
 
     return response.json();

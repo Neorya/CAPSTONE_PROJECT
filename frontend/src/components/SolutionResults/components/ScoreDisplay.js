@@ -58,7 +58,8 @@ const ScoreDisplay = ({
             <div className="score-section">
                 <div className="score-label">Total Score</div>
                 <div className="score-value" id="total-score-value">
-                    {score}<span className="score-separator">/</span>{maxScore}
+                    {score !== null && score !== undefined ? score : 'N/A'}
+                    <span className="score-separator">/</span>{maxScore}
                 </div>
             </div>
         </div>
@@ -66,7 +67,7 @@ const ScoreDisplay = ({
 };
 
 ScoreDisplay.propTypes = {
-    score: PropTypes.number.isRequired,
+    score: PropTypes.number,
     maxScore: PropTypes.number.isRequired,
     publicTestsPassed: PropTypes.number.isRequired,
     publicTestsTotal: PropTypes.number.isRequired,

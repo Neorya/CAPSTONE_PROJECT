@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Spin, message } from 'antd';
 import { jwtDecode } from 'jwt-decode';
-import { getStudentSolutionId } from '../../services/solutionResultsService';
+import { getStudentSolutionId, calculateSessionScores } from '../../services/solutionResultsService';
+import { evaluateBadges } from '../../services/badgeService';
 import './GameResults.css';
 
 /**
@@ -15,6 +16,7 @@ const GameResults = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [statusMessage, setStatusMessage] = useState('Initializing results...');
 
     const gameId = searchParams.get('gameId');
 
@@ -38,7 +40,24 @@ const GameResults = () => {
                 const decoded = jwtDecode(token);
                 const studentId = parseInt(decoded.sub, 10);
 
-                // Fetch the student's solution ID for this game
+                //  trigger score calculation for the game session
+                setStatusMessage('Calculating final scores...');
+                
+                try {
+                    await calculateSessionScores(gameId);
+                } catch (scoreErr) {
+                    
+                    console.warn('Score calculation warning:', scoreErr);
+                }
+                
+                try {
+                    await evaluateBadges(gameId);
+                } catch (badgeErr) {
+                    console.error('Badge evaluation failed', badgeErr);
+                }
+
+                // Then fetch the student's solution ID for this game
+                setStatusMessage('Loading your results...');
                 const data = await getStudentSolutionId(studentId, gameId);
                 
                 if (data.solution_id) {
@@ -62,7 +81,7 @@ const GameResults = () => {
         return (
             <div className="game-results-loading">
                 <Spin size="large" />
-                <p>Loading your results...</p>
+                <p>{statusMessage}</p>
             </div>
         );
     }
