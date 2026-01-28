@@ -112,7 +112,7 @@ def run_cpp_executable(executable_path: str, input_str: str) -> Dict:
             "status": "timeout"
         }
     except FileNotFoundError:
-         return {
+        return {
             "stdout": "",
             "stderr": "System Configuration Error: nsjail executable not found. Please contact administrator.",
             "exit_code": -1,
