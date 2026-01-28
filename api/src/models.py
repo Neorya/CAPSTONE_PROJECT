@@ -39,7 +39,7 @@ class Teacher(Base):
     last_name = Column(String(100), nullable=False)
     
     email = Column(String(150), unique=True, nullable=False) 
-    user_id = Column(Integer, nullable=False) 
+    user_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.users.id"), nullable=False) 
 
     # Relationships: A teacher can create many...
     match_settings = relationship("MatchSetting", back_populates="creator")
