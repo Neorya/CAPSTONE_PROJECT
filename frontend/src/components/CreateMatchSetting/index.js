@@ -1,1 +1,1 @@
-export { default } from './CreateMatchSetting';
+export { default } from './CreateMatchSetting.container';
