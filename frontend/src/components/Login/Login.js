@@ -140,6 +140,17 @@ const Login = () => {
                 >
                   👨‍🏫 Login as Teacher (Dev)
                 </Button>
+                <Button
+                  type="dashed"
+                  size="large"
+                  onClick={() => handleDevLogin('admin')}
+                  block
+                  loading={isLoading}
+                  className="dev-login-btn dev-admin-btn"
+                  style={{ borderColor: 'volcano', color: 'volcano' }}
+                >
+                  🛡️ Login as Admin (Dev)
+                </Button>
               </Space>
             </div>
           )}

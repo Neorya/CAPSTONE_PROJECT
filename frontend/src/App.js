@@ -21,6 +21,7 @@ import AlgorithmMatchPhaseOne from './components/PhaseOne/AlgorithmMatchPhaseOne
 import { SolutionReview } from './components/SolutionReview';
 import SolutionResults from './components/SolutionResults';
 import Profile from './components/Profile';
+import AdminDashboard from './components/AdminDashboard/AdminDashboard';
 
 import './App.css';
 
@@ -202,21 +203,29 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route 
-              path="/phase-one" 
+            <Route
+              path="/phase-one"
               element={
                 <ProtectedRoute>
                   <AlgorithmMatchPhaseOne />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/voting" 
+            <Route
+              path="/voting"
               element={
                 <ProtectedRoute>
                   <SolutionReview />
                 </ProtectedRoute>
-              } 
+              }
+            />
+            <Route
+              path="/admin-dashboard"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
             />
             {/* Catch-all route - redirects to root */}
             <Route path="*" element={<Navigate to="/" replace />} />
