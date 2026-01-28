@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Card, Typography, Table, message, Checkbox, Tooltip, Input, DatePicker } from "antd";
-import { ArrowLeftOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import "./GameSessionCreation.css";
 import { getUserProfile } from '../../services/userService';
 import { getMatches } from "../../services/matchService.js";
@@ -27,6 +27,9 @@ const GameSessionCreation = () => {
   // Validation error states
   const [sessionNameError, setSessionNameError] = useState("");
   const [startDateError, setStartDateError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [sortOrder, setSortOrder] = useState({ field: 'match_id', order: 'descend' }); // Default sort to Latest created
 
   // fetch matches 
   useEffect(() => {
@@ -51,6 +54,47 @@ const GameSessionCreation = () => {
       setSelectedRows(prev => prev.filter(id => id !== matchId));
     }
   };
+
+  const handleTableChange = (pagination, filters, sorter) => {
+    if (sorter.order) {
+      setSortOrder({ field: sorter.field, order: sorter.order });
+    } else {
+      setSortOrder({ field: 'match_id', order: 'descend' }); // Default sort to latest
+    }
+  };
+
+  // Toggle sort by creation date (match_id)
+  const toggleCreatedSort = () => {
+    const isNewest = sortOrder.field === 'match_id' && sortOrder.order === 'descend';
+    setSortOrder({
+      field: 'match_id',
+      order: isNewest ? 'ascend' : 'descend'
+    });
+  };
+
+  // Filter and Sort items
+  const processedItems = React.useMemo(() => {
+    let result = items.filter(item =>
+      item.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (sortOrder.field && sortOrder.order) {
+      result.sort((a, b) => {
+        let valA = a[sortOrder.field];
+        let valB = b[sortOrder.field];
+
+        // Handle string comparison nicely
+        if (typeof valA === 'string') valA = valA.toLowerCase();
+        if (typeof valB === 'string') valB = valB.toLowerCase();
+
+        if (valA < valB) return sortOrder.order === 'ascend' ? -1 : 1;
+        if (valA > valB) return sortOrder.order === 'ascend' ? 1 : -1;
+        return 0;
+      });
+    }
+    return result;
+  }, [items, searchTerm, sortOrder]);
+
 
   // Validate session name on change
   const validateSessionName = (value) => {
@@ -154,6 +198,8 @@ const GameSessionCreation = () => {
       title: "Name",
       dataIndex: "title",
       key: "title",
+      sorter: true,
+      render: (text) => <Text strong>{text}</Text>, // Highlight text matches could be added here
     },
     {
       title: "Selected",
@@ -272,16 +318,42 @@ const GameSessionCreation = () => {
 
         {/* Match Selection Section */}
         <div className="match-selection-section">
-          <Title level={5} className="section-title">Select Matches</Title>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <Title level={5} className="section-title" style={{ margin: 0 }}>Select Matches</Title>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <Input
+                placeholder="Search matches..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ width: 250 }}
+                allowClear
+              />
+              <Tooltip title={
+                sortOrder.field === 'match_id' && sortOrder.order === 'descend'
+                  ? "Sort by Oldest First"
+                  : "Sort by Latest First"
+              }>
+                <Button
+                  icon={<ClockCircleOutlined />}
+                  onClick={toggleCreatedSort}
+                  type={sortOrder.field === 'match_id' ? "primary" : "default"}
+                  ghost={sortOrder.field === 'match_id'}
+                >
+                  {sortOrder.field === 'match_id' && sortOrder.order === 'descend' ? " Latest" : " Oldest"}
+                </Button>
+              </Tooltip>
+            </div>
+          </div>
         </div>
 
         <div className="table-container">
           <Table
             id="game-session-creation-table"
-            dataSource={items}
+            dataSource={processedItems}
             columns={columns}
             loading={loading}
             pagination={{ pageSize: 5, showSizeChanger: false }}
+            onChange={handleTableChange}
             rowKey="match_id"
             className="match-settings-table"
             locale={{ emptyText: "No matches found." }}

@@ -55,6 +55,11 @@ After logging in, you will see the home page with the following options:
    * Description
    * Status (Ready/Not Ready)
    * Available actions (edit, delete, etc.)
+   
+   **You can also:**
+   * **Filter** using the "Ready" / "Draft" / "All" buttons
+   * **Search** for a settings by name using the search bar
+   * **Sort** the list by clicking on the "Name" or "Status" column headers
 
 ### Step 3.2: Create a new Match Setting (via database for now)
 
@@ -77,7 +82,7 @@ Match settings in the database include:
 
 ### Step 4.2: Configure the match
 
-1. **Select a Match Setting**: Choose from the list of available match settings (only those with status "Ready")
+1. **Select a Match Setting**: Choose from the list of available match settings (only those with status "Ready"). You can use the search bar to find a specific setting by name, or use the sort button to reorder the list.
 2. **Enter the Match title**: e.g. "Algorithms – Class 5A"
 3. **Select the difficulty level**: From 1 (easy) to 10 (hard)
 4. **Set the number of reviews**: How many solutions each student must review in Phase 2
@@ -105,7 +110,7 @@ Match settings in the database include:
 
 ### Step 5.3: Select the Matches
 
-1. In the table of available matches, select one or more matches by checking the checkboxes
+1. In the table of available matches, select one or more matches by checking the checkboxes. You can **search** for matches by name using the search input above the table or **sort** the table by clicking the "Name" header.
 2. The selected matches will be included in the session
 
 ### Step 5.4: Create the session
