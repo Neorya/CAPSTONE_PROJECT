@@ -7,20 +7,16 @@ from sqlalchemy.exc import IntegrityError
 from pydantic import BaseModel
 
 from models import (
-    Student,
     Badge,
     StudentBadge,
-    GameSession,
     StudentReviewVote,
     StudentAssignedReview,
     StudentSolution,
-    StudentSolutionTest,
     StudentJoinGame,
     MatchesForGame,
     Match,
     Test,
-    VoteType,
-    SCHEMA_NAME
+    VoteType
 )
 from database import get_db
 from leaderboard_api import _calculate_all_student_scores_optimized, _assign_ranks
