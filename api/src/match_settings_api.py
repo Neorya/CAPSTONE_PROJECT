@@ -73,6 +73,7 @@ class MatchSettingCreateRequest(BaseModel):
     function_inputs: Optional[str] = None
     language: str = "cpp"
     tests: List[TestCreateRequest] = []
+    publish: bool = False
 
 
 class MatchSettingUpdateRequest(BaseModel):
@@ -85,6 +86,8 @@ class MatchSettingUpdateRequest(BaseModel):
     function_type: Optional[str] = None
     function_inputs: Optional[str] = None
     language: Optional[str] = None
+    tests: Optional[List[TestCreateRequest]] = None
+    publish: bool = False
 
 
 class TestResult(BaseModel):
@@ -212,6 +215,38 @@ def run_tests(code: str, language: str, tests: List[TestCreateRequest]) -> TryMa
     )
 
 
+def validate_match_setting_logic(
+    function_name: Optional[str],
+    function_type: Optional[str],
+    reference_solution: str,
+    language: str,
+    tests: List[TestCreateRequest]
+):
+    """
+    Validate match setting fields and run tests.
+    Raises HTTPException if validation fails.
+    """
+    # Validate required fields
+    if not function_name or not function_type:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Function name and type are required to publish"
+        )
+    
+    # Run tests
+    validation_result = run_tests(
+        reference_solution,
+        language,
+        tests
+    )
+    
+    if not validation_result.success:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Validation failed: {validation_result.message}",
+        )
+
+
 # ============================================================================
 # Endpoints
 # ============================================================================
@@ -330,7 +365,7 @@ async def create_match_setting(
         new_setting = MatchSetting(
             title=data.title,
             description=data.description,
-            is_ready=False,  # Always start as draft
+            is_ready=data.publish,  # Set based on publish flag
             reference_solution=data.reference_solution,
             student_code=data.student_code,
             function_name=data.function_name,
@@ -339,6 +374,16 @@ async def create_match_setting(
             language=data.language,
             creator_id=teacher_id
         )
+        
+        # Validate if publishing
+        if data.publish:
+            validate_match_setting_logic(
+                data.function_name,
+                data.function_type,
+                data.reference_solution,
+                data.language,
+                data.tests
+            )
         
         db.add(new_setting)
         db.flush()  # Get the ID
@@ -399,8 +444,53 @@ async def update_match_setting(
     
     # Update fields
     update_data = data.dict(exclude_unset=True)
+    
+    tests_update = update_data.pop('tests', None)
+    
     for field, value in update_data.items():
-        setattr(match_setting, field, value)
+        if field != 'publish':  # Ignore publish field for setting attributes
+            setattr(match_setting, field, value)
+    
+    # Update tests if provided
+    if tests_update is not None:
+        # Clear existing tests (cascade should handle delete)
+        match_setting.tests = []
+        
+        # Add new tests
+        for test_data in data.tests:
+            test = Test(
+                test_in=test_data.test_in,
+                test_out=test_data.test_out,
+                scope=TestScope[test_data.scope],
+                match_set_id=match_setting.match_set_id
+            )
+            db.add(test)
+    
+    # Validate if publishing
+    if data.publish:
+        # Determine tests to run
+        tests_to_run = []
+        if tests_update is not None:
+            # Use the new tests provided in the request
+            tests_to_run = data.tests
+        else:
+            # Use existing tests from the database
+            tests_to_run = [
+                TestCreateRequest(
+                    test_in=t.test_in,
+                    test_out=t.test_out,
+                    scope=t.scope.name if hasattr(t.scope, 'name') else str(t.scope)
+                ) for t in match_setting.tests
+            ]
+
+        validate_match_setting_logic(
+            match_setting.function_name,
+            match_setting.function_type,
+            match_setting.reference_solution,
+            match_setting.language,
+            tests_to_run
+        )
+        match_setting.is_ready = True
     
     try:
         db.commit()
@@ -440,15 +530,8 @@ async def publish_match_setting(
     
     verify_ownership(match_setting, teacher_id)
     
-    # Validate required fields
-    if not match_setting.function_name or not match_setting.function_type:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Function name and type are required to publish"
-        )
-    
-    # Run tests
-    test_requests = [
+    # Validate required fields and run tests
+    tests_requests = [
         TestCreateRequest(
             test_in=t.test_in,
             test_out=t.test_out,
@@ -456,17 +539,13 @@ async def publish_match_setting(
         ) for t in match_setting.tests
     ]
     
-    validation_result = run_tests(
+    validate_match_setting_logic(
+        match_setting.function_name,
+        match_setting.function_type,
         match_setting.reference_solution,
         match_setting.language,
-        test_requests
+        tests_requests
     )
-    
-    if not validation_result.success:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Validation failed: {validation_result.message}",
-        )
     
     # Publish
     match_setting.is_ready = True

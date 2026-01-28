@@ -82,7 +82,7 @@ CREATE TABLE capstone_app.match_setting (
 
 
 
-CREATE TYPE test_scope AS ENUM ('private', 'public');
+CREATE TYPE capstone_app.test_scope AS ENUM ('private', 'public');
 
 DROP TABLE IF EXISTS capstone_app.tests;
 
@@ -90,7 +90,7 @@ CREATE TABLE capstone_app.tests (
     test_id SERIAL PRIMARY KEY,
     test_in VARCHAR(500),
     test_out VARCHAR(500),
-    scope test_scope NOT NULL,
+    scope capstone_app.test_scope NOT NULL,
   
     match_set_id INTEGER REFERENCES capstone_app.match_setting(match_set_id) NOT NULL
 );
@@ -215,14 +215,14 @@ CREATE TABLE capstone_app.student_assigned_review (
 );
 
 
-CREATE TYPE vote AS ENUM ('correct', 'incorrect', 'skip');
+CREATE TYPE capstone_app.vote AS ENUM ('correct', 'incorrect', 'skip');
 
 DROP TABLE IF EXISTS capstone_app.student_review_vote;
 
 CREATE TABLE capstone_app.student_review_vote (
     review_vote_id SERIAL PRIMARY KEY,
     student_assigned_review_id INTEGER REFERENCES capstone_app.student_assigned_review(student_assigned_review_id) NOT NULL,
-    vote vote NOT NULL,
+    vote capstone_app.vote NOT NULL,
     proof_test_in VARCHAR(500) DEFAULT NULL,
     proof_test_out VARCHAR(500) DEFAULT NULL,
     valid BOOLEAN DEFAULT NULL,

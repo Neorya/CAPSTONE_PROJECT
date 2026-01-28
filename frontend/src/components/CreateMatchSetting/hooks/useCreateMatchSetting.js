@@ -251,19 +251,17 @@ const useCreateMatchSetting = () => {
             const payload = {
                 ...formData,
                 tests: allTests,
+                publish: true,
             };
-
-            let matchSetId = id;
 
             if (isEditMode) {
                 await updateMatchSetting(id, payload);
             } else {
-                const created = await createMatchSetting(payload);
-                matchSetId = created.match_set_id;
+                await createMatchSetting(payload);
             }
 
-            // Then publish
-            await publishMatchSetting(matchSetId);
+            // Publish handling is now done atomically in create/update
+            // await publishMatchSetting(matchSetId);
 
             setAlert({ type: 'success', message: 'Match setting published successfully!' });
             setHasUnsavedChanges(false);

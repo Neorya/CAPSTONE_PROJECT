@@ -84,7 +84,7 @@ class Test(Base):
     test_id = Column(Integer, primary_key=True)
     test_in = Column(String(500), nullable=True)
     test_out = Column(String(500), nullable=True)
-    scope = Column(Enum(TestScope), nullable=False)
+    scope = Column(Enum(TestScope, name='test_scope', schema=SCHEMA_NAME), nullable=False)
     match_set_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.match_setting.match_set_id"), nullable=False)
 
     match_setting = relationship("MatchSetting", back_populates="tests")
@@ -257,7 +257,7 @@ class StudentReviewVote(Base):
 
     review_vote_id = Column(Integer, primary_key=True)
     student_assigned_review_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student_assigned_review.student_assigned_review_id"), nullable=False)
-    vote = Column(Enum(VoteType), nullable=False)
+    vote = Column(Enum(VoteType, name='vote', schema=SCHEMA_NAME), nullable=False)
     proof_test_in = Column(String(500), nullable=True)
     proof_test_out = Column(String(500), nullable=True)
     valid = Column(Boolean, nullable=True)
