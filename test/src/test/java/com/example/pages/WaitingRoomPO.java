@@ -11,13 +11,13 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class WaitingRoomPO {
     private WebDriver driver;
     private WebDriverWait wait;
-    private static final String GAME_OBJ_NAME       = "//*[@class=\"header-top\"]/h2";
-    private static final String GAME_TIMER_XPATH    = "//div[@class='timer-display']//span[@class='ant-typography css-dev-only-do-not-override-hofb1t']/strong";
-    private static final String STUDENT_LIST_TITLE  =  "//div[@id='root']/div[@class='App']/div[@class='pre-start-session-container']/div[@class='ant-card ant-card-bordered session-card css-dev-only-do-not-override-hofb1t']/div[@class='ant-card-body']/div[2]/span[1]/strong";
-    private static final String UNORDERED_LIST      = "//ul[@class='ant-list-items']";
+    private static final String GAME_OBJ_NAME       = "//div[@class='header-top']//h2";
+    private static final String GAME_TIMER_XPATH    = "//div[@class='timer-display']//span[contains(@class, 'ant-typography')]//strong";
+    private static final String STUDENT_LIST_TITLE  = "//div[@class='section']//span[contains(text(), 'students joined')]";
+    private static final String UNORDERED_LIST      = "//ul[contains(@class, 'ant-list-items')]";
     private static final String MATCH_LIST          = "//div[@class='matches-list']"; 
     private static final String START_GAME_BUTTON   = "//*[@id='start_game_button']";
-    private static final String BACK_TO_HOME_BUTTON_ID = "//*[@id=\"back-to-home-button\"]";
+    private static final String BACK_TO_HOME_BUTTON_ID = "//button[@id='back-to-home-button']";
 
     public WaitingRoomPO (WebDriver driver) {
         this.driver = driver;
@@ -56,8 +56,9 @@ public class WaitingRoomPO {
 
     public boolean isPageLoaded() {
         try {
+            String titleText = getGameObjName().getText();
             return getGameObjName().isDisplayed() && 
-                   getGameObjName().getText().equals("Welcome to Match Management System");
+                   (titleText.contains("Start") && titleText.contains("Game Session"));
         } catch (Exception e) {
             return false;
         }

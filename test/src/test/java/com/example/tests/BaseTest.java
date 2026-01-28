@@ -70,4 +70,40 @@ public abstract class BaseTest {
     protected void navigateTo(String path) {
         driver.get(BASE_URL + path);
     }
+
+    /**
+     * Injects a JWT token into localStorage
+     * @param token The JWT token to inject
+     */
+    protected void injectAuthToken(String token) {
+        org.openqa.selenium.JavascriptExecutor js = (org.openqa.selenium.JavascriptExecutor) driver;
+        js.executeScript("window.localStorage.setItem('token', arguments[0]);", token);
+    }
+
+    /**
+     * Simulates a login as a Student (ID: 1, Name: Sam Smith)
+     * Generates a basic JWT and injects it.
+     */
+    protected void loginAsStudent() {
+        // Token signed with 'test-jwt-secret-key-for-ci-testing-only'
+        // Payload: {"sub":"100000000000000000001","role":"student","iat":1516239022,"exp":1999999999}
+        String token = "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTAwMDAwMDAwMDAwMDAwMDAwMDAxIiwgInJvbGUiOiAic3R1ZGVudCIsICJpYXQiOiAxNTE2MjM5MDIyLCAiZXhwIjogMTk5OTk5OTk5OX0.t3x5Y1NPzyDYizXhUN0L8a8-_JEFpHWy7RjOXv6Y4TE";
+
+        // Navigate to home first to set localstorage domain context
+        driver.get(BASE_URL);
+        injectAuthToken(token);
+    }
+
+    /**
+     * Simulates a login as a Teacher (ID: 9, Name: Amy Adams)
+     */
+    protected void loginAsTeacher() {
+        // Token signed with 'test-jwt-secret-key-for-ci-testing-only'
+        // Payload: {"sub":"100000000000000000009","role":"teacher","iat":1516239022,"exp":1999999999}
+        String token = "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTAwMDAwMDAwMDAwMDAwMDAwMDA5IiwgInJvbGUiOiAidGVhY2hlciIsICJpYXQiOiAxNTE2MjM5MDIyLCAiZXhwIjogMTk5OTk5OTk5OX0.CNuLNHOXbU6EoK9IWjQi08OKzCDqsBziCRxfueZyTXc";
+
+        // Navigate to home first to set localstorage domain context
+        driver.get(BASE_URL);
+        injectAuthToken(token);
+    }
 }

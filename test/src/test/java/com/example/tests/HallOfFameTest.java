@@ -61,10 +61,10 @@ public class HallOfFameTest extends BaseTest {
         assertNotNull(topPlayer, "Top player data should be available");
         
         // Verify this is Mario Rossi with 100.00 points (based on test data)
-        assertEquals("Mario Rossi", topPlayer.getName(), 
-            "Top player should be Mario Rossi");
-        assertEquals("100.00", topPlayer.getScore(), 
-            "Top player score should be 100.00");
+        assertEquals("Wendy White", topPlayer.getName(), 
+            "Top player should be Wendy White");
+        assertEquals("580.00", topPlayer.getScore(), 
+            "Top player score should be 580.00");
     }
     
     @Test
@@ -75,10 +75,10 @@ public class HallOfFameTest extends BaseTest {
         assertNotNull(secondPlayer, "Second player data should be available");
         
         // Verify this is Giulia Romano with 75.00 points
-        assertEquals("Giulia Romano", secondPlayer.getName(), 
-            "Second player should be Giulia Romano");
-        assertEquals("75.00", secondPlayer.getScore(), 
-            "Second player score should be 75.00");
+        assertEquals("Riley Reed", secondPlayer.getName(), 
+            "Second player should be Riley Reed");
+        assertEquals("540.00", secondPlayer.getScore(), 
+            "Second player score should be 540.00");
     }
     
     @Test
@@ -89,10 +89,10 @@ public class HallOfFameTest extends BaseTest {
         assertNotNull(thirdPlayer, "Third player data should be available");
         
         // Verify this is Chiara Neri with 50.00 points
-        assertEquals("Chiara Neri", thirdPlayer.getName(), 
-            "Third player should be Chiara Neri");
-        assertEquals("50.00", thirdPlayer.getScore(), 
-            "Third player score should be 50.00");
+        assertEquals("Justin James", thirdPlayer.getName(), 
+            "Third player should be Justin James");
+        assertEquals("530.00", thirdPlayer.getScore(), 
+            "Third player score should be 530.00");
     }
     
     // ========================================
@@ -104,11 +104,11 @@ public class HallOfFameTest extends BaseTest {
     @DisplayName("Players with tied scores should have the same rank")
     public void testTiedPlayersShareSameRank() {
         // Andrea Verdi and Alessia Costa both have 25.00 points
-        PlayerData player1 = hallOfFamePage.getPlayerDataByName("Andrea Verdi");
-        PlayerData player2 = hallOfFamePage.getPlayerDataByName("Alessia Costa");
+        PlayerData player1 = hallOfFamePage.getPlayerDataByName("Vince Vaughn");
+        PlayerData player2 = hallOfFamePage.getPlayerDataByName("Victor Vance");
         
-        assertNotNull(player1, "Andrea Verdi should be in leaderboard");
-        assertNotNull(player2, "Alessia Costa should be in leaderboard");
+        assertNotNull(player1, "Vince Vaughn should be in leaderboard");
+        assertNotNull(player2, "Victor Vance should be in leaderboard");
         
         assertEquals(player1.getScore(), player2.getScore(), 
             "Tied players should have the same score");
@@ -122,11 +122,11 @@ public class HallOfFameTest extends BaseTest {
     public void testRankSkipsAfterTiedPlayers() {
         // Andrea Verdi and Alessia Costa are both Rank 4
         // Next player should be Rank 6 (not Rank 5)
-        PlayerData rank4Player = hallOfFamePage.getPlayerDataByName("Andrea Verdi");
+        PlayerData rank4Player = hallOfFamePage.getPlayerDataByName("Vince Vaughn");
         assertNotNull(rank4Player, "Rank 4 player should exist");
         
         // Find the next player after the tied pair
-        PlayerData rank6Player = hallOfFamePage.getPlayerDataByName("Sara Bianchi");
+        PlayerData rank6Player = hallOfFamePage.getPlayerDataByName("Quinn Quail");
         assertNotNull(rank6Player, "Player after tied ranks should exist");
         
         // Verify rank skipping

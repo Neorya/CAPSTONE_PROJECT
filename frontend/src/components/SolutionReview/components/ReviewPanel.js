@@ -38,7 +38,7 @@ const ReviewPanel = ({
         <Card className="review-panel-card" bordered={false}>
             {/* Code Editor */}
             <div className="code-section">
-                <div id="code-editor-readonly" className="monaco-editor-wrapper" readonly="true">
+                <div id="code-editor-readonly" data-testid="code-editor-readonly" className="monaco-editor-wrapper" readonly="true">
                     <Editor
                         height="100%"
                         defaultLanguage="cpp"

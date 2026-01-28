@@ -13,6 +13,7 @@ const VotingSection = ({ voteType, isPhaseEnded, onVoteChange }) => {
                 <Space direction="horizontal" size="large">
                     <Radio
                         id="vote-incorrect"
+                        data-testid="vote-incorrect-radio"
                         value="incorrect"
                         className="vote-radio incorrect"
                     >
@@ -20,6 +21,7 @@ const VotingSection = ({ voteType, isPhaseEnded, onVoteChange }) => {
                     </Radio>
                     <Radio
                         id="vote-correct"
+                        data-testid="vote-correct-radio"
                         value="correct"
                         className="vote-radio correct"
                     >
@@ -27,6 +29,7 @@ const VotingSection = ({ voteType, isPhaseEnded, onVoteChange }) => {
                     </Radio>
                     <Radio
                         id="vote-skip"
+                        data-testid="vote-skip-radio"
                         value="skip"
                         className="vote-radio skip"
                     >

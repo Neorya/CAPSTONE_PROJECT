@@ -1,9 +1,9 @@
 import React from 'react';
 import { Button, Space, Tooltip, Popconfirm } from 'antd';
 import { EyeOutlined, EditOutlined, CopyOutlined, DeleteOutlined } from '@ant-design/icons';
-import { 
+import {
   // ... altre icone che già usi
-  PlayCircleOutlined 
+  PlayCircleOutlined
 } from '@ant-design/icons';
 
 import { useNavigate } from 'react-router-dom'; // Necessario per il reindirizzamento
@@ -34,31 +34,32 @@ const SessionActionButtons = ({
   const started = session.actual_start_date !== null;
 
   return (
-    
+
     <Space size="small">
       {
-      (
-        <Tooltip title="Go to Game Session">
-          <Button
-            type="primary"
-            icon={<PlayCircleOutlined />} // Assicurati di importarlo da @ant-design/icons
-            onClick={async () => {
-              const data = await getGameSessionDetails(session.game_id);
-              const started = !!data.actual_start_date;
-          
-              navigate(started
-                ? `/start-game-session/${session.game_id}`
-                : `/pre-start-game-session/${session.game_id}`
-              );
-            }}
-            style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }} // Colore verde per indicare "attivo"
-          />
-        </Tooltip>
-      )}
+        (
+          <Tooltip title="Go to Game Session">
+            <Button
+              type="primary"
+              icon={<PlayCircleOutlined />} // Assicurati di importarlo da @ant-design/icons
+              onClick={async () => {
+                const data = await getGameSessionDetails(session.game_id);
+                const started = !!data.actual_start_date;
+
+                navigate(started
+                  ? `/start-game-session/${session.game_id}`
+                  : `/pre-start-game-session/${session.game_id}`
+                );
+              }}
+              style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }} // Colore verde per indicare "attivo"
+            />
+          </Tooltip>
+        )}
       <Tooltip title="View Details">
         <Button
           icon={<EyeOutlined />}
           onClick={() => onView(session)}
+          data-testid="view-session-btn"
         />
       </Tooltip>
 
@@ -73,6 +74,7 @@ const SessionActionButtons = ({
           <Button
             icon={<CopyOutlined />}
             style={{ color: 'rgba(0, 0, 0, 0.88)' }}
+            data-testid="clone-session-btn"
           />
         </Popconfirm>
       </Tooltip>
@@ -82,6 +84,7 @@ const SessionActionButtons = ({
           icon={<EditOutlined />}
           onClick={() => onEdit(session)}
           style={{ color: '#1890ff', borderColor: '#1890ff' }}
+          data-testid="edit-session-btn"
         />
       </Tooltip>
 
@@ -97,6 +100,7 @@ const SessionActionButtons = ({
           <Button
             danger
             icon={<DeleteOutlined />}
+            data-testid="delete-session-btn"
           />
         </Tooltip>
       </Popconfirm>

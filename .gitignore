@@ -32,3 +32,4 @@ Thumbs.db
 # Builds
 test/target/
 test/bin/
+test-reports/

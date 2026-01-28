@@ -412,6 +412,13 @@ VALUES
 ('dev_admin_sub_23', 'dev.admin@test.com', 'Dev', 'Admin', 'admin', 0, NULL);
 
 
+-- ######################################
+-- INSERT DATA INTO GAME_SESSION TABLE
+-- ######################################
+INSERT INTO capstone_app.game_session (name, start_date, duration_phase1, duration_phase2, creator_id)
+VALUES ('Spring Semester Game Session', '2028-01-15 09:00:00+00', 60, 60, 9);
+
+
 INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id)
 VALUES
 ('5', '25', 'public', 1),

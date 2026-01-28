@@ -14,14 +14,14 @@ public class AlgorithmMatchPO {
     private WebDriver driver;
     private WebDriverWait wait;
 
-    private static final String PAGE_TITLE_XPATH = "//div[contains(text(), 'Algorithm Match - Phase 1')]";
-    private static final String TIMER_XPATH = "//*[contains(text(), 'Time Remaining')]";
+    private static final String PAGE_TITLE_XPATH = "//*[@data-testid='phase1-title']";
+    private static final String TIMER_XPATH = "//*[@data-testid='phase1-timer']";
     private static final String PROBLEM_TAB_XPATH = "//div[text()='Problem Description']";
     private static final String TESTS_TAB_XPATH = "//div[contains(text(), 'Tests')]";
-    private static final String LANGUAGE_SELECT_XPATH = "//select";
+    private static final String ANT_SELECT_SELECTOR = "//div[contains(@class, 'ant-select-selector')]";
     private static final String EDITOR_XPATH = "//div[contains(@class, 'ace_content')]";
-    private static final String RUN_PUBLIC_TESTS_BTN_XPATH = "//button[contains(text(), 'Run Public Tests')]";
-    private static final String CUSTOM_INPUTS_BTN_XPATH = "//button[text()='Test My Custom Inputs']";
+    private static final String RUN_PUBLIC_TESTS_BTN_XPATH = "//button[contains(., 'Run Public Tests')]";
+    private static final String CUSTOM_INPUTS_BTN_XPATH = "//button[contains(., 'Test My Custom Inputs')]";
     private static final String ADD_TEST_BTN_XPATH = "//button[contains(., 'Add New Test Case')]";
     private static final String PUBLIC_TEST_ITEMS_XPATH = "//div[contains(@class, 'test-case-item')]"; 
     private static final String TRASH_ICONS_XPATH = "//i[contains(@class, 'fa-trash')]";
@@ -44,7 +44,9 @@ public class AlgorithmMatchPO {
     
     public boolean isPageLoaded() {
         try {
-            return getPageTitle().isDisplayed() && getTimer().isDisplayed();
+            boolean titleVisible = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(PAGE_TITLE_XPATH))).isDisplayed();
+            boolean timerVisible = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(TIMER_XPATH))).isDisplayed();
+            return titleVisible && timerVisible;
         } catch (Exception e) {
             return false;
         }
@@ -52,13 +54,24 @@ public class AlgorithmMatchPO {
 
     public void setEditorCode(String code) {
         WebElement editor = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(EDITOR_XPATH)));
-        editor.clear();
-        editor.sendKeys(code);
+        // Focus the editor first
+        editor.click();
+        
+        // Use JavaScript to set the value in Monaco editor model efficiently
+        org.openqa.selenium.JavascriptExecutor js = (org.openqa.selenium.JavascriptExecutor) driver;
+        String script = "var editors = document.querySelectorAll('.monaco-editor');" +
+                       "if(editors.length > 0) {" +
+                       "  var editor = monaco.editor.getModels()[0];" +
+                       "  if(editor) { editor.setValue(arguments[0]); }" +
+                       "}";
+        js.executeScript(script, code);
     }
 
     public String getEditorCode() {
-        WebElement editor = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(EDITOR_XPATH)));
-        return editor.getAttribute("value");
+        org.openqa.selenium.JavascriptExecutor js = (org.openqa.selenium.JavascriptExecutor) driver;
+        String script = "var model = monaco.editor.getModels()[0];" +
+                       "return model ? model.getValue() : '';";
+        return (String) js.executeScript(script);
     }
 
     public WebElement getPageTitle() {
@@ -78,9 +91,13 @@ public class AlgorithmMatchPO {
     }
 
     public void selectLanguage(String language) {
-        WebElement dropdown = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(LANGUAGE_SELECT_XPATH)));
-        Select select = new Select(dropdown);
-        select.selectByVisibleText(language);
+        // Click the Ant Design Select component
+        WebElement selectTrigger = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(ANT_SELECT_SELECTOR)));
+        selectTrigger.click();
+        
+        // Wait for the dropdown option to be visible and click it
+        String optionXpath = "//div[contains(@class, 'ant-select-item-option-content')][text()='" + language + "']";
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(optionXpath))).click();
     }
 
     public void clickRunPublicTests() {
@@ -107,10 +124,10 @@ public class AlgorithmMatchPO {
         WebElement outputField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(EXPECTED_OUTPUT_FIELD_XPATH)));
         WebElement submitBtn = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(CREATE_TEST_BTN_XPATH)));
 
-        inputField.clear();
+        inputField.sendKeys(org.openqa.selenium.Keys.chord(org.openqa.selenium.Keys.CONTROL, "a"), org.openqa.selenium.Keys.BACK_SPACE);
         inputField.sendKeys(input);
         
-        outputField.clear();
+        outputField.sendKeys(org.openqa.selenium.Keys.chord(org.openqa.selenium.Keys.CONTROL, "a"), org.openqa.selenium.Keys.BACK_SPACE);
         outputField.sendKeys(expectedOutput);
         
         submitBtn.click();

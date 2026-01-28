@@ -6,7 +6,7 @@ const { TextArea } = Input;
 
 const TestCaseForm = ({ testInput, expectedOutput, isPhaseEnded, onTestInputChange, onExpectedOutputChange }) => {
     return (
-        <div id="test-case-form" className="test-case-section">
+        <div id="test-case-form" data-testid="test-case-form" className="test-case-section">
             <Title level={5}>Proposed Test Case (Incorrect Code)</Title>
             <Row gutter={16}>
                 <Col span={12}>

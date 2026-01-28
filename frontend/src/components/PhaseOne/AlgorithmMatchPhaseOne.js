@@ -76,10 +76,10 @@ const AlgorithmMatchPhaseOne = () => {
 
             <Card className="create-match-card">
                 <Flex justify="space-between" align="center" className="header-container">
-                    <div className="page-title">
+                    <div className="page-title" data-testid="phase1-title">
                         <Typography.Title level={2} className="page-title-text">Algorithm Match - Phase 1</Typography.Title>
                     </div>
-                    <div className="timer">
+                    <div className="timer" data-testid="phase1-timer">
                         <Typography.Text strong className="timer-text">
                             <ClockCircleOutlined /> Time Remaining: {formatTime(timeLeft)}
                         </Typography.Text>

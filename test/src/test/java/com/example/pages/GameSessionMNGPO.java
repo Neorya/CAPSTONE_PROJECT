@@ -13,18 +13,18 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class GameSessionMNGPO {
     private WebDriver driver;
     private WebDriverWait wait;
-    private static final String PAGE_TITLE_XPATH = "";
-    private static final String PAGE_TITLE = "";
+    private static final String PAGE_TITLE_XPATH = "//h2[text()='Game Sessions']";
+    private static final String PAGE_TITLE = "Game Sessions";
     private static final String ANTD_DIV_TABLE_XPATH = "//*[contains(@class, 'ant-table-content')]";
     private static final String TABLE_BODY_XPATH = ANTD_DIV_TABLE_XPATH + "/table/tbody";
     private static final String BUTTON_XPATH = "";
     private static final String SUCCESS_MESSAGE_XPATH = "";
     private static final String WARNING_MESSAGE_XPATH = "";
-    private static final String COPY_BUTTON = "//button[.//span[@aria-label='copy']]";
-    private static final String DELETE_BUTTON = "//button[.//span[@aria-label='delete']]";
-    private static final String VIEW_BUTTON = "//button[.//span[@aria-label='eye']]";
-    private static final String UPDATE_BUTTON = "//button[.//span[@aria-label='edit']]";
-    private static final String BACK_TO_HOME_BUTTON_ID = "//*[@id=\"back-to-home-button\"]";
+    private static final String COPY_BUTTON = "//button[@data-testid='clone-session-btn']";
+    private static final String DELETE_BUTTON = "//button[@data-testid='delete-session-btn']";
+    private static final String VIEW_BUTTON = "//button[@data-testid='view-session-btn']";
+    private static final String UPDATE_BUTTON = "//button[@data-testid='edit-session-btn']";
+    private static final String BACK_TO_HOME_BUTTON_ID = "//button[@id='back-to-home-button']";
 
     // POP UP - CLONE 
     private static final String DIV_POP_UP_CLONE = "//div[contains(@class, 'ant-popover-inner')]";

@@ -2,6 +2,7 @@ package com.example.tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -51,16 +52,21 @@ public class GameSessionMNGTest extends BaseTest{
     }
     
     @BeforeEach
-    public void navigateToPage() {
-        // Navigate to the manage game session page before each test
+    public void setupScenario() {
+        loginAsTeacher();
+        gameSessionMNGPO = new GameSessionMNGPO(driver);
         navigateTo("/game-sessions");
+        
+        if (!gameSessionMNGPO.isPageLoaded()) {
+            fail("The Game Session Management page failed to load.");
+        }
     }
 
     @Test
     @Order(1)
     @DisplayName("View Game Session")
     public void viewGameSession() {
-        int rowIndex = gameSessionMNGPO.gameSessionIndex(testRowName); 
+        int rowIndex = gameSessionMNGPO.gameSessionIndex(testRowName);
         gameSessionMNGPO.getViewButtonAt(rowIndex).click();
         assertTrue(gameSessionMNGPO.isModalDisplayed());
         assertEquals(gameSessionMNGPO.getModalNAME(), viewModalName);

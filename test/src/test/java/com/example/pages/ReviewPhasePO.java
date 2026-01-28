@@ -46,17 +46,17 @@ public class ReviewPhasePO {
     }
 
     public void clickIncorrectVote() {
-        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(By.id(VOTE_INCORRECT_RADIO_ID)));
+        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@data-testid='vote-incorrect-radio']")));
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
     }
 
     public void clickCorrectVote() {
-        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(By.id(VOTE_CORRECT_RADIO_ID)));
+        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@data-testid='vote-correct-radio']")));
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
     }
 
     public void clickSkipVote() {
-        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(By.id(VOTE_SKIP_RADIO_ID)));
+        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@data-testid='vote-skip-radio']")));
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
     }
     
@@ -101,7 +101,7 @@ public class ReviewPhasePO {
 
     public boolean isSolutionsListVisible() {
          try {
-            return driver.findElement(By.id(VIEW_SOLUTIONS_LIST_ID)).isDisplayed();
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(VIEW_SOLUTIONS_LIST_ID))).isDisplayed();
         } catch (Exception e) {
             return false;
         }

@@ -14,8 +14,9 @@ public class AlgorithmMatchTest extends BaseTest {
 
     @BeforeEach
     public void setupScenario() {
+        loginAsStudent();
         matchPage = new AlgorithmMatchPO(driver);
-        navigateTo("/phase1"); 
+        navigateTo("/phase-one");
         if (!matchPage.isPageLoaded()) {
             fail("The Algorithm Match Phase 1 page failed to load.");
         }

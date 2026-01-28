@@ -12,14 +12,13 @@ public class ReviewPhaseTest extends BaseTest {
 
     private static ReviewPhasePO reviewPage;
 
-    @BeforeAll
-    public static void setUpTest() {
-        reviewPage = new ReviewPhasePO(driver);
-    }
-
     @BeforeEach
-    public void navigateToReviewPage() {
+    public void setupScenario() {
+        loginAsStudent();
+        reviewPage = new ReviewPhasePO(driver);
         navigateTo("/voting");
+        // We assume the test environment puts the user in a state where /voting is valid
+        // or we mocking the session state might be needed if the previous phase isn't complete.
 
         if (System.getenv("CI") != null) {
             try { Thread.sleep(2000); } catch (InterruptedException e) {}
