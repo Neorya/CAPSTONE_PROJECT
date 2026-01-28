@@ -39,7 +39,7 @@ class Teacher(Base):
     last_name = Column(String(100), nullable=False)
     
     email = Column(String(150), unique=True, nullable=False) 
-    user_id = Column(Integer, nullable=False) 
+    user_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.users.id"), nullable=False) 
 
     # Relationships: A teacher can create many...
     match_settings = relationship("MatchSetting", back_populates="creator")
@@ -258,6 +258,42 @@ class StudentReviewVote(Base):
 
     # Relationship
     assigned_review = relationship("StudentAssignedReview")
+
+
+class Badge(Base):
+    """
+    SQLAlchemy model for the 'badge' table.
+    """
+    __tablename__ = "badge"
+    __table_args__ = {'schema': SCHEMA_NAME}
+
+    badge_id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False, unique=True)
+    description = Column(Text, nullable=False)
+    icon_path = Column(String(255), nullable=True)
+    criteria_type = Column(String(50), nullable=False)
+
+    
+class StudentBadge(Base):
+    """
+    SQLAlchemy model for the 'student_badge' table.
+    """
+    __tablename__ = "student_badge"
+    __table_args__ = (
+        UniqueConstraint("student_id", "badge_id", name="uq_student_badge_unique"),
+        {'schema': SCHEMA_NAME}
+    )
+
+    student_badge_id = Column(Integer, primary_key=True)
+    student_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student.student_id"), nullable=False)
+    badge_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.badge.badge_id"), nullable=False)
+    earned_at = Column(DateTime(timezone=True), default=dt.now)
+    game_session_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.game_session.game_id"), nullable=True)
+
+    # Relationships
+    badge = relationship("Badge")
+    student = relationship("Student")
+
 
 # ============================================================================
 # Pydantic Models for Game Session Management API (User Story 3)
