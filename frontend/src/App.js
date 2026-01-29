@@ -22,6 +22,7 @@ import AlgorithmMatchPhaseOne from './components/PhaseOne/AlgorithmMatchPhaseOne
 import { SolutionReview } from './components/SolutionReview';
 import SolutionResults from './components/SolutionResults';
 import Profile from './components/Profile';
+import AdminDashboard from './components/AdminDashboard/AdminDashboard';
 
 import './App.css';
 
@@ -236,6 +237,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <SolutionReview />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin-dashboard"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
                 </ProtectedRoute>
               }
             />

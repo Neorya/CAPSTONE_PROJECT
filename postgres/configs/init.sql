@@ -184,11 +184,10 @@ DROP TABLE IF EXISTS capstone_app.student_solution_tests;
 
 CREATE TABLE capstone_app.student_solution_tests (
   student_solution_test_id SERIAL PRIMARY KEY,
-  teacher_test_id INTEGER REFERENCES capstone_app.tests(test_id) DEFAULT NULL,
-  student_test_id INTEGER REFERENCES capstone_app.student_tests(test_id) DEFAULT NULL,
   solution_id INTEGER REFERENCES capstone_app.student_solutions(solution_id) NOT NULL,
-  test_output TEXT NOT NULL,
-  CONSTRAINT uc_solution_test_result UNIQUE (solution_id, teacher_test_id, student_test_id)
+  teacher_test_id INTEGER REFERENCES capstone_app.tests(test_id),
+  student_test_id INTEGER REFERENCES capstone_app.student_tests(test_id),
+  test_output TEXT NOT NULL
 );
 
 --- The creation of table for relationship between students and game session: (User Story 5)
@@ -200,6 +199,7 @@ CREATE TABLE capstone_app.student_join_game (
   student_id INTEGER REFERENCES capstone_app.student(student_id) ON DELETE CASCADE NOT NULL,
   game_id    INTEGER REFERENCES capstone_app.game_session(game_id) ON DELETE CASCADE NOT NULL,
   assigned_match_id INTEGER REFERENCES capstone_app.match(match_id),
+  session_score NUMERIC(10, 2) DEFAULT NULL,
   CONSTRAINT uc_student_game UNIQUE (student_id, game_id)
 );
 
@@ -359,7 +359,16 @@ SELECT * FROM capstone_app.teacher;
 -- Match Settings created by Teacher 1 (ID 1)
 INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('Standard Mode 1', 'Quick match, 5 rounds.', TRUE, 'int square(int n) { return n * n; }', 9),
+('Standard Mode 1', 'Quick match, 5 rounds.', TRUE, '#include <iostream>
+using namespace std;
+
+int main() {
+    int n;
+    if (cin >> n) {
+        cout << n * n;
+    }
+    return 0;
+}', 9),
 ('Advanced Algebra', '15-round math challenge.', TRUE, 'int add(int x, int y) { return x + y; }', 9);
 
 -- Match Settings created by Teacher 2 (ID 2)
@@ -423,3 +432,68 @@ VALUES
 ('-3', '9', 'private', 1),
 ('10', '100', 'private', 1);
 
+
+-- ######################################
+-- BADGES SYSTEM
+-- ######################################
+
+DROP TABLE IF EXISTS capstone_app.badge CASCADE;
+
+CREATE TABLE capstone_app.badge (
+    badge_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT NOT NULL,
+    icon_path VARCHAR(255) DEFAULT NULL, -- Path to frontend resource or identifier
+    criteria_type VARCHAR(50) NOT NULL -- e.g., 'top_n', 'bug_hunter', 'clean_run', 'review_master'
+);
+
+DROP TABLE IF EXISTS capstone_app.student_badge CASCADE;
+
+CREATE TABLE capstone_app.student_badge (
+    student_badge_id SERIAL PRIMARY KEY,
+    student_id INTEGER REFERENCES capstone_app.student(student_id) ON DELETE CASCADE NOT NULL,
+    badge_id INTEGER REFERENCES capstone_app.badge(badge_id) ON DELETE CASCADE NOT NULL,
+    earned_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    game_session_id INTEGER REFERENCES capstone_app.game_session(game_id), -- Optional context where it was earned
+    CONSTRAINT uq_student_badge_unique UNIQUE (student_id, badge_id) -- A student can't earn the same badge twice
+);
+
+-- Grant permissions
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE capstone_app.badge TO api_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE capstone_app.student_badge TO api_user;
+
+-- Insert Badges
+INSERT INTO capstone_app.badge (name, description, icon_path, criteria_type) VALUES
+-- Hall of Fame Top-N
+('Rising Star', 'Reached Top-10 in a game session.', 'rising_star.png', 'top_10'),
+('Elite Performer', 'Reached Top-5 in a game session.', 'elite_performer.png', 'top_5'),
+('Podium Master', 'Reached Top-3 in a game session.', 'podium_master.png', 'top_3'),
+('Champion', 'Finished First in a game session.', 'champion.png', 'top_1'),
+
+-- Bug Hunter (Finding n tests that show codes fail)
+('Bug Hunter', 'Found 5 failing tests in reviews.', 'bug_hunter.png', 'bug_hunter_5'),
+('Bug Tracker', 'Found 10 failing tests in reviews.', 'bug_tracker.png', 'bug_hunter_10'),
+('Bug Slayer', 'Found 20 failing tests in reviews.', 'bug_slayer.png', 'bug_hunter_20'),
+('Bug Exterminator', 'Found 50 failing tests in reviews.', 'bug_exterminator.png', 'bug_hunter_50'),
+('Bug Whisperer', 'Found 100 failing tests in reviews.', 'bug_whisperer.png', 'bug_hunter_100'),
+
+-- Review Master (Up-voting correct answers n times)
+('Sharp Eye', 'Up-voted correct answers 5 times.', 'sharp_eye.png', 'review_master_5'),
+('Quality Checker', 'Up-voted correct answers 10 times.', 'quality_checker.png', 'review_master_10'),
+('Insightful Reviewer', 'Up-voted correct answers 20 times.', 'insightful_reviewer.png', 'review_master_20'),
+('Truth Seeker', 'Up-voted correct answers 50 times.', 'truth_seeker.png', 'review_master_50'),
+('Peer Review Master', 'Up-voted correct answers 100 times.', 'peer_review_master.png', 'review_master_100'),
+
+-- Teacher's Tests (Passing all teacher's tests)
+('First Pass', 'Passed all teacher tests in 1 session.', 'first_pass.png', 'teacher_tests_1'),
+('Consistent Performer', 'Passed all teacher tests in 5 sessions.', 'consistent_performer.png', 'teacher_tests_5'),
+('Reliable Solver', 'Passed all teacher tests in 10 sessions.', 'reliable_solver.png', 'teacher_tests_10'),
+('Test Master', 'Passed all teacher tests in 15 sessions.', 'test_master.png', 'teacher_tests_15'),
+('Teachers Champion', 'Passed all teacher tests in 20 sessions.', 'teachers_champion.png', 'teacher_tests_20'),
+
+-- Flawless Finish (No mistakes)
+('Flawless Start', 'Finished a session perfectly 1 time.', 'flawless_start.png', 'flawless_1'),
+('Clean Run', 'Finished a session perfectly 5 times.', 'clean_run.png', 'flawless_5'),
+('Precision Player', 'Finished a session perfectly 10 times.', 'precision_player.png', 'flawless_10'),
+('Perfectionist', 'Finished a session perfectly 15 times.', 'perfectionist.png', 'flawless_15'),
+('Untouchable', 'Finished a session perfectly 20 times.', 'untouchable.png', 'flawless_20');

@@ -48,6 +48,14 @@ def seed_dev_users():
                 "last_name": "Teacher",
                 "role": UserRoleEnum.teacher,
                 "profile_url": None
+            },
+            {
+                "email": "dev.admin@test.com",
+                "google_sub": "dev_admin_sub_789",
+                "first_name": "Dev",
+                "last_name": "Admin",
+                "role": UserRoleEnum.admin,
+                "profile_url": None
             }
         ]
         
