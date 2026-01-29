@@ -179,11 +179,10 @@ DROP TABLE IF EXISTS capstone_app.student_solution_tests;
 
 CREATE TABLE capstone_app.student_solution_tests (
   student_solution_test_id SERIAL PRIMARY KEY,
-  teacher_test_id INTEGER REFERENCES capstone_app.tests(test_id) DEFAULT NULL,
-  student_test_id INTEGER REFERENCES capstone_app.student_tests(test_id) DEFAULT NULL,
   solution_id INTEGER REFERENCES capstone_app.student_solutions(solution_id) NOT NULL,
-  test_output TEXT NOT NULL,
-  CONSTRAINT uc_solution_test_result UNIQUE (solution_id, teacher_test_id, student_test_id)
+  teacher_test_id INTEGER REFERENCES capstone_app.tests(test_id),
+  student_test_id INTEGER REFERENCES capstone_app.student_tests(test_id),
+  test_output TEXT NOT NULL
 );
 
 --- The creation of table for relationship between students and game session: (User Story 5)
@@ -195,6 +194,7 @@ CREATE TABLE capstone_app.student_join_game (
   student_id INTEGER REFERENCES capstone_app.student(student_id) ON DELETE CASCADE NOT NULL,
   game_id    INTEGER REFERENCES capstone_app.game_session(game_id) ON DELETE CASCADE NOT NULL,
   assigned_match_id INTEGER REFERENCES capstone_app.match(match_id),
+  session_score NUMERIC(10, 2) DEFAULT NULL,
   CONSTRAINT uc_student_game UNIQUE (student_id, game_id)
 );
 
@@ -354,7 +354,16 @@ SELECT * FROM capstone_app.teacher;
 -- Match Settings created by Teacher 1 (ID 1)
 INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('Standard Mode 1', 'Quick match, 5 rounds.', TRUE, 'int square(int n) { return n * n; }', 9),
+('Standard Mode 1', 'Quick match, 5 rounds.', TRUE, '#include <iostream>
+using namespace std;
+
+int main() {
+    int n;
+    if (cin >> n) {
+        cout << n * n;
+    }
+    return 0;
+}', 9),
 ('Advanced Algebra', '15-round math challenge.', TRUE, 'int add(int x, int y) { return x + y; }', 9);
 
 -- Match Settings created by Teacher 2 (ID 2)
@@ -408,9 +417,7 @@ VALUES
 INSERT INTO capstone_app.users (google_sub, email, first_name, last_name, role, score, profile_url)
 VALUES 
 ('dev_student_sub_123', 'dev.student@test.com', 'Dev', 'Student', 'student', 0, NULL),
-('dev_teacher_sub_456', 'dev.teacher@test.com', 'Dev', 'Teacher', 'teacher', 0, NULL),
-('dev_admin_sub_23', 'dev.admin@test.com', 'Dev', 'Admin', 'admin', 0, NULL);
-
+('dev_teacher_sub_456', 'dev.teacher@test.com', 'Dev', 'Teacher', 'teacher', 0, NULL);
 
 INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id)
 VALUES

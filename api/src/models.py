@@ -8,7 +8,7 @@ from datetime import datetime as dt
 from typing import List
 
 from pydantic import BaseModel, Field
-from sqlalchemy import Boolean, Column, Integer, String, Text, ForeignKey, Enum, DateTime
+from sqlalchemy import Boolean, Column, Integer, String, Text, ForeignKey, Enum, DateTime, Numeric
 from sqlalchemy.dialects.postgresql import ENUM as PG_ENUM
 from sqlalchemy.orm import relationship
 from typing import Optional
@@ -122,10 +122,10 @@ class StudentSolutionTest(Base):
         {'schema': SCHEMA_NAME}
     )
 
-    student_solution_test_id = Column(Integer, primary_key=True)                            # New PK
-    teacher_test_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.tests.test_id"), nullable=True) # Nullable
-    student_test_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student_tests.test_id"), nullable=True) # Nullable
+    student_solution_test_id = Column(Integer, primary_key=True, autoincrement=True)
     solution_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student_solutions.solution_id"), nullable=False)
+    teacher_test_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.tests.test_id"), nullable=True)
+    student_test_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student_tests.test_id"), nullable=True)
     test_output = Column(Text, nullable=False)
 
 
@@ -188,6 +188,7 @@ class StudentJoinGame(Base):
     game_id       = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.game_session.game_id"))
 
     assigned_match_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.match.match_id"), nullable=True)
+    session_score = Column(Numeric(10, 2), nullable=True)  # Score for this game session (calculated after Phase 2)
 
 class MatchJoinGame(Base):
     __tablename__ = "match_for_game"

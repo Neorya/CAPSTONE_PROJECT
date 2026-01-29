@@ -79,9 +79,12 @@ const SolutionResultsContainer = () => {
         resultsData.test_results || []
     );
 
-    // Calculate total score based on implementation score percentage
-    const totalScore = Math.round(resultsData.implementation_score_percentage || 0);
-    const maxScore = 100;
+    // Use session_score (implementation + reviews)
+    // Fallback to implementation score percentage if session_score not yet calculated
+    const totalScore = resultsData.session_score !== null && resultsData.session_score !== undefined
+        ? resultsData.session_score
+        : null; // Will show "Not calculated" in the view if null
+    const maxScore = resultsData.max_score || 100;
 
     return (
         <SolutionResultsView

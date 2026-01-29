@@ -7,7 +7,7 @@ from database import get_db
 from authentication.routes.auth_routes import get_current_user
 from authentication.repositories.user_repository import UserRepository
 from student_results_api import _get_test_status
-from leaderboard_api import _calculate_all_student_scores_optimized, _assign_ranks
+from leaderboard_api import _get_all_student_scores_from_db, _assign_ranks
 from models import (
     StudentSolution,
     StudentSolutionTest,
@@ -78,7 +78,7 @@ async def get_user_profile(
     if role == "student":
         # For students, we need to find their rank and calculate real-time score
         # Note: We reuse the leaderboard logic for consistency
-        student_scores = _calculate_all_student_scores_optimized(db)
+        student_scores = _get_all_student_scores_from_db(db)
         full_leaderboard = _assign_ranks(student_scores)
         
         # In our system, student_id might match user_id if they are synced

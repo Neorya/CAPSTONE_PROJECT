@@ -15,11 +15,11 @@ from models import (
     MatchesForGame,
     StudentTest,
     StudentSolution,
+    StudentSolutionTest,
     GameSession,
 )
 from authentication.routes.auth_routes import get_current_user
 from code_runner import compile_cpp, run_cpp_executable
-from models import StudentSolutionTest
 
 router = APIRouter(prefix="/api/phase-one", tags=["phase-one"])
 
@@ -321,15 +321,24 @@ def submit_solution(
             solution_id=None
         )
 
-    # Run against tests
+    # Fetch Teacher Tests
     tests = (
         db.query(Test)
         .filter(Test.match_set_id == match_entry.match_set_id)
         .all()
     )
+    
+    # Fetch Student Tests
+    student_tests = (
+        db.query(StudentTest)
+        .filter(
+            StudentTest.match_for_game_id == match_for_game.match_for_game_id,
+            StudentTest.student_id == request.student_id
+        )
+        .all()
+    )
 
-    all_passed = True
-    test_results = []
+    test_results_response = []
     
     passed_test_count = 0
     encountered_error = False
@@ -337,10 +346,12 @@ def submit_solution(
     passed_public_tests = 0
     total_public_tests = 0
     
-    
-    execution_results_to_save = []
-    
+    # Buffers to hold results for saving
+    teacher_results_buffer = []
+    student_results_buffer = []
+
     try:
+        # Run Teacher Tests
         for test in tests:
             result = run_cpp_executable(exe_path, test.test_in or "")
             
@@ -367,27 +378,36 @@ def submit_solution(
                 message = result["stderr"]
                 encountered_error = True
 
-            if status != "pass":
-                all_passed = False
-            
-            # Prepare result for frontend response
+            # Save to buffer
+            teacher_results_buffer.append({
+                "test_id": test.test_id,
+                "actual_output": actual_out if result["status"] == "success" else (result["stderr"] or "Error")
+            })
+
             if is_public:
-                test_results.append(TestResultDetail(
+                test_results_response.append(TestResultDetail(
                     test_id=test.test_id,
                     status=status,
                     message=message,
                     actual_output=actual_out if status != "timeout" and status != "runtime_error" else None
                 ))
-            
-            output_to_save = actual_out
-            if status != "pass" and status != "fail" and message:
-                 pass
 
-            execution_results_to_save.append({
-                "teacher_test_id": test.test_id,
-                "test_output": actual_out
-            })
+        # Run Student Tests (Custom Tests)
+        for test in student_tests:
+            result = run_cpp_executable(exe_path, test.test_in or "")
             
+            actual_out = ""
+            if result["status"] == "success":
+                actual_out = (result["stdout"] or "").strip()
+            else:
+                actual_out = (result["stderr"] or "Error")
+            
+            # Save to buffer
+            student_results_buffer.append({
+                "test_id": test.test_id,
+                "actual_output": actual_out
+            })
+
     finally:
         if os.path.exists(exe_path):
             try:
@@ -397,10 +417,6 @@ def submit_solution(
 
     solution_id = None
     final_message = "Solution ran successfully."
-
-    
-    should_save = False
-    solution_obj = None
 
     if not encountered_error:
         # Check if a solution already exists
@@ -419,16 +435,18 @@ def submit_solution(
         else:
             solution_has_passed = False
             
+        should_save = False
+        
         if existing_solution:
             # If exists, check if It is improved or equaled
             current_best = existing_solution.passed_test or 0
-            # Allow equal score to update (e.g. code refactoring)
             if passed_test_count >= current_best:
                 should_save = True
                 existing_solution.code = request.code
                 existing_solution.has_passed = solution_has_passed
                 existing_solution.passed_test = passed_test_count
-                solution_obj = existing_solution
+                db.flush() # Flush to get ID if needed, though it exists
+                solution_id = existing_solution.solution_id
                 final_message = "Solution updated (score improved or matched)."
             else:
                 final_message = f"Solution not saved: Score ({passed_test_count}) is lower than best ({current_best})."
@@ -443,32 +461,36 @@ def submit_solution(
                 student_id=request.student_id
             )
             db.add(new_solution)
-            # Need flush to get solution_id
-            db.flush() 
-            solution_obj = new_solution
+            db.flush() # Flush to get new_solution.solution_id
             solution_id = new_solution.solution_id
             final_message = "Solution submitted successfully."
             
-        if should_save and solution_obj:
-        
-        
-            db.query(StudentSolutionTest).filter(
-                StudentSolutionTest.solution_id == solution_obj.solution_id
-            ).delete()
+        if should_save and solution_id:
+            # Persist detailed test results
             
-            for res in execution_results_to_save:
-                new_test_result = StudentSolutionTest(
-                    solution_id=solution_obj.solution_id,
-                    teacher_test_id=res["teacher_test_id"],
-                    test_output=res["test_output"],
-                    student_test_id=None
-                )
-                db.add(new_test_result)
+            # Delete old results
+            db.query(StudentSolutionTest).filter(StudentSolutionTest.solution_id == solution_id).delete()
             
-            db.commit()
-            db.refresh(solution_obj)
-            solution_id = solution_obj.solution_id
-
+            # Insert teacher test results
+            for item in teacher_results_buffer:
+                db.add(StudentSolutionTest(
+                    solution_id=solution_id,
+                    teacher_test_id=item["test_id"],
+                    student_test_id=None,
+                    test_output=item["actual_output"]
+                ))
+            
+            # Insert student test results
+            for item in student_results_buffer:
+                db.add(StudentSolutionTest(
+                    solution_id=solution_id,
+                    teacher_test_id=None,
+                    student_test_id=item["test_id"],
+                    test_output=item["actual_output"]
+                ))
+            
+        db.commit()
+            
     else:
         final_message = "Solution not saved due to runtime errors."
     
@@ -476,7 +498,7 @@ def submit_solution(
         solution_id=solution_id,
         message=final_message,
         compiled=True,
-        test_results=test_results
+        test_results=test_results_response
     )
 
 
