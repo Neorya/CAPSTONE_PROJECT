@@ -4,23 +4,19 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from models import (
-    Student,
     Badge,
     StudentBadge,
-    GameSession,
     StudentReviewVote,
     StudentAssignedReview,
     StudentSolution,
-    StudentSolutionTest,
     StudentJoinGame,
     MatchesForGame,
     Match,
     Test,
-    VoteType,
-    SCHEMA_NAME
+    VoteType
 )
 from database import get_db
 from leaderboard_api import _assign_ranks

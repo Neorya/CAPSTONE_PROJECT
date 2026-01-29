@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Spin, message } from 'antd';
 import { jwtDecode } from 'jwt-decode';
 import { getStudentSolutionId, calculateSessionScores } from '../../services/solutionResultsService';
+import { getStudentSolutionId } from '../../services/solutionResultsService';
 import { evaluateBadges } from '../../services/badgeService';
 import './GameResults.css';
 
@@ -58,8 +59,22 @@ const GameResults = () => {
 
                 // Then fetch the student's solution ID for this game
                 setStatusMessage('Loading your results...');
+
+                // TRIGGER BADGE EVALUATION
+                // We fire and forget this, or await it?
+                // Ideally, we want to ensure it runs, but not block the UI too long.
+                // Since this page is "Game Results" (End of Game), it's the right place.
+                try {
+                    await evaluateBadges(gameId);
+                    console.log('Badge evaluation triggered');
+                } catch (badgeErr) {
+                    console.error('Badge evaluation failed', badgeErr);
+                    // Don't block redirect on badge error
+                }
+
+                // Fetch the student's solution ID for this game
                 const data = await getStudentSolutionId(studentId, gameId);
-                
+
                 if (data.solution_id) {
                     // Redirect to solution results page
                     navigate(`/solution-results/${data.solution_id}`, { replace: true });
@@ -76,6 +91,7 @@ const GameResults = () => {
 
         fetchSolutionAndRedirect();
     }, [gameId, navigate]);
+
 
     if (loading) {
         return (
