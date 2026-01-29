@@ -45,7 +45,8 @@ export const useAlgorithmMatchPhaseOne = () => {
     const [activeTab, setActiveTab] = useState('tests');
     const [language, setLanguage] = useState('C++');
     const [code, setCode] = useState(() => {
-        return localStorage.getItem('phase_one_user_code') || DEFAULT_CODE;
+        const storageKey = `phase_one_user_code_${urlGameId ? parseInt(urlGameId, 10) : 3}`;
+        return localStorage.getItem(storageKey) || '';
     });
     const [timeLeft, setTimeLeft] = useState(null); // null until loaded from backend
     const [timerInitialized, setTimerInitialized] = useState(false);
@@ -94,8 +95,9 @@ export const useAlgorithmMatchPhaseOne = () => {
     }, [timeLeft, timerInitialized, navigate, gameId]);
 
     useEffect(() => {
-        localStorage.setItem('phase_one_user_code', code);
-    }, [code]);
+        const storageKey = `phase_one_user_code_${gameId}`;
+        localStorage.setItem(storageKey, code);
+    }, [code, gameId]);
 
     const loadMatchData = useCallback(async () => {
         try {
@@ -110,6 +112,12 @@ export const useAlgorithmMatchPhaseOne = () => {
             if (matchDetails.title) setProblemTitle(matchDetails.title);
             if (matchDetails.description) setProblemDescription(matchDetails.description);
 
+            // Use student_code template if provided, otherwise use DEFAULT_CODE
+            // Only applies if there's no saved code in localStorage
+            const storageKey = `phase_one_user_code_${gameId}`;
+            if (!localStorage.getItem(storageKey)) {
+                setCode(matchDetails.student_code || DEFAULT_CODE);
+            }
 
             // Calculate the target end time from actual_start_date and duration_phase1
             if (matchDetails.actual_start_date && matchDetails.duration_phase1 !== undefined) {

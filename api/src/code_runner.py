@@ -77,6 +77,7 @@ def run_cpp_executable(executable_path: str, input_str: str) -> Dict:
         cmd = [
             "nsjail",
             "--config", NSJAIL_CONFIG_PATH,
+            "--really_quiet",
             "--bindmount_ro", f"{executable_path}:/app/program",
             "--",
             "/app/program"
@@ -110,11 +111,18 @@ def run_cpp_executable(executable_path: str, input_str: str) -> Dict:
             "exit_code": -1,
             "status": "timeout"
         }
+    except FileNotFoundError:
+        return {
+            "stdout": "",
+            "stderr": "System Configuration Error: nsjail executable not found. Please contact administrator.",
+            "exit_code": -1,
+            "status": "system_error"
+        }
     except Exception as e:
         logger.error(f"Error running code: {e}")
         return {
             "stdout": "",
-            "stderr": f"Internal Error: {str(e)}",
+            "stderr": f"System Error: {str(e)}",
             "exit_code": -1,
-            "status": "internal_error"
+            "status": "system_error"
         }

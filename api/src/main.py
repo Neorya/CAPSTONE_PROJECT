@@ -19,11 +19,7 @@ from authentication.config import validate_required_env_vars
 
 app = FastAPI()
 
-# Add SessionMiddleware first (applied last, so inner)
-# In production, use a secure secret key from environment variables
-app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "your-secret-key"))
-
-# Configure CORS last (applied first, so outer)
+# Configure CORS first (applied first, so outer)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],  # Frontend URL
@@ -31,6 +27,10 @@ app.add_middleware(
     allow_methods=["*"],  # Allow all HTTP methods
     allow_headers=["*"],  # Allow all headers
 )
+
+# Add SessionMiddleware after CORS (applied last, so inner)
+# In production, use a secure secret key from environment variables
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "your-secret-key"))
 
 # Validate required environment variables at startup
 @app.on_event("startup")

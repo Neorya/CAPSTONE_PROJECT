@@ -9,6 +9,7 @@ import {
   TeamOutlined,
   AppstoreOutlined,
   TrophyOutlined,
+  FileAddOutlined
   SafetyCertificateOutlined
 } from "@ant-design/icons";
 import { getUserProfile } from "../../services/userService";
@@ -34,6 +35,16 @@ const HomePage = () => {
     fetchProfile();
   }, []);
   const bentoItems = [
+    // Creation actions first
+    {
+      id: "create-match-settings",
+      title: "Create Match Settings",
+      description: "Design new coding problems with test cases and solutions",
+      icon: <FileAddOutlined />,
+      route: "/match-settings/create",
+      accent: "#6366f1",
+      roles: ["teacher"]
+    },
     {
       id: "create-match",
       title: "Create New Match",
@@ -41,15 +52,6 @@ const HomePage = () => {
       icon: <PlusOutlined />,
       route: "/create-match",
       accent: "#3b82f6",
-      roles: ["teacher"]
-    },
-    {
-      id: "match-settings",
-      title: "Match Settings",
-      description: "Browse and manage all available match settings",
-      icon: <SettingOutlined />,
-      route: "/match-settings",
-      accent: "#10b981",
       roles: ["teacher"]
     },
     {
@@ -61,6 +63,16 @@ const HomePage = () => {
       accent: "#f59e0b",
       roles: ["teacher"]
     },
+    // View/manage actions below
+    {
+      id: "match-settings",
+      title: "Match Settings",
+      description: "Browse and manage all available match settings",
+      icon: <SettingOutlined />,
+      route: "/match-settings",
+      accent: "#10b981",
+      roles: ["teacher"]
+    },
     {
       id: "view-sessions",
       title: "View Game Sessions",
@@ -70,6 +82,7 @@ const HomePage = () => {
       accent: "#8b5cf6",
       roles: ["teacher"]
     },
+    // Student cards
     {
       id: "join-session",
       title: "Join Game Sessions",

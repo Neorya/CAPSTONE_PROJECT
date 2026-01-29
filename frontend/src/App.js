@@ -4,6 +4,7 @@ import { ConfigProvider } from 'antd';
 import HomePage from './components/Home';
 import { CreateMatchForm } from './components/CreateMatchForm';
 import { MatchSettingsList } from './components/MatchSettings';
+import CreateMatchSetting from './components/CreateMatchSetting';
 import { GameSessionCreation } from './components/GameSessionCreation';
 import { GameSessionList } from './components/GameSessionList';
 import { StartGameSession } from './components/StartGameSession';
@@ -99,6 +100,26 @@ function App() {
                 <ProtectedRoute>
                   <AppLayout>
                     <MatchSettingsList />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/match-settings/create"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <CreateMatchSetting />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/match-settings/:id/edit"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <CreateMatchSetting />
                   </AppLayout>
                 </ProtectedRoute>
               }

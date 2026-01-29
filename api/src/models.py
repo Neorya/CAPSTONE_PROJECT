@@ -46,6 +46,7 @@ class Teacher(Base):
     matches = relationship("Match", back_populates="creator")
     game_sessions = relationship("GameSession", back_populates="creator")
 
+
 class MatchSetting(Base):
     """
     SQLAlchemy model for the 'match_setting' table.
@@ -58,6 +59,11 @@ class MatchSetting(Base):
     description = Column(Text, nullable=False)
     is_ready = Column(Boolean, nullable=False, default=False)
     reference_solution = Column(Text, nullable=False)
+    student_code = Column(Text, nullable=True)  # Template code for students
+    function_name = Column(String(100), nullable=True)
+    function_type = Column(String(50), nullable=True, default="output")
+    function_inputs = Column(Text, nullable=True)  # JSON array
+    language = Column(String(20), nullable=False, default="cpp")
     total_points = Column(Integer, nullable=False, default=100)
     creator_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.teacher.teacher_id"))
     
@@ -65,6 +71,7 @@ class MatchSetting(Base):
     creator = relationship("Teacher", back_populates="match_settings")
     matches = relationship("Match", back_populates="match_setting")
     tests = relationship("Test", back_populates="match_setting", cascade="all, delete-orphan")
+
 
 
 class Test(Base):
@@ -77,7 +84,7 @@ class Test(Base):
     test_id = Column(Integer, primary_key=True)
     test_in = Column(String(500), nullable=True)
     test_out = Column(String(500), nullable=True)
-    scope = Column(Enum(TestScope), nullable=False)
+    scope = Column(Enum(TestScope, name='test_scope', schema=SCHEMA_NAME), nullable=False)
     match_set_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.match_setting.match_set_id"), nullable=False)
 
     match_setting = relationship("MatchSetting", back_populates="tests")
@@ -251,7 +258,7 @@ class StudentReviewVote(Base):
 
     review_vote_id = Column(Integer, primary_key=True)
     student_assigned_review_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student_assigned_review.student_assigned_review_id"), nullable=False)
-    vote = Column(Enum(VoteType), nullable=False)
+    vote = Column(Enum(VoteType, name='vote', schema=SCHEMA_NAME), nullable=False)
     proof_test_in = Column(String(500), nullable=True)
     proof_test_out = Column(String(500), nullable=True)
     valid = Column(Boolean, nullable=True)
