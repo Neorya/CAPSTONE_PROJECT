@@ -226,12 +226,6 @@ def validate_match_setting_logic(
     Validate match setting fields and run tests.
     Raises HTTPException if validation fails.
     """
-    # Validate required fields
-    if not function_name or not function_type:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Function name and type are required to publish"
-        )
     
     # Run tests
     validation_result = run_tests(
