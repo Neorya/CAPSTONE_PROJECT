@@ -51,8 +51,8 @@ const MatchSettingDetailsPopup = ({ visible, onClose, matchSetting }) => {
 
         <Descriptions title="Reference Solution" bordered column={1} id="popup-reference-solution-table" style={{ marginTop: '20px' }}>
           <Descriptions.Item label="Code">
-            <pre id="popup-reference-solution-text" style={{ maxHeight: '200px', overflow: 'auto', margin: 0 }}>
-              {matchSetting.reference_solution || <span style={{ color: '#999' }}>No reference solution provided</span>}
+            <pre id="popup-reference-solution-text" style={{ maxHeight: '200px', overflow: 'auto', margin: 0, whiteSpace: 'pre-wrap' }}>
+              {matchSetting.reference_solution.replace(/\\n/g, "\n") || <span style={{ color: '#999' }}>No reference solution provided</span >}
             </pre>
           </Descriptions.Item>
         </Descriptions>
@@ -101,7 +101,7 @@ const MatchSettingDetailsPopup = ({ visible, onClose, matchSetting }) => {
           )}
         </div>
       </div>
-    </Modal>
+    </Modal >
   );
 };
 

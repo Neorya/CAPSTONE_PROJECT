@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Spin, message } from 'antd';
 import { jwtDecode } from 'jwt-decode';
 import { getStudentSolutionId, calculateSessionScores } from '../../services/solutionResultsService';
-import { getStudentSolutionId } from '../../services/solutionResultsService';
+
 import { evaluateBadges } from '../../services/badgeService';
 import './GameResults.css';
 
@@ -43,14 +43,14 @@ const GameResults = () => {
 
                 //  trigger score calculation for the game session
                 setStatusMessage('Calculating final scores...');
-                
+
                 try {
                     await calculateSessionScores(gameId);
                 } catch (scoreErr) {
-                    
+
                     console.warn('Score calculation warning:', scoreErr);
                 }
-                
+
                 try {
                     await evaluateBadges(gameId);
                 } catch (badgeErr) {

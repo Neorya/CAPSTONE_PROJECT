@@ -1,0 +1,22 @@
+.match-setting-edit-modal .match-setting-form {
+  max-height: 65vh;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.match-setting-edit-modal .ant-form-item {
+  margin-bottom: 16px;
+}
+
+.match-setting-edit-modal .ant-card {
+  background-color: #fafafa;
+}
+
+.match-setting-edit-modal .ant-card-head {
+  min-height: 40px;
+  padding: 0 12px;
+}
+
+.match-setting-edit-modal .ant-card-body {
+  padding: 12px;
+}
