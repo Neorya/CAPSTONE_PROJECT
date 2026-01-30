@@ -9,7 +9,7 @@ import {
   TeamOutlined,
   AppstoreOutlined,
   TrophyOutlined,
-  FileAddOutlined
+  FileAddOutlined,
   SafetyCertificateOutlined
 } from "@ant-design/icons";
 import { getUserProfile } from "../../services/userService";

@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Radio, Space, Table, Tag, Typography, Tooltip } from "antd";
-import { ArrowLeftOutlined, EyeOutlined } from "@ant-design/icons";
-import { fetchMatchSettings } from "../../services/matchSettingsService.js";
-import { useMatchSettingDetails } from "./hooks/useMatchSettingDetails";
+import { Button, Card, Radio, Space, Table, Tag, Typography, Tooltip, message, Alert } from "antd";
+import { ArrowLeftOutlined } from "@ant-design/icons";
+import { useMatchSettings } from "./hooks/useMatchSettings";
+// import { useMatchSettingDetails } from "./hooks/useMatchSettingDetails";
 import MatchSettingDetailsPopup from "./components/MatchSettingDetailsPopup";
+import MatchSettingActionButtons from "./components/MatchSettingActionButtons";
+import MatchSettingEditModal from "./components/MatchSettingEditModal";
 import "./MatchSettingsList.css";
 
 const { Title, Text } = Typography;
@@ -14,41 +16,74 @@ const STATUS_COLOR = {
   Draft: "default",
 };
 
+/**
+ * MatchSettingsList - Main component for displaying and managing match settings
+ * Features: browse, filter, view details, clone, edit, delete, and publish
+ */
 const MatchSettingsList = () => {
-  const navigate = useNavigate();                     // navigation hook
-  const [filter, setFilter] = useState("All");        // filter state (all, ready, draft)
-  const [items, setItems] = useState([]);             // match settings items
-  const [loading, setLoading] = useState(false);      // loading
+  const navigate = useNavigate();
 
+  // Error state
+  const [error, setError] = useState(null);
+
+  // Edit modal state
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [selectedForEdit, setSelectedForEdit] = useState(null);
+  const [editLoading, setEditLoading] = useState(false);
+
+  // Alert handlers
+  const showAlert = useCallback((type, msg) => {
+    if (type === 'error') {
+      setError(msg);
+    }
+  }, []);
+
+  const showSuccess = useCallback((msg) => {
+    message.success(msg);
+  }, []);
+
+  // Custom hooks
   const {
+    items,
+    loading,
+    filter,
+    setFilter,
+    updateMatchSetting,
+    deleteMatchSetting,
+    cloneMatchSetting,
+    publishMatchSetting,
     selectedMatchSetting,
     isPopupVisible,
     openPopup,
     closePopup
-  } = useMatchSettingDetails();
+  } = useMatchSettings(showAlert, showSuccess);
 
-  useEffect(() => {                         // useEffect runs on component mount and filter change
-    const fetchItems = async () => {        // fetch match settings based on filter
-      try {
-        setLoading(true);
-        const data = await fetchMatchSettings(filter);
-        const formatted = data.map((item) => ({   // format data for table
-          id: item.match_set_id,
-          name: item.title,
-          description: item.description,
-          tests: item.tests,
-          reference_solution: item.reference_solution,
-          status: item.is_ready ? "Ready" : "Draft",
-        }));
-        setItems(formatted);
-      } catch (err) {
-        console.error("Error fetching match settings:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchItems();
-  }, [filter]);
+  // const {
+  //   selectedMatchSetting,
+  //   isPopupVisible,
+  //   openPopup,
+  //   closePopup
+  // } = useMatchSettingDetails();
+
+  // Edit handlers
+  const handleOpenEdit = useCallback((matchSetting) => {
+    setSelectedForEdit(matchSetting);
+    setIsEditModalVisible(true);
+  }, []);
+
+  const handleCloseEdit = useCallback(() => {
+    setIsEditModalVisible(false);
+    setSelectedForEdit(null);
+  }, []);
+
+  const handleSaveEdit = useCallback(async (id, values) => {
+    setEditLoading(true);
+    const success = await updateMatchSetting(id, values);
+    setEditLoading(false);
+    if (success) {
+      handleCloseEdit();
+    }
+  }, [updateMatchSetting, handleCloseEdit]);
 
   // Table columns definition
   const columns = [
@@ -62,22 +97,25 @@ const MatchSettingsList = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: 140,
+      width: 100,
       render: (status) => (
         <Tag color={STATUS_COLOR[status] || "default"}>{status}</Tag>
       ),
     },
     {
-      key: "action",
-      width: 120,
+      title: "Actions",
+      key: "actions",
+      align: "right",
+      width: 220,
       render: (_, record) => (
-        <Button
-          id={`btn-details-${record.id}`}
-          icon={<EyeOutlined />}
-          onClick={() => openPopup(record)}
-        >
-          Details
-        </Button>
+        <MatchSettingActionButtons
+          matchSetting={record}
+          onView={openPopup}
+          onClone={cloneMatchSetting}
+          onEdit={handleOpenEdit}
+          onDelete={deleteMatchSetting}
+          onPublish={publishMatchSetting}
+        />
       ),
     },
   ];
@@ -104,9 +142,21 @@ const MatchSettingsList = () => {
 
         <div className="subheader">
           <Text type="secondary">
-            Browse existing match settings. Use the filter to narrow results.
+            Browse, clone, edit, delete, or publish match settings.
           </Text>
         </div>
+
+        {/* Error Alert */}
+        {error && (
+          <Alert
+            message={error}
+            type="error"
+            showIcon
+            closable
+            onClose={() => setError(null)}
+            style={{ marginBottom: 16 }}
+          />
+        )}
 
         <div className="filter-bar">
           <Space size="middle" align="center" wrap>
@@ -137,10 +187,20 @@ const MatchSettingsList = () => {
         />
       </Card>
 
+      {/* Details Popup (View mode) */}
       <MatchSettingDetailsPopup
         visible={isPopupVisible}
         onClose={closePopup}
         matchSetting={selectedMatchSetting}
+      />
+
+      {/* Edit Modal */}
+      <MatchSettingEditModal
+        visible={isEditModalVisible}
+        matchSetting={selectedForEdit}
+        loading={editLoading}
+        onSave={handleSaveEdit}
+        onCancel={handleCloseEdit}
       />
     </div>
   );
