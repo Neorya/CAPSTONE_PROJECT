@@ -359,7 +359,7 @@ SELECT * FROM capstone_app.teacher;
 -- Match Settings created by Teacher 1 (ID 1)
 INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('Standard Mode 1', 'Quick match, 5 rounds.', TRUE, '#include <iostream>
+('Square Integer', 'Write a program that takes an integer as input and returns the squared value of the given integer. The program should read an integer from standard input and output its square value.', TRUE, '#include <iostream>
 using namespace std;
 
 int main() {
@@ -369,31 +369,31 @@ int main() {
     }
     return 0;
 }', 9),
-('Advanced Algebra', '15-round math challenge.', TRUE, 'int add(int x, int y) { return x + y; }', 9);
+('Add Two Numbers', 'Write a function that takes two integers as parameters and returns their sum. The function should accept two integer values and return a single integer representing their addition.', TRUE, 'int add(int x, int y) { return x + y; }', 9);
 
 -- Match Settings created by Teacher 2 (ID 2)
 INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('History Facts', 'Review of Roman Empire history.', FALSE, '#include <map>\n#include <string>\n\nstd::map<std::string, std::string> history = { {"Julius Caesar", "44 BC"}, {"Augustus", "27 BC"} };', 10),
-('Geography Quiz', 'Quiz on European capitals.', TRUE, '#include <map>\n#include <string>\n\nstd::map<std::string, std::string> capitals = { {"France", "Paris"}, {"Germany", "Berlin"} };', 10);
+('Historical Dates Lookup', 'Create a data structure that stores historical dates for Roman Empire leaders. The solution should use a map to associate leader names with their corresponding dates in history, allowing for efficient lookup of when specific leaders ruled.', FALSE, '#include <map>\n#include <string>\n\nstd::map<std::string, std::string> history = { {"Julius Caesar", "44 BC"}, {"Augustus", "27 BC"} };', 10),
+('Capital City Mapping', 'Create a data structure that maps European countries to their capital cities. The solution should use a map container to store country-capital pairs and provide efficient lookup capabilities for retrieving the capital of any given country.', TRUE, '#include <map>\n#include <string>\n\nstd::map<std::string, std::string> capitals = { {"France", "Paris"}, {"Germany", "Berlin"} };', 10);
 
 -- Match Settings created by Teacher 3 (ID 19)
 INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('Science Fundamentals', 'Basics of Physics.', TRUE, 'double calculate_force(double mass, double acceleration) { return mass * acceleration; }', 19),
-('Chemistry Equations', 'Balancing basic equations.', FALSE, '#include <string>\n\nstd::string balance_equation(std::string reactants) { return (reactants.find("H2+O2") != std::string::npos) ? "2H2O" : "CO2"; }', 19);
+('Calculate Force from Mass and Acceleration', 'Write a function that calculates the force applied to an object using Newton''s second law of motion (F = ma). The function should accept two double parameters: mass and acceleration, then return the resulting force as a double value.', TRUE, 'double calculate_force(double mass, double acceleration) { return mass * acceleration; }', 19),
+('Chemical Equation Balancer', 'Create a function that determines the balanced product of simple chemical reactions. The function should accept a string representing reactants and return the appropriate balanced product based on the input chemical equation.', FALSE, '#include <string>\n\nstd::string balance_equation(std::string reactants) { return (reactants.find("H2+O2") != std::string::npos) ? "2H2O" : "CO2"; }', 19);
 
 -- Match Settings created by Teacher 4 (ID 20)
 INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('Literature Review 1', '19th Century English novels.', TRUE, '#include <map>\n#include <string>\n\nstd::map<std::string, std::string> authors = { {"Pride and Prejudice", "Jane Austen"}, {"Wuthering Heights", "Emily Brontë"} };', 20),
-('Grammar Practice', 'Advanced Italian grammar.', TRUE, '#include <string>\n\nstd::string get_tense(std::string verb) { return (verb.find("mangio") != std::string::npos) ? "presente indicativo" : "passato prossimo"; }', 20);
+('Book Author Mapping', 'Create a data structure that maps classic 19th century English novels to their respective authors. The solution should use a map container to store book-author pairs and provide efficient lookup capabilities for finding the author of any given novel.', TRUE, '#include <map>\n#include <string>\n\nstd::map<std::string, std::string> authors = { {"Pride and Prejudice", "Jane Austen"}, {"Wuthering Heights", "Emily Brontë"} };', 20),
+('Italian Verb Tense Identifier', 'Write a function that identifies the grammatical tense of Italian verbs. The function should accept a string containing an Italian verb and return the corresponding tense name in Italian grammar terminology (e.g., presente indicativo, passato prossimo).', TRUE, '#include <string>\n\nstd::string get_tense(std::string verb) { return (verb.find("mangio") != std::string::npos) ? "presente indicativo" : "passato prossimo"; }', 20);
 
 -- Match Settings created by Teacher 5 (ID 31)
 INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('Coding Basics', 'Introduction to Python syntax.', TRUE, '#include <vector>\n#include <numeric>\n\nint sum_numbers(std::vector<int> args) { return std::accumulate(args.begin(), args.end(), 0); }', 31),
-('Data Structures Review', 'Review of linked lists and trees.', FALSE, 'struct Node { int data; Node* next; Node(int d) : data(d), next(nullptr) {} };', 31);
+('Sum Vector Elements', 'Write a function that calculates the sum of all integers in a vector. The function should accept a vector of integers as a parameter and return a single integer representing the total sum of all elements using standard library algorithms.', TRUE, '#include <vector>\n#include <numeric>\n\nint sum_numbers(std::vector<int> args) { return std::accumulate(args.begin(), args.end(), 0); }', 31),
+('Implement Singly Linked List Node', 'Create a basic node structure for a singly linked list data structure. The structure should contain an integer data field and a pointer to the next node, with a constructor that initializes the data and sets the next pointer to null.', FALSE, 'struct Node { int data; Node* next; Node(int d) : data(d), next(nullptr) {} };', 31);
 
 
 
