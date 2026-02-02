@@ -148,7 +148,7 @@ const Lobby = () => {
               </Descriptions.Item>
 
               <Descriptions.Item label={<><TeamOutlined /> Participants</>}>
-                <Text strong>{gameDetails.participants?.length || 0} player(s)</Text>
+                <Text strong>{gameDetails.students?.length || 0} player(s)</Text>
               </Descriptions.Item>
 
               <Descriptions.Item label="Status">
