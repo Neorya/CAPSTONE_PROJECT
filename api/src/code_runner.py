@@ -78,9 +78,9 @@ def run_cpp_executable(executable_path: str, input_str: str) -> Dict:
             "nsjail",
             "--config", NSJAIL_CONFIG_PATH,
             "--really_quiet",
-            "--bindmount_ro", f"{executable_path}:/app/program",
+            "--bindmount_ro", f"{executable_path}:/sandbox/program",
             "--",
-            "/app/program"
+            "/sandbox/program"
         ]
 
         logger.info(f"Running command: {' '.join(cmd)}")

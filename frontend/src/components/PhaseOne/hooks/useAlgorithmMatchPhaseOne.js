@@ -242,11 +242,23 @@ export const useAlgorithmMatchPhaseOne = () => {
         const testResults = result.test_results || [];
         const passed = testResults.filter(t => t.status === 'pass').length;
         const failed = testResults.filter(t => t.status !== 'pass').length;
+
+        // Build detailed error messages with expected vs received (HackerRank style)
         const errors = testResults
             .filter(t => t.status !== 'pass')
-            .map(t => `Test ${t.test_id}: ${t.message || 'Output mismatch'}${t.actual_output ? ` (Got: ${t.actual_output})` : ''}`);
+            .map(t => {
+                const expected = t.expected_output || 'N/A';
+                const received = t.actual_output || 'N/A';
+                return `Test ${t.test_id}: ${t.message || 'Output mismatch'}\n  Expected: ${expected}\n  Received: ${received}`;
+            });
 
-        return { passed, failed, errors, testResults };
+        // Also add expected_output to testResults for UI display
+        const enrichedTestResults = testResults.map(t => ({
+            ...t,
+            expected_output: t.expected_output
+        }));
+
+        return { passed, failed, errors, testResults: enrichedTestResults };
     };
 
     const updateTestsWithResults = (tests, testResults) => {

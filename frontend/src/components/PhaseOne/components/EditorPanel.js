@@ -1,5 +1,5 @@
 import React from 'react';
-import { Select, Button, Flex, Collapse, Typography } from 'antd';
+import { Select, Button, Flex, Collapse, Typography, Table, Tag } from 'antd';
 import { CaretRightOutlined } from '@ant-design/icons';
 import Editor from '@monaco-editor/react';
 
@@ -26,12 +26,75 @@ const EditorPanel = ({
             label: 'Execution Output Windows / Test Results',
             children: runResults && (
                 <div className="run-results-content">
-                    <div className="run-results-header">
+                    <div className="run-results-header" style={{ marginBottom: 16 }}>
                         Test Results: <span className="run-result-success">{runResults.passed} Passed</span>, <span className="run-result-failure">{runResults.failed} Failed</span>
                     </div>
-                    {runResults.errors.map((err, i) => (
-                        <div key={i} className="run-result-error-msg">{err}</div>
-                    ))}
+
+                    {runResults.testResults.length > 0 ? (
+                        <Table
+                            dataSource={runResults.testResults}
+                            rowKey="test_id"
+                            pagination={false}
+                            size="small"
+                            columns={[
+                                {
+                                    title: 'Test Case',
+                                    dataIndex: 'test_id',
+                                    key: 'test_id',
+                                    render: (id) => `Test ${id}`,
+                                    width: 80,
+                                },
+                                {
+                                    title: 'Status',
+                                    dataIndex: 'status',
+                                    key: 'status',
+                                    width: 100,
+                                    render: (status) => {
+                                        let color = status === 'pass' ? 'success' : 'error';
+                                        let text = status === 'pass' ? 'Passed' : 'Failed';
+                                        if (status === 'timeout') { color = 'warning'; text = 'Timeout'; }
+                                        if (status === 'runtime_error') { color = 'error'; text = 'Runtime Error'; }
+                                        return <Tag color={color}>{text}</Tag>;
+                                    }
+                                },
+                                {
+                                    title: 'Expected Output',
+                                    dataIndex: 'expected_output',
+                                    key: 'expected_output',
+                                    render: (text) => <Text code>{text || 'N/A'}</Text>
+                                },
+                                {
+                                    title: 'Received Output',
+                                    dataIndex: 'actual_output',
+                                    key: 'actual_output',
+                                    render: (text, record) => (
+                                        <Text
+                                            style={{
+                                                whiteSpace: 'pre-wrap',
+                                                color: record.status !== 'pass' ? '#ff4d4f' : 'inherit'
+                                            }}
+                                        >
+                                            {text || 'N/A'}
+                                        </Text>
+                                    )
+                                }
+                            ]}
+                        />
+                    ) : (
+                        // Fallback for compilation errors or empty results
+                        runResults.errors.map((err, i) => (
+                            <pre key={i} className="run-result-error-msg" style={{
+                                margin: '8px 0',
+                                padding: '8px 12px',
+                                backgroundColor: '#fff1f0',
+                                border: '1px solid #ffa39e',
+                                borderRadius: '4px',
+                                fontSize: '13px',
+                                whiteSpace: 'pre-wrap',
+                                fontFamily: 'monospace'
+                            }}>{err}</pre>
+                        ))
+                    )}
                 </div>
             )
         }
