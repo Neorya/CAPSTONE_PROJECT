@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Button, Card, Tooltip, Typography, message, Spin } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
@@ -11,6 +11,7 @@ const Lobby = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const [checking, setChecking] = useState(false);
+  const hasShownMessage = useRef(false);
 
   // Get gameId from location state OR URL query params (fallback for when state is lost)
   const gameId = location.state?.gameId || searchParams.get('gameId');
@@ -18,7 +19,11 @@ const Lobby = () => {
   useEffect(() => {
     if (!gameId) {
       console.log('Lobby: No gameId found');
-      message.error('No game session found. Please join a game session first.');
+      // Only show the message once, even if effect runs multiple times
+      if (!hasShownMessage.current) {
+        message.info('No game session found. Please join a game session first.');
+        hasShownMessage.current = true;
+      }
       navigate('/join-game-session');
       return;
     }
