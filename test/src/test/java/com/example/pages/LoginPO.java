@@ -14,9 +14,8 @@ public class LoginPO {
     private WebDriverWait wait;
     private Actions actions;
 
-    // Locators
-    private By devStudentButton = By.xpath("//button[contains(@class, 'dev-student-btn')]");
-    private By devTeacherButton = By.xpath("//button[contains(@class, 'dev-teacher-btn')]");
+    private By devStudentButton = By.id("dev-student-btn");
+    private By devTeacherButton = By.id("dev-teacher-btn");
     private By alertMessage = By.className("alert-message");
     
     public LoginPO(WebDriver driver) {
@@ -25,8 +24,6 @@ public class LoginPO {
         int waitTimeout = (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) ? 30 : 10;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(waitTimeout));
     }
-    
-    // Kept generic methods if needed, but dev login uses buttons now
     
     public boolean isAlertVisible() {
         try {
@@ -50,6 +47,8 @@ public class LoginPO {
     }
 
     public void loginAsPreconfiguredTeacher() {
-        wait.until(ExpectedConditions.elementToBeClickable(devTeacherButton)).click();
+        wait.until(ExpectedConditions.elementToBeClickable(devTeacherButton)).click(); 
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(devTeacherButton));
     }
+
 }
