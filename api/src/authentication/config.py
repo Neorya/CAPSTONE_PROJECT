@@ -13,8 +13,8 @@ from datetime import timedelta
 # ============================================================================
 
 # Access Token Configuration
-# Short-lived JWT tokens used for API requests
-ACCESS_TOKEN_EXPIRE_MINUTES = 15  # 15 minutes
+# JWT tokens used for API requests
+ACCESS_TOKEN_EXPIRE_MINUTES = 120  # 2 hours (120 minutes)
 
 # Refresh Token Configuration
 # Long-lived tokens used to obtain new access tokens without re-authentication
