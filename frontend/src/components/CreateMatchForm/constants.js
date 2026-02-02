@@ -18,7 +18,9 @@ export const MIN_DURATION = 1;
 export const REQUIRED_FIELDS = [
   'title',
   'difficulty_level',
-  'review_number'
+  'review_number',
+  'duration_phase1',
+  'duration_phase2'
 ];
 
 // Difficulty levels configuration

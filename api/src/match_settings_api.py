@@ -227,6 +227,13 @@ def validate_match_setting_logic(
     Raises HTTPException if validation fails.
     """
     
+    # Check if there are any tests defined
+    if not tests or len(tests) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="At least one test case is required to publish a match setting",
+        )
+    
     # Run tests
     validation_result = run_tests(
         reference_solution,

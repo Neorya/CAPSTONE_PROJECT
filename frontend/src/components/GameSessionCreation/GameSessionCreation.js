@@ -202,6 +202,20 @@ const GameSessionCreation = () => {
       render: (text) => <Text strong>{text}</Text>, // Highlight text matches could be added here
     },
     {
+      title: "Phase 1 (min)",
+      dataIndex: "duration_phase1",
+      key: "duration_phase1",
+      sorter: true,
+      render: (duration) => duration ? `${duration}` : "-",
+    },
+    {
+      title: "Phase 2 (min)",
+      dataIndex: "duration_phase2",
+      key: "duration_phase2",
+      sorter: true,
+      render: (duration) => duration ? `${duration}` : "-",
+    },
+    {
       title: "Selected",
       key: "select",
       render: (_, record) => {
