@@ -435,8 +435,12 @@ async def update_match_setting(
         )
     
     verify_ownership(match_setting, teacher_id)
-    
-    # Update fields
+    print("data", data.json())
+    if run_tests(data.reference_solution, data.language, data.tests).success == False:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Reference solution is incorrect"
+        )
     update_data = data.dict(exclude_unset=True)
     
     tests_update = update_data.pop('tests', None)
