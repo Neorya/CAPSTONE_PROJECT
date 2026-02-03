@@ -19,6 +19,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const isDevMode = isDevModeEnabled();
   const authEnabled = useMemo(() => isAuthEnabled(), []);
+  console.log("authEnabled", authEnabled);
   const [profile, setProfile] = useState(null);
 
   useEffect(() => {
