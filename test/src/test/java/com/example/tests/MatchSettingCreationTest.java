@@ -98,7 +98,7 @@ public class MatchSettingCreationTest extends BaseTest {
     public void testManageTests() throws InterruptedException {
         String title = "Test Management " + System.currentTimeMillis();
         creationPO.enterTitle(title);
-        creationPO.enterDescription("Desc");
+        creationPO.enterDescription("Valid Description for Publish");
 
         creationPO.enterReferenceSolution("#include <iostream>\nint main() { if (input == \"input1\") std::cout << \"output1\"; else if (input == \"input_priv\") std::cout << \"output_priv\"; return 0; }");
         

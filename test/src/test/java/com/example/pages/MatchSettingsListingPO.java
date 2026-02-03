@@ -16,7 +16,7 @@ public class MatchSettingsListingPO {
     
     // Locators for Page Header
     private By backToHomeButton = By.id("back-to-home-button");
-    private By pageTitle = By.xpath("//h2[contains(@class, 'page-title') and text()='Match Settings']");
+    private By pageTitle = By.id("page-title");
     
     // Locators for Subheader
     private By subheaderText = By.xpath("//span[contains(@class, 'ant-typography-secondary') and contains(text(), 'Browse, clone, edit, delete')]");
