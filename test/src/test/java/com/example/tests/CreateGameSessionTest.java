@@ -15,20 +15,28 @@ import org.openqa.selenium.WebElement;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.MethodOrderer;
 import com.example.pages.CreateGameSessionPO;
+import com.example.pages.LoginPO;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CreateGameSessionTest extends BaseTest  {
     private static CreateGameSessionPO createGameSessionPage;
+    private static LoginPO loginPO;
 
     @BeforeAll
     public static void setUpTest() {
         // BaseTest.setUp() is automatically called by JUnit due to @BeforeAll in parent class
         // Initialize Page Object here
+        loginPO = new LoginPO(driver);
         createGameSessionPage = new CreateGameSessionPO(driver);
     }
     
     @BeforeEach
     public void navigateToPage() {
+        navigateTo("/login");
+        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("window.localStorage.clear();");
+        driver.navigate().refresh();
+        loginPO.loginAsPreconfiguredTeacher();
+        
         // Navigate to the create game session page before each test
         navigateTo("/create-game-session");
     }
@@ -59,6 +67,10 @@ public class CreateGameSessionTest extends BaseTest  {
         
         createGameSessionPage.fillSessionName(sessionName);
         createGameSessionPage.fillStartDate(startDate);
+
+        createGameSessionPage.fillDurationPhaseOne("10");
+        createGameSessionPage.fillDurationPhaseTwo("10");
+
 
         WebElement c1 = createGameSessionPage.getCheckBox(1).findElement(By.tagName("input"));
         WebElement c2 = createGameSessionPage.getCheckBox(2).findElement(By.tagName("input"));
