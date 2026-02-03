@@ -147,9 +147,8 @@ public class MatchSettingCreationPO {
     public void addPublicTest(String input, String expectedOutput) {
         wait.until(ExpectedConditions.elementToBeClickable(addPublicTestBtn)).click();
         
-        // Find the last row in public tests
         List<WebElement> rows = driver.findElements(By.xpath("//div[contains(., 'Public Test Cases')]//tbody//tr"));
-        int lastIndex = rows.size() - 1; // 0-based
+        int lastIndex = rows.size() - 1; 
         
         By inputLocator = By.xpath("(//div[contains(@class, 'test-case-section')])[1]//tbody//tr[" + (lastIndex + 1) + "]//td[1]//input");
         By outputLocator = By.xpath("(//div[contains(@class, 'test-case-section')])[1]//tbody//tr[" + (lastIndex + 1) + "]//td[2]//input");
@@ -164,13 +163,11 @@ public class MatchSettingCreationPO {
     public void addPrivateTest(String input, String expectedOutput) {
         wait.until(ExpectedConditions.elementToBeClickable(addPrivateTestBtn)).click();
         
-        // Find the last row in private tests (2nd section)
-        List<WebElement> rows = driver.findElements(By.xpath("//div[contains(., 'Private Test Cases')]//tbody//tr"));
+        List<WebElement> rows = driver.findElements(By.xpath("(//div[contains(@class, 'test-case-section')])[2]//tbody//tr"));
         int lastIndex = rows.size() - 1; 
         
-        // Assuming Private Test Cases is the second section
-        By inputLocator = By.xpath("(//div[contains(@class, 'test-case-section')])[1]//tbody//tr[" + (1) + "]//td[1]//input");
-        By outputLocator = By.xpath("(//div[contains(@class, 'test-case-section')])[1]//tbody//tr[" + (1) + "]//td[2]//input");
+        By inputLocator = By.xpath("(//div[contains(@class, 'test-case-section')])[2]//tbody//tr[" + (lastIndex + 1) + "]//td[1]//input");
+        By outputLocator = By.xpath("(//div[contains(@class, 'test-case-section')])[2]//tbody//tr[" + (lastIndex + 1) + "]//td[2]//input");
         
         WebElement inputField = wait.until(ExpectedConditions.visibilityOfElementLocated(inputLocator));
         inputField.sendKeys(input);
