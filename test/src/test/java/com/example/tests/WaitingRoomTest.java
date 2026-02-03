@@ -15,23 +15,31 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.example.pages.LoginPO;
 import com.example.pages.StartGamePO;
 import com.example.pages.WaitingRoomPO;
 
 public class WaitingRoomTest extends BaseTest {
     private static StartGamePO      startGamePO;
     private static WaitingRoomPO    waitingRoomPO;
+    private static LoginPO          loginPO;
     
     @BeforeAll
     public static void setUpTest() {
         // BaseTest.setUp() is automatically called by JUnit due to @BeforeAll in parent class
         // Just initialize Page Object here
+        loginPO         = new LoginPO(driver);
         waitingRoomPO   = new WaitingRoomPO(driver);
         startGamePO     = new StartGamePO(driver);
     }
     
     @BeforeEach
     public void navigateToPage() {
+        navigateTo("/login");
+        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("window.localStorage.clear();");
+        driver.navigate().refresh();
+        loginPO.loginAsPreconfiguredTeacher();
+        
         // Navigate to the settings listing page before each test
         navigateTo("/pre-start-game-session/1");
         

@@ -1,5 +1,6 @@
 package com.example.tests;
 
+import com.example.pages.LoginPO;
 import com.example.pages.ReviewPhasePO;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.WebElement;
@@ -11,14 +12,21 @@ import java.util.List;
 public class ReviewPhaseTest extends BaseTest {
 
     private static ReviewPhasePO reviewPage;
+    private static LoginPO loginPO;
 
     @BeforeAll
     public static void setUpTest() {
         reviewPage = new ReviewPhasePO(driver);
+        loginPO = new LoginPO(driver);
     }
 
     @BeforeEach
     public void navigateToReviewPage() {
+        navigateTo("/login");
+        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("window.localStorage.clear();");
+        driver.navigate().refresh();
+        loginPO.loginAsPreconfiguredStudent();
+        
         navigateTo("/voting");
 
         if (System.getenv("CI") != null) {

@@ -18,9 +18,9 @@ const AUTH_ENABLED_OVERRIDE_KEY = "auth_enabled_override";
 
 // Check REACT_APP_TESTING_MODE first (inverted logic - testing mode means auth disabled)
 // Fall back to REACT_APP_AUTH_ENABLED for backwards compatibility
-const TESTING_MODE = String(process.env.REACT_APP_TESTING_MODE || "false") === "true";
-const AUTH_ENABLED_LEGACY = String(process.env.REACT_APP_AUTH_ENABLED || "false") === "true";
-const AUTH_ENABLED_DEFAULT = TESTING_MODE ? false : AUTH_ENABLED_LEGACY;
+const TESTING_MODE = false;
+const AUTH_ENABLED_LEGACY = true;
+const AUTH_ENABLED_DEFAULT = true;
 
 /**
  * Dev mode flag key in localStorage

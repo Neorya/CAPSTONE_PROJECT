@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MatchSettingCreationTest extends BaseTest {
     private static MatchSettingCreationPO creationPO;
-    private static MatchSettingsPO listingPO; // To verify presence in list
+    private static MatchSettingsListingPO listingPO; // To verify presence in list
     private static LoginPO loginPO;
 
     @BeforeAll
@@ -15,9 +15,13 @@ public class MatchSettingCreationTest extends BaseTest {
   
         loginPO = new LoginPO(driver);
         creationPO = new MatchSettingCreationPO(driver);
-        listingPO = new MatchSettingsPO(driver);
+        listingPO = new MatchSettingsListingPO(driver);
     }
     
+    private void clearLocalStorage() {
+        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("window.localStorage.clear();");
+    }
+
     @BeforeEach
     public void navigateToCreationPage() throws InterruptedException {
         navigateTo("/login");
@@ -36,14 +40,14 @@ public class MatchSettingCreationTest extends BaseTest {
         String title = "Draft Test " + System.currentTimeMillis();
         creationPO.enterTitle(title); 
         creationPO.enterDescription("Draft Description"); 
-        creationPO.enterReferenceSolution("#include <iostream> int main() { std::cout << \"1\"; return 0; }"); 
+        creationPO.enterReferenceSolution("#include <iostream>\nint main() { std::cout << \"1\"; return 0; }"); 
         
         creationPO.clickSaveDraft();
         
         try { Thread.sleep(2000); } catch (InterruptedException e) {}
         
         navigateTo("/match-settings");
-        listingPO.waitForTableData();
+        listingPO.isPageLoaded();
         
         assertTrue(listingPO.isPageLoaded(), "Should be on list page");
     }
@@ -65,6 +69,7 @@ public class MatchSettingCreationTest extends BaseTest {
     public void testPublishWithoutRequiredFields() {
         creationPO.clickPublish();
         assertTrue(creationPO.isAlertVisible(), "Alert should be visible");
+        assertTrue(creationPO.isAlertError(), "Alert should be an error");
     }
 
     @Test
@@ -74,9 +79,9 @@ public class MatchSettingCreationTest extends BaseTest {
         String title = "Published Test " + System.currentTimeMillis();
         creationPO.enterTitle(title);
         creationPO.enterDescription("Valid Description for Publish");
-        creationPO.enterReferenceSolution("#include <iostream> int main() { std::cout << \"1\"; return 0; }");
+        creationPO.enterReferenceSolution("#include <iostream>\nint main() { std::cout << \"1\" << endl; return 0; }");
         
-        creationPO.addPublicTest("", "1");
+        creationPO.addPublicTest("1", "1");
         
         creationPO.clickPublish();
         
@@ -84,17 +89,29 @@ public class MatchSettingCreationTest extends BaseTest {
         
         String currentUrl = driver.getCurrentUrl();
         assertTrue(currentUrl.contains("/match-settings"), "Should redirect to match settings list");
+        assertTrue(listingPO.isPageLoaded(), "Should be on list page");
     }
 
     @Test
     @Order(5)
     @DisplayName("Scenario: Manage tests")
-    public void testManageTests() {
-        creationPO.enterTitle("Test Management " + System.currentTimeMillis());
+    public void testManageTests() throws InterruptedException {
+        String title = "Test Management " + System.currentTimeMillis();
+        creationPO.enterTitle(title);
         creationPO.enterDescription("Desc");
+
+        creationPO.enterReferenceSolution("#include <iostream>\nint main() { if (input == \"input1\") std::cout << \"output1\"; else if (input == \"input_priv\") std::cout << \"output_priv\"; return 0; }");
         
         creationPO.addPublicTest("input1", "output1");
         
         creationPO.addPrivateTest("input_priv", "output_priv");
+
+        creationPO.clickPublish();
+        
+        try { Thread.sleep(2000); } catch (InterruptedException e) {}
+        
+        String currentUrl = driver.getCurrentUrl();
+        assertTrue(currentUrl.contains("/match-settings"), "Should redirect to match settings list");
+        assertTrue(listingPO.isPageLoaded(), "Should be on list page");
     }
 }

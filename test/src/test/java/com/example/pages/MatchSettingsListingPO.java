@@ -9,7 +9,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class settingListingPO {
+public class MatchSettingsListingPO {
     
     private WebDriver driver;
     private WebDriverWait wait;
@@ -19,7 +19,7 @@ public class settingListingPO {
     private By pageTitle = By.xpath("//h2[contains(@class, 'page-title') and text()='Match Settings']");
     
     // Locators for Subheader
-    private By subheaderText = By.xpath("//span[contains(@class, 'ant-typography-secondary') and contains(text(), 'Browse existing match settings')]");
+    private By subheaderText = By.xpath("//span[contains(@class, 'ant-typography-secondary') and contains(text(), 'Browse, clone, edit, delete')]");
     
     // Locators for Filter Bar
     private By filterLabel = By.xpath("//span[contains(@class, 'ant-typography')]//strong[text()='Filter:']");
@@ -47,11 +47,11 @@ public class settingListingPO {
     private By nextPageButton = By.xpath("//li[contains(@class, 'ant-pagination-next')]//button");
     private By currentPageNumber = By.xpath("//li[contains(@class, 'ant-pagination-item-active')]");
     
-    // Locators for Details Button (dynamic ID pattern: btn-details-{id})
-    private By detailsButtons = By.xpath("//button[starts-with(@id, 'btn-details-')]");
+    // Locators for View Details Button (dynamic ID pattern: btn-view-{id})
+    private By detailsButtons = By.xpath("//button[starts-with(@id, 'btn-view-')]");
     
     // Locators for Details Popup/Modal
-    private By modal = By.xpath("//div[@class='ant-modal-content']");
+    private By modal = By.xpath("//div[contains(@class, 'ant-modal-content')]");
     private By modalHeader = By.id("popup-header-title");
     private By modalCloseButton = By.xpath("//button[@aria-label='Close']");
     private By modalStatusTag = By.id("popup-status-tag");
@@ -68,7 +68,7 @@ public class settingListingPO {
     private By privateTestsSection = By.xpath("//div[@class='tests-section'][.//h4[text()='Private Tests']]");
     
     // Constructor
-    public settingListingPO(WebDriver driver) {
+    public MatchSettingsListingPO(WebDriver driver) {
         this.driver = driver;
         // Use longer timeout in CI environments
         int waitTimeout = (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) ? 30 : 10;

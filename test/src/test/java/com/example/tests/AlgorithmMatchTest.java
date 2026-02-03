@@ -12,12 +12,39 @@ public class AlgorithmMatchTest extends BaseTest {
 
     private AlgorithmMatchPO matchPage;
 
+    /**
+     * Test Prerequisites:
+     * 1. Backend must have API_TESTING_MODE=true environment variable set
+     * 2. Database must have mock game_session data with an active game (in phase 1)
+     * 3. Database must have student_join_game entries linking dev student to the game
+     * 
+     * This test uses the legacy auth bypass system instead of the login flow.
+     */
     @BeforeEach
     public void setupScenario() {
         matchPage = new AlgorithmMatchPO(driver);
-        navigateTo("/phase1"); 
+        
+        // Navigate to any page first to set localStorage (can't set on about:blank)
+        navigateTo("/");
+        
+        // Use the legacy system to bypass frontend authentication
+        // - auth_enabled_override=false: disables frontend auth checks and route guards
+        // - dev_mode_bypass=true: enables dev mode token validation bypass
+        // - token=dev_mode_token: dummy token so hasToken() returns true
+        // - student_id: sets the current student ID for frontend operations
+        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript(
+            "window.localStorage.setItem('auth_enabled_override', 'false');" +
+            "window.localStorage.setItem('dev_mode_bypass', 'true');" +
+            "window.localStorage.setItem('token', 'dev_mode_token');" +
+            "window.localStorage.setItem('student_id', '41');"  // Dev Student user ID from init.sql
+        );
+        
+        // Navigate directly to phase-one with gameId parameter
+        // Note: This requires a game session with ID 1 to exist and be in active phase 1 state
+        navigateTo("/phase-one?gameId=1"); 
         if (!matchPage.isPageLoaded()) {
-            fail("The Algorithm Match Phase 1 page failed to load.");
+            fail("The Algorithm Match Phase 1 page failed to load. " +
+                 "Ensure mock game session data exists and the game is in phase 1 state.");
         }
     }
 

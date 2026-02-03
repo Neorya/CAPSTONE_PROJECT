@@ -22,6 +22,8 @@ public class CreateGameSessionPO {
     private static final String SESSION_NAME_INPUT_XPATH = "//*[@id=\"session-name\"]";
     private static final String START_DATE_INPUT_XPATH = "//*[@id=\"start-date\"]";
     private static final String CALENDAR_OK_BUTTON_XPATH = "//button[@class='ant-btn css-dev-only-do-not-override-hofb1t ant-btn-primary ant-btn-color-primary ant-btn-variant-solid ant-btn-sm']";
+    private static final String DURATION_PHASE_ONE_INPUT_XPATH = "//*[@id=\"duration_phas1\"]";
+    private static final String DURATION_PHASE_TWO_INPUT_XPATH = "//*[@id=\"duration_phas2\"]";
 
     public CreateGameSessionPO(WebDriver driver) {
         this.driver = driver;
@@ -95,4 +97,17 @@ public class CreateGameSessionPO {
         WebElement okButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(CALENDAR_OK_BUTTON_XPATH)));
         okButton.click();
     }
+
+    public void fillDurationPhaseOne(String duration) {
+        WebElement durationPhaseOneInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(DURATION_PHASE_ONE_INPUT_XPATH)));
+        durationPhaseOneInput.clear();
+        durationPhaseOneInput.sendKeys(duration);
+    }
+
+    public void fillDurationPhaseTwo(String duration) {
+        WebElement durationPhaseTwoInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(DURATION_PHASE_TWO_INPUT_XPATH)));
+        durationPhaseTwoInput.clear();
+        durationPhaseTwoInput.sendKeys(duration);
+    }
+        
 }

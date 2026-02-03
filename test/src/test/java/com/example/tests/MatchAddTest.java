@@ -13,16 +13,23 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MatchAddTest extends BaseTest {
     
     private static MatchAddPO matchAddPage;
+    private static LoginPO loginPO;
     
     @BeforeAll
     public static void setUpTest() {
         // BaseTest.setUp() is automatically called by JUnit due to @BeforeAll in parent class
         // Initialize Page Object here
+        loginPO = new LoginPO(driver);
         matchAddPage = new MatchAddPO(driver);
     }
     
     @BeforeEach
     public void navigateToPage() {
+        navigateTo("/login");
+        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("window.localStorage.clear();");
+        driver.navigate().refresh();
+        loginPO.loginAsPreconfiguredTeacher();
+        
         // Navigate to the create match page before each test
         navigateTo("/create-match");
         

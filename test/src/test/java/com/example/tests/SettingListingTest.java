@@ -16,7 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.openqa.selenium.WebElement;
 
-import com.example.pages.settingListingPO;
+import com.example.pages.LoginPO;
+import com.example.pages.MatchSettingsListingPO;
 
 /**
  * Test class for Match Settings Listing page functionality.
@@ -25,17 +26,25 @@ import com.example.pages.settingListingPO;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SettingListingTest extends BaseTest {
     
-    private static settingListingPO settingListingPage;
+    private static MatchSettingsListingPO settingListingPage;
+    private static LoginPO loginPO;
     
     @BeforeAll
     public static void setUpTest() {
         // BaseTest.setUp() is automatically called by JUnit due to @BeforeAll in parent class
         // Just initialize Page Object here
-        settingListingPage = new settingListingPO(driver);
+        loginPO = new LoginPO(driver);
+        settingListingPage = new MatchSettingsListingPO(driver);
     }
     
     @BeforeEach
     public void navigateToPage() {
+        // Login as Teacher
+        navigateTo("/login");
+        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("window.localStorage.clear();");
+        driver.navigate().refresh();
+        loginPO.loginAsPreconfiguredTeacher();
+        
         // Navigate to the settings listing page before each test
         navigateTo("/match-settings");
         
@@ -81,7 +90,7 @@ public class SettingListingTest extends BaseTest {
     @DisplayName("Verify subheader text is displayed")
     public void testSubheaderText() {
         String subheaderText = settingListingPage.getSubheaderText();
-        assertTrue(subheaderText.contains("Browse existing match settings"), 
+        assertTrue(subheaderText.contains("Browse, clone, edit, delete"), 
             "Subheader should contain correct text");
     }
     
