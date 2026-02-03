@@ -165,7 +165,8 @@ CREATE TABLE capstone_app.student_tests (
     test_out VARCHAR(500),
 
     match_for_game_id INTEGER REFERENCES capstone_app.matches_for_game(match_for_game_id) NOT NULL,
-    student_id INTEGER REFERENCES capstone_app.student(student_id) NOT NULL
+    student_id INTEGER REFERENCES capstone_app.student(student_id) NOT NULL,
+    reviewer_comment VARCHAR(500) DEFAULT NULL
 
 );
 

@@ -78,3 +78,20 @@ export const getStudentSessionScore = async (studentId, gameId) => {
 
     return response.json();
 };
+
+/**
+ * Get all peer reviews for a student's solution
+ * @param {number} solutionId - ID of the student solution
+ * @returns {Promise<Object>} Peer reviews with votes and comments
+ */
+export const getSolutionPeerReviews = async (solutionId) => {
+    const url = `${API_BASE_URL}/api/student-results/reviews/${solutionId}`;
+    const response = await apiFetch(url);
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Failed to fetch peer reviews: ${response.statusText}`);
+    }
+
+    return response.json();
+};

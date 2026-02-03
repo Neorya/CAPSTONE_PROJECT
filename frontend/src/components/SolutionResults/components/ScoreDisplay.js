@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 /**
  * ScoreDisplay Component
- * Displays the total score and test summary in a horizontal card layout
+ * Displays the total score and test summary in a vertical card layout
  */
 const ScoreDisplay = ({
     score,
@@ -19,9 +19,21 @@ const ScoreDisplay = ({
 
     return (
         <div className="score-display-card" id="score-display">
-            {/* Left side - Test Summary */}
+            {/* Top section - Total Score */}
+            <div className="score-section">
+                <div className="score-label">TOTAL SCORE</div>
+                <div className="score-value" id="total-score-value">
+                    {score !== null && score !== undefined ? score : 'N/A'}
+                    <span className="score-separator">/</span>{maxScore}
+                </div>
+            </div>
+
+            {/* Horizontal divider */}
+            <div className="score-horizontal-divider"></div>
+
+            {/* Bottom section - Test Summary */}
             <div className="test-summary-section">
-                <div className="test-summary-label">Test Results Summary</div>
+                <div className="test-summary-label">TEST RESULTS SUMMARY</div>
                 <div className="test-summary-grid">
                     <div className="test-summary-item">
                         <span className="test-summary-icon public">📘</span>
@@ -48,18 +60,6 @@ const ScoreDisplay = ({
                             </div>
                         </div>
                     )}
-                </div>
-            </div>
-
-            {/* Vertical divider */}
-            <div className="score-divider"></div>
-
-            {/* Right side - Total Score */}
-            <div className="score-section">
-                <div className="score-label">Total Score</div>
-                <div className="score-value" id="total-score-value">
-                    {score !== null && score !== undefined ? score : 'N/A'}
-                    <span className="score-separator">/</span>{maxScore}
                 </div>
             </div>
         </div>

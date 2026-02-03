@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 
 /**
  * TestResultItem Component
- * Displays a single test result with input, output, and status
+ * Displays a single test result with input, output, status, and optional reviewer comment
  */
-const TestResultItem = ({ testNumber, input, expectedOutput, actualOutput, status }) => {
+const TestResultItem = ({ testNumber, input, expectedOutput, actualOutput, status, comment }) => {
     const isPassed = status === 'Passed';
     const statusIcon = isPassed ? '✓' : '✗';
     const statusClass = isPassed ? 'passed' : 'failed';
@@ -34,6 +34,13 @@ const TestResultItem = ({ testNumber, input, expectedOutput, actualOutput, statu
                     <span className="failure-output">(Output: {actualOutput})</span>
                 </div>
             )}
+            {/* Display reviewer comment if present */}
+            {comment && (
+                <div className="test-comment">
+                    <span className="comment-icon">💬</span>
+                    <span className="comment-text">{comment}</span>
+                </div>
+            )}
         </div>
     );
 };
@@ -44,6 +51,7 @@ TestResultItem.propTypes = {
     expectedOutput: PropTypes.string.isRequired,
     actualOutput: PropTypes.string.isRequired,
     status: PropTypes.oneOf(['Passed', 'Failed']).isRequired,
+    comment: PropTypes.string,
 };
 
 export default TestResultItem;
