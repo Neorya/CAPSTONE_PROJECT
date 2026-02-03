@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tag, Collapse, Typography, Space, theme } from 'antd';
+import { Tag, Collapse, Typography, Space, theme, Button } from 'antd';
 import {
     DeleteOutlined,
     CheckCircleFilled,
@@ -28,9 +28,14 @@ const TestCaseItem = ({ test, label, onDelete }) => {
         <Space onClick={(event) => event.stopPropagation()}>
             {getStatusTag()}
             {onDelete && (
-                <i className="fa-trash test-case-delete-icon" onClick={onDelete} style={{ color: token.colorError }}>
-                    <DeleteOutlined />
-                </i>
+                <Button
+                    type="text"
+                    danger
+                    size="small"
+                    icon={<DeleteOutlined />}
+                    onClick={onDelete}
+                    data-testid="delete-test-button"
+                />
             )}
         </Space>
     );

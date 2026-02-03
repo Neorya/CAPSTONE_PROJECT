@@ -75,6 +75,7 @@ class TestResultDetail(BaseModel):
     status: str # "pass", "fail", "timeout", "runtime_error"
     message: str
     actual_output: Optional[str] = None
+    expected_output: Optional[str] = None
 
 class SubmitSolutionResponse(BaseModel):
     solution_id: Optional[int] = None
@@ -363,10 +364,10 @@ def submit_solution(
             status = "fail"
             message = ""
             actual_out = ""
+            expected_out = (test.test_out or "").strip()  # Define before if block
             
             if result["status"] == "success":
                 actual_out = (result["stdout"] or "").strip()
-                expected_out = (test.test_out or "").strip()
                 if actual_out == expected_out:
                     status = "pass"
                     passed_test_count += 1
@@ -376,7 +377,8 @@ def submit_solution(
                     message = f"Output mismatch"
             else:
                 status = result["status"]
-                message = result["stderr"]
+                message = result["stderr"] or "Execution failed"
+                actual_out = message  # Set actual_out to error message for debugging
                 encountered_error = True
 
             # Save to buffer
@@ -390,7 +392,8 @@ def submit_solution(
                     test_id=test.test_id,
                     status=status,
                     message=message,
-                    actual_output=actual_out if status != "timeout" and status != "runtime_error" else None
+                    actual_output=actual_out,
+                    expected_output=expected_out
                 ))
 
         # Run Student Tests (Custom Tests)
@@ -550,10 +553,10 @@ def run_custom_tests(
             status = "fail"
             message = ""
             actual_out = ""
+            expected_out = (test.test_out or "").strip()  # Define before if block
 
             if result["status"] == "success":
                 actual_out = (result["stdout"] or "").strip()
-                expected_out = (test.test_out or "").strip()
                 
                 if actual_out == expected_out:
                     status = "pass"
@@ -561,13 +564,15 @@ def run_custom_tests(
                     message = "Output mismatch"
             else:
                 status = result["status"]
-                message = result["stderr"]
+                message = result["stderr"] or "Execution failed"
+                actual_out = message  # Set actual_out to error message for debugging
 
             test_results.append(TestResultDetail(
                 test_id=test.test_id,
                 status=status,
                 message=message,
-                actual_output=actual_out if status != "timeout" and status != "runtime_error" else None
+                actual_output=actual_out,
+                expected_output=expected_out
             ))
             
     finally:
