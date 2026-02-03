@@ -7,14 +7,28 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MatchSettingTest extends BaseTest {
     private static MatchSettingsPO matchSettingsPage;
+    private static LoginPO loginPO;
+
     
     @BeforeAll
     public static void setUpTest() {
+        loginPO = new LoginPO(driver);
         matchSettingsPage = new MatchSettingsPO(driver);
+    }
+
+    private void clearLocalStorage() {
+        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("window.localStorage.clear();");
     }
     
     @BeforeEach
-    public void navigateToMatchSettings() {
+    public void navigateToMatchSettings() throws InterruptedException {
+        navigateTo("/login");
+        clearLocalStorage();
+        driver.navigate().refresh(); // Refresh to apply cleared storage
+        loginPO.loginAsPreconfiguredTeacher();
+        Thread.sleep(50);
+        System.out.println("Logged in");
+
         navigateTo("/match-settings");
         
         if (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) {
