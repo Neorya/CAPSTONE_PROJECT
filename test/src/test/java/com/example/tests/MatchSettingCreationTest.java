@@ -79,7 +79,7 @@ public class MatchSettingCreationTest extends BaseTest {
         String title = "Published Test " + System.currentTimeMillis();
         creationPO.enterTitle(title);
         creationPO.enterDescription("Valid Description for Publish");
-        creationPO.enterReferenceSolution("#include <iostream>\nint main() { std::cout << \"1\" << endl; return 0; }");
+        creationPO.enterReferenceSolution("#include <iostream>\nint main() { std::cout << \"1\"; return 0; }");
         
         creationPO.addPublicTest("1", "1");
         
@@ -100,7 +100,7 @@ public class MatchSettingCreationTest extends BaseTest {
         creationPO.enterTitle(title);
         creationPO.enterDescription("Valid Description for Publish");
 
-        creationPO.enterReferenceSolution("#include <iostream>\nint main() { if (input == \"input1\") std::cout << \"output1\"; else if (input == \"input_priv\") std::cout << \"output_priv\"; return 0; }");
+        creationPO.enterReferenceSolution("#include <iostream>\nint main() { std::string input; std::cin >> input; if (input == \"input1\") std::cout << \"output1\"; else if (input == \"input_priv\") std::cout << \"output_priv\"; return 0; }");
         
         creationPO.addPublicTest("input1", "output1");
         
