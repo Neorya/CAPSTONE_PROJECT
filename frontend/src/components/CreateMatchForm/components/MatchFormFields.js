@@ -158,7 +158,7 @@ const MatchFormFields = ({
 
         {/* Duration Phase 1 */}
         <Form.Item
-          label="Duration Phase 1 (minutes)"
+          label="Estimated Duration Phase 1 (minutes)"
           name="duration_phase1"
           rules={[
             {
@@ -173,13 +173,13 @@ const MatchFormFields = ({
           <Input
             id="first-phase-duration-input"
             size="large"
-            placeholder="Enter duration in minutes"
+            placeholder="Enter Duration in minutes"
           />
         </Form.Item>
 
         {/* Duration Phase 2 */}
         <Form.Item
-          label="Duration Phase 2 (minutes)"
+          label="Estimated Duration Phase 2 (minutes)"
           name="duration_phase2"
           rules={[
             {

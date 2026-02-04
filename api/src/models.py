@@ -153,6 +153,8 @@ class Match(Base):
     creator_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.teacher.teacher_id"))
     difficulty_level = Column(Integer, nullable=False)
     review_number = Column(Integer, nullable=False)
+    duration_phase1 = Column(Integer, nullable=False, default=0)  # in minutes
+    duration_phase2 = Column(Integer, nullable=False, default=0)  # in minutes
     
     # Relationships
     creator = relationship("Teacher", back_populates="matches")

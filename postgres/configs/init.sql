@@ -107,7 +107,9 @@ CREATE TABLE capstone_app.match (
     match_set_id INTEGER REFERENCES capstone_app.match_setting(match_set_id),
     creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id),
     difficulty_level INTEGER NOT NULL,
-    review_number INTEGER NOT NULL
+    review_number INTEGER NOT NULL,
+    duration_phase1 INTEGER NOT NULL DEFAULT 0,  -- in minutes
+    duration_phase2 INTEGER NOT NULL DEFAULT 0   -- in minutes
     
 );
 
@@ -402,18 +404,18 @@ VALUES
 -- INSERT DATA INTO MATCH TABLE (10 RECORDS)
 -- ######################################
 
-INSERT INTO capstone_app.match (title, match_set_id, creator_id, difficulty_level, review_number)
+INSERT INTO capstone_app.match (title, match_set_id, creator_id, difficulty_level, review_number, duration_phase1, duration_phase2)
 VALUES
-('Standard Match - Class 5A', 1, 9, 1, 5),
-('Standard Match - Class 5B', 1, 9, 1, 5),
-('Functions Lab - Group 1', 4, 10, 4, 3),
-('Functions Lab - Group 2', 4, 10, 4, 3),
-('Variable Declarations - Section A', 5, 19, 3, 4),
-('Variable Declarations - Section B', 5, 19, 3, 4),
-('If Statement - Group 1', 8, 20, 5, 3),
-('If Statement - Group 2', 8, 20, 5, 3),
-('Pointers Basics - Section A', 9, 31, 8, 3),
-('Pointers Basics - Section B', 9, 31, 8, 3);
+('Standard Match - Class 5A', 1, 9, 1, 5, 30, 30),
+('Standard Match - Class 5B', 1, 9, 1, 5, 30, 30),
+('Functions Lab - Group 1', 4, 10, 4, 3, 30, 30),
+('Functions Lab - Group 2', 4, 10, 4, 3, 30, 30),
+('Variable Declarations - Section A', 5, 19, 3, 4, 30, 30),
+('Variable Declarations - Section B', 5, 19, 3, 4, 30, 30),
+('If Statement - Group 1', 8, 20, 5, 3, 30, 30),
+('If Statement - Group 2', 8, 20, 5, 3, 30, 30),
+('Pointers Basics - Section A', 9, 31, 8, 3, 30, 30),
+('Pointers Basics - Section B', 9, 31, 8, 3, 30, 30);
 
 
 -- INSERT DEV TEST USERS (For Testing Mode)
@@ -426,13 +428,111 @@ VALUES
 ('dev_teacher_sub_456', 'dev.teacher@test.com', 'Dev', 'Teacher', 'teacher', 0, NULL),
 ('dev_admin_sub_789', 'dev.admin@test.com', 'Dev', 'Admin', 'admin', 0, NULL);
 
+-- ######################################
+-- INSERT DATA INTO TESTS TABLE (50+ RECORDS)
+-- ######################################
+
+-- Match Setting 1: Square Integer
+-- Tests for squaring integers
 INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id)
 VALUES
 ('5', '25', 'public', 1),
 ('0', '0', 'private', 1),
 ('2', '4', 'private', 1),
 ('-3', '9', 'private', 1),
-('10', '100', 'private', 1);
+('10', '100', 'private', 1),
+('1', '1', 'public', 1),
+('-5', '25', 'private', 1),
+('100', '10000', 'private', 1);
+
+-- Match Setting 2: Add Two Numbers
+-- Tests for adding two integers
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id)
+VALUES
+('2 3', '5', 'public', 2),
+('0 0', '0', 'private', 2),
+('10 5', '15', 'private', 2),
+('-5 3', '-2', 'private', 2),
+('100 200', '300', 'public', 2),
+('-10 -5', '-15', 'private', 2),
+('7 8', '15', 'private', 2);
+
+-- Match Setting 3: Historical Dates Lookup
+-- Tests for map lookups (key-value pairs)
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id)
+VALUES
+('Julius Caesar', '44 BC', 'public', 3),
+('Augustus', '27 BC', 'private', 3),
+('Nero', 'Not Found', 'private', 3),
+('Caligula', 'Not Found', 'public', 3),
+('Trajan', 'Not Found', 'private', 3);
+
+-- Match Setting 4: Capital City Mapping
+-- Tests for country-capital lookups
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id)
+VALUES
+('France', 'Paris', 'public', 4),
+('Germany', 'Berlin', 'private', 4),
+('Italy', 'Rome', 'public', 4),
+('Spain', 'Madrid', 'private', 4),
+('Greece', 'Athens', 'private', 4),
+('Poland', 'Warsaw', 'public', 4),
+('Portugal', 'Lisbon', 'private', 4);
+
+-- Match Setting 5: Calculate Force from Mass and Acceleration
+-- Tests for F = ma formula
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id)
+VALUES
+('2 3', '6', 'public', 5),
+('5 2', '10', 'private', 5),
+('10 10', '100', 'private', 5),
+('0 5', '0', 'public', 5),
+('1.5 2', '3', 'private', 5),
+('100 0.5', '50', 'private', 5);
+
+-- Match Setting 6: Chemical Equation Balancer
+-- Tests for chemical reactions
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id)
+VALUES
+('H2+O2', '2H2O', 'public', 6),
+('C+O2', 'CO2', 'private', 6),
+('H2+Cl2', '2HCl', 'private', 6),
+('N2+H2', 'NH3', 'public', 6),
+('Fe+O2', 'Fe2O3', 'private', 6);
+
+-- Match Setting 7: Book Author Mapping
+-- Tests for book-author lookups
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id)
+VALUES
+('Pride and Prejudice', 'Jane Austen', 'public', 7),
+('Wuthering Heights', 'Emily Brontë', 'private', 7),
+('Jane Eyre', 'Charlotte Brontë', 'public', 7),
+('The Tenant of Wildfell Hall', 'Anne Brontë', 'private', 7),
+('Emma', 'Jane Austen', 'private', 7),
+('Persuasion', 'Jane Austen', 'public', 7);
+
+-- Match Setting 8: Italian Verb Tense Identifier
+-- Tests for Italian verb conjugations
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id)
+VALUES
+('mangio', 'presente indicativo', 'public', 8),
+('ho mangiato', 'passato prossimo', 'private', 8),
+('mangiavo', 'imperfetto', 'private', 8),
+('avrò mangiato', 'futuro anteriore', 'public', 8),
+('mangerei', 'condizionale semplice', 'private', 8),
+('mangiassi', 'congiuntivo imperfetto', 'private', 8);
+
+-- Match Setting 9: Sum Vector Elements
+-- Tests for summing vector elements
+INSERT INTO capstone_app.tests (test_in, test_out, scope, match_set_id)
+VALUES
+('1 2 3', '6', 'public', 9),
+('0 0 0', '0', 'private', 9),
+('10 20 30', '60', 'private', 9),
+('5', '5', 'public', 9),
+('-1 -2 -3', '-6', 'private', 9),
+('100 200 300', '600', 'private', 9),
+('1 2 3 4 5', '15', 'public', 9);
 
 
 -- ######################################
