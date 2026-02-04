@@ -24,6 +24,7 @@ const TestResultsSection = ({ title, testResults, sectionId }) => {
                         expectedOutput={test.expected_output || 'N/A'}
                         actualOutput={test.actual_output}
                         status={test.status}
+                        comment={test.comment}
                     />
                 ))}
             </div>
@@ -40,6 +41,7 @@ TestResultsSection.propTypes = {
             expected_output: PropTypes.string,
             actual_output: PropTypes.string.isRequired,
             status: PropTypes.string.isRequired,
+            comment: PropTypes.string,
         })
     ).isRequired,
     sectionId: PropTypes.string.isRequired,

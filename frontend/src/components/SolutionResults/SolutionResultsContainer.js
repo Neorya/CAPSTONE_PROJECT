@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { message } from 'antd';
-import { getSolutionTestResults } from '../../services/solutionResultsService';
+import { getSolutionTestResults, getSolutionPeerReviews } from '../../services/solutionResultsService';
 import SolutionResultsView from './SolutionResultsView';
 import './SolutionResults.css';
 
@@ -13,6 +13,7 @@ const SolutionResultsContainer = () => {
     const { solutionId } = useParams();
     const [loading, setLoading] = useState(true);
     const [resultsData, setResultsData] = useState(null);
+    const [peerReviewsData, setPeerReviewsData] = useState(null);
     const [error, setError] = useState(null);
 
     useEffect(() => {
@@ -21,8 +22,19 @@ const SolutionResultsContainer = () => {
             setError(null);
 
             try {
-                const data = await getSolutionTestResults(solutionId);
-                setResultsData(data);
+                // Fetch test results (required)
+                const testResults = await getSolutionTestResults(solutionId);
+                setResultsData(testResults);
+
+                // Fetch peer reviews (optional - don't fail if unavailable)
+                try {
+                    const peerReviews = await getSolutionPeerReviews(solutionId);
+                    setPeerReviewsData(peerReviews);
+                } catch (peerReviewError) {
+                    // Peer reviews not available (e.g., Phase 1, no reviews yet)
+                    console.log('Peer reviews not available:', peerReviewError.message);
+                    setPeerReviewsData(null);
+                }
             } catch (err) {
                 setError(err.message);
                 message.error(`Failed to load solution results: ${err.message}`);
@@ -96,6 +108,7 @@ const SolutionResultsContainer = () => {
             publicTeacherTests={publicTeacher}
             privateTeacherTests={privateTeacher}
             studentTests={student}
+            peerReviews={peerReviewsData}
         />
     );
 };

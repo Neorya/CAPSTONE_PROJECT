@@ -102,6 +102,7 @@ class StudentTest(Base):
     test_out = Column(String(500), nullable=True)
     match_for_game_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.matches_for_game.match_for_game_id"), nullable=False)
     student_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.student.student_id"), nullable=False)
+    reviewer_comment = Column(String(500), nullable=True)
 
 
 class StudentSolution(Base):

@@ -6,6 +6,7 @@ import { HomeOutlined } from '@ant-design/icons';
 import SolutionCodeBlock from './components/SolutionCodeBlock';
 import ScoreDisplay from './components/ScoreDisplay';
 import TestResultsSection from './components/TestResultsSection';
+import PeerReviewsSection from './components/PeerReviewsSection';
 
 /**
  * SolutionResultsView Component
@@ -20,6 +21,7 @@ const SolutionResultsView = ({
     publicTeacherTests,
     privateTeacherTests,
     studentTests,
+    peerReviews,
 }) => {
     const navigate = useNavigate();
 
@@ -38,53 +40,72 @@ const SolutionResultsView = ({
 
             </div>
 
-            {/* Main Content - Two Column Layout */}
+            {/* Main Content - 2x2 Grid Layout */}
             <div className="solution-results-content">
-                {/* Left Panel - Code Block */}
-                <div className="left-panel">
-                    <SolutionCodeBlock code={code} language="cpp" />
+                {/* Top Row */}
+                <div className="results-top-row">
+                    {/* Top Left - Code Block */}
+                    <div className="top-left-panel">
+                        <SolutionCodeBlock code={code} language="cpp" />
+                    </div>
+
+                    {/* Top Right - Score Display */}
+                    <div className="top-right-panel">
+                        <ScoreDisplay
+                            score={totalScore}
+                            maxScore={maxScore}
+                            publicTestsPassed={publicTeacherTests.filter(t => t.status === 'Passed').length}
+                            publicTestsTotal={publicTeacherTests.length}
+                            privateTestsPassed={privateTeacherTests.filter(t => t.status === 'Passed').length}
+                            privateTestsTotal={privateTeacherTests.length}
+                            studentTestsPassed={studentTests.filter(t => t.status === 'Passed').length}
+                            studentTestsTotal={studentTests.length}
+                        />
+                    </div>
                 </div>
 
-                {/* Right Panel - Score and Test Results */}
-                <div className="right-panel">
-                    <ScoreDisplay
-                        score={totalScore}
-                        maxScore={maxScore}
-                        publicTestsPassed={publicTeacherTests.filter(t => t.status === 'Passed').length}
-                        publicTestsTotal={publicTeacherTests.length}
-                        privateTestsPassed={privateTeacherTests.filter(t => t.status === 'Passed').length}
-                        privateTestsTotal={privateTeacherTests.length}
-                        studentTestsPassed={studentTests.filter(t => t.status === 'Passed').length}
-                        studentTestsTotal={studentTests.length}
-                    />
-
-                    {/* Public Teacher Tests */}
-                    {publicTeacherTests.length > 0 && (
-                        <TestResultsSection
-                            title="PUBLIC TEACHER TESTS"
-                            testResults={publicTeacherTests}
-                            sectionId="public-teacher-tests"
+                {/* Bottom Row */}
+                <div className="results-bottom-row">
+                    {/* Bottom Left - Peer Reviews */}
+                    <div className="bottom-left-panel">
+                        <PeerReviewsSection
+                            reviews={peerReviews?.reviews || []}
+                            totalReviews={peerReviews?.total_reviews || 0}
+                            correctVotes={peerReviews?.correct_votes || 0}
+                            incorrectVotes={peerReviews?.incorrect_votes || 0}
+                            sectionId="peer-review-feedback"
                         />
-                    )}
+                    </div>
 
-                    {/* Private Teacher Tests */}
-                    {privateTeacherTests.length > 0 && (
-                        <TestResultsSection
-                            title="PRIVATE TEACHER TESTS"
-                            testResults={privateTeacherTests}
-                            sectionId="private-teacher-tests"
-                        />
-                    )}
+                    {/* Bottom Right - Test Results */}
+                    <div className="bottom-right-panel">
+                        {/* Public Teacher Tests */}
+                        {publicTeacherTests.length > 0 && (
+                            <TestResultsSection
+                                title="PUBLIC TEACHER TESTS"
+                                testResults={publicTeacherTests}
+                                sectionId="public-teacher-tests"
+                            />
+                        )}
 
-                    {/* Student Provided Tests */}
-                    {studentTests.length > 0 && (
-                        <TestResultsSection
-                            title="STUDENT PROVIDED TESTS"
-                            testResults={studentTests}
-                            sectionId="student-provided-tests"
-                        />
-                    )}
+                        {/* Private Teacher Tests */}
+                        {privateTeacherTests.length > 0 && (
+                            <TestResultsSection
+                                title="PRIVATE TEACHER TESTS"
+                                testResults={privateTeacherTests}
+                                sectionId="private-teacher-tests"
+                            />
+                        )}
 
+                        {/* Student Provided Tests */}
+                        {studentTests.length > 0 && (
+                            <TestResultsSection
+                                title="STUDENT PROVIDED TESTS"
+                                testResults={studentTests}
+                                sectionId="student-provided-tests"
+                            />
+                        )}
+                    </div>
                 </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
@@ -107,11 +128,17 @@ SolutionResultsView.propTypes = {
     studentName: PropTypes.string.isRequired,
     challengeTitle: PropTypes.string.isRequired,
     code: PropTypes.string.isRequired,
-    totalScore: PropTypes.number.isRequired,
+    totalScore: PropTypes.number,
     maxScore: PropTypes.number.isRequired,
     publicTeacherTests: PropTypes.array.isRequired,
     privateTeacherTests: PropTypes.array.isRequired,
     studentTests: PropTypes.array.isRequired,
+    peerReviews: PropTypes.shape({
+        reviews: PropTypes.array,
+        total_reviews: PropTypes.number,
+        correct_votes: PropTypes.number,
+        incorrect_votes: PropTypes.number,
+    }),
 };
 
 export default SolutionResultsView;
