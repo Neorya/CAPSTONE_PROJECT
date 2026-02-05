@@ -32,7 +32,7 @@ Dopo il login, vedrai la home page con le seguenti opzioni:
 
 | Card | Descrizione |
 |------|-------------|
-| **Create Match Settings** | Progetta nuovi problemi di codifica con test cases e soluzioni |
+| **Create Match Settings** | Progetta nuovi problemi di coding con test cases e soluzioni |
 | **Create New Match** | Crea un nuovo match basato su un match setting esistente |
 | **Match Settings** | Gestisci e visualizza tutti i match settings |
 | **Create Game Session** | Crea una nuova sessione di gioco per gli studenti |
