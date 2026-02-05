@@ -435,7 +435,6 @@ async def update_match_setting(
         )
     
     verify_ownership(match_setting, teacher_id)
-    print("data", data.json())
     validation_result = run_tests(data.reference_solution, data.language, data.tests)
     if not validation_result.success:
         error_detail = getattr(validation_result, "message", "Reference solution failed validation")
