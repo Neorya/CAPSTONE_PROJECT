@@ -36,6 +36,7 @@ After logging in, you will see the home page with the following options:
 
 | Card                    | Description                                           |
 | ----------------------- | ----------------------------------------------------- |
+| **Create Match Settings** | Design new coding problems with test cases and solutions |
 | **Create New Match**    | Create a new match based on an existing match setting |
 | **Match Settings**      | Manage and view all match settings                    |
 | **Create Game Session** | Create a new game session for students                |
@@ -61,16 +62,52 @@ After logging in, you will see the home page with the following options:
    * **Search** for a settings by name using the search bar
    * **Sort** the list by clicking on the "Name" or "Status" column headers
 
-### Step 3.2: Create a new Match Setting (via database for now)
+### Step 3.2: Create a new Match Setting
 
 > Match settings define the algorithmic problem that students must solve, including the reference solution and test cases.
 
-Match settings in the database include:
+**From the home page:**
 
-* **Title**: Problem name
-* **Description**: Text of the problem to solve
-* **Reference solution**: Code used to validate submissions
-* **Test cases (public/private)**: Expected input and output
+1. Click **"Create Match Settings"**
+2. You will be taken to the match settings creation form
+
+**Configure the match setting:**
+
+#### Match Details
+1. **Title**: Give the problem a clear name
+2. **Description**: Write the complete problem statement that students will see
+3. **Reference Solution**: Provide the correct code solution in C++
+4. **Student Code Template**: Optional starting code template for students
+5. **Language**: Select the programming language (currently C++)
+
+#### Test Cases
+1. Add **Public Test Cases**: These are visible to students and help them understand the expected output
+   * Input: Test input data
+   * Output: Expected output
+2. Add **Private Test Cases**: These are hidden from students and used for final evaluation
+   * Input: Test input data
+   * Output: Expected output
+
+#### Professor Configuration
+1. Define the **Function Signature**:
+   * **Function Name**: The function students must implement (e.g. "fibonacci")
+   * **Return Type**: Data type returned by the function (e.g., "int", "string")
+   * **Function Inputs**: Define input parameters and their types
+2. **Test the Match Setting**:
+   * Click **"Try"** to compile and run your reference solution against the test cases
+   * Verify all tests pass before publishing
+
+#### Publishing
+1. **Save as Draft**: Saves the match setting in draft status (can be edited later)
+2. **Publish**: Makes the match setting "Ready" and available for creating matches
+   * Once published, the status will show as "Ready"
+   * Only ready match settings can be used in matches
+
+**After creation:**
+
+* Your new match setting will appear in the Match Settings list
+* You can edit, clone, or delete draft settings
+* Published settings can be viewed or cloned to create variations
 
 ---
 
