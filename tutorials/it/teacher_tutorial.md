@@ -32,6 +32,7 @@ Dopo il login, vedrai la home page con le seguenti opzioni:
 
 | Card | Descrizione |
 |------|-------------|
+| **Create Match Settings** | Progetta nuovi problemi di coding con test cases e soluzioni |
 | **Create New Match** | Crea un nuovo match basato su un match setting esistente |
 | **Match Settings** | Gestisci e visualizza tutti i match settings |
 | **Create Game Session** | Crea una nuova sessione di gioco per gli studenti |
@@ -50,14 +51,51 @@ Dopo il login, vedrai la home page con le seguenti opzioni:
    - Stato (Ready/Not Ready)
    - Azioni disponibili (modifica, elimina, etc.)
 
-### Passo 3.2: Crea un nuovo Match Setting (via database per ora)
+### Passo 3.2: Crea un nuovo Match Setting
+
 > I match settings definiscono il problema algoritmico che gli studenti dovranno risolvere, inclusa la soluzione di riferimento e i test cases.
 
-I match settings nel database includono:
-- **Titolo**: Nome del problema
-- **Descrizione**: Testo del problema da risolvere
-- **Soluzione di riferimento**: Codice che sarà usato per validare le soluzioni
-- **Test cases (pubblici/privati)**: Input e output attesi
+**Dalla home page:**
+
+1. Clicca su **"Create Match Settings"**
+2. Verrai portato al modulo di creazione dei match settings
+
+**Configura il match setting:**
+
+#### Dettagli Match
+1. **Titolo**: Dai un nome chiaro al problema
+2. **Descrizione**: Scrivi il testo completo del problema che gli studenti vedranno
+3. **Soluzione di Riferimento**: Fornisci il codice soluzione corretto in C++
+4. **Template di Codice Studente** (opzionale): Codice iniziale (facoltativo) che vedranno gli studenti
+
+#### Test Cases
+1. Aggiungi **Test Cases Pubblici**: Visibili agli studenti, aiutano a comprendere l'output atteso
+   * Input: Dati di input del test
+   * Output: Output atteso
+2. Aggiungi **Test Cases Privati**: Nascosti agli studenti, usati per la valutazione finale
+   * Input: Dati di input del test
+   * Output: Output atteso
+
+#### Configurazione Docente (opzionale)
+1. Definisci la **Firma della Funzione**:
+   * **Nome Funzione**: La funzione che gli studenti devono implementare (es. "fibonacci")
+   * **Tipo di Ritorno**: Il tipo di dato restituito (es. "int", "string")
+   * **Input Funzione**: Definisci i parametri di input e i loro tipi
+2. **Testa il Match Setting**:
+   * Clicca su **"Try"** per compilare ed eseguire la tua soluzione di riferimento con i test cases
+   * Verifica che tutti i test passino prima di pubblicare
+
+#### Pubblicazione
+1. **Salva come Bozza**: Salva il match setting come bozza (può essere modificato successivamente)
+2. **Pubblica**: Rende il match setting "Ready" e disponibile per la creazione di match
+   * Una volta pubblicato, lo stato cambierà a "Ready"
+   * Solo i match settings ready possono essere usati nei match
+
+**Dopo la creazione:**
+
+* Il tuo nuovo match setting apparirà nella lista Match Settings
+* Puoi modificare, clonare o eliminare le impostazioni in bozza
+* Le impostazioni pubblicate possono essere visualizzate o clonate per creare variazioni
 
 ---
 

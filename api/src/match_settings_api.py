@@ -442,8 +442,13 @@ async def update_match_setting(
         )
     
     verify_ownership(match_setting, teacher_id)
-    
-    # Update fields
+    validation_result = run_tests(data.reference_solution, data.language, data.tests)
+    if not validation_result.success:
+        error_detail = getattr(validation_result, "message", "Reference solution failed validation")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=error_detail
+        )
     update_data = data.dict(exclude_unset=True)
     
     tests_update = update_data.pop('tests', None)
