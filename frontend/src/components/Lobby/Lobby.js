@@ -109,7 +109,7 @@ const Lobby = () => {
         </div>
 
         <div className="page-subtitle">
-          <Text type="secondary">
+          <Text type="secondary" data-testid="lobby-waiting-message">
             Waiting for the game to start...
           </Text>
           {checking && <Spin style={{ marginLeft: '10px' }} />}
