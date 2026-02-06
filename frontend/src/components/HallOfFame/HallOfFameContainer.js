@@ -5,12 +5,6 @@ import HallOfFameView from './HallOfFameView';
 import './HallOfFame.css';
 import { getUserProfile } from '../../services/userService';
 
-/**
- * HallOfFameContainer
- * 
- * Logic and state management for the Hall of Fame feature.
- */
-
 const DEFAULT_PAGE_SIZE = 10;
 
 const HallOfFameContainer = () => {
@@ -26,7 +20,6 @@ const HallOfFameContainer = () => {
 
     const tableRef = useRef(null);
 
-    // Fetch leaderboard data
     const fetchLeaderboard = useCallback(async (page) => {
         setLoading(true);
         try {
@@ -50,12 +43,10 @@ const HallOfFameContainer = () => {
         fetchLeaderboard(currentPage);
     }, [currentPage, fetchLeaderboard]);
 
-    // Handle page change
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
 
-    // Scroll to current user's position
     const handleWhereAmI = () => {
         if (!currentUserRank) {
             message.info('Your rank information is not available');
@@ -75,15 +66,18 @@ const HallOfFameContainer = () => {
         }
     };
 
-    // Render rank with medal icons for top 3
-    const renderRank = (rank) => {
-        if (rank === 1) return <span className="medal gold" data-testid="medal-gold">🥇</span>;
-        if (rank === 2) return <span className="medal silver" data-testid="medal-silver">🥈</span>;
-        if (rank === 3) return <span className="medal bronze" data-testid="medal-bronze">🥉</span>;
-        return <span className="rank-number" data-testid="rank-number">{rank}</span>;
+    const renderRank = (rank, user) => {
+        console.log("score ", user.score);
+        if (user.score > 0 && user.rank <= 3)
+            switch (user.rank) {
+                case 1: return <span className="medal gold" data-testid="medal-gold">🥇</span>;
+                case 2: return <span className="medal silver" data-testid="medal-silver">🥈</span>;
+                case 3: return <span className="medal bronze" data-testid="medal-bronze">🥉</span>;
+            }
+        else
+            return <span className="rank-number" data-testid="rank-number"> NO MEDAL </span>;
     };
 
-    // Table columns configuration
     const columns = [
         {
             title: 'Rank',
