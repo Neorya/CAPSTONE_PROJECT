@@ -16,10 +16,6 @@ public class MatchSettingTest extends BaseTest {
         matchSettingsPage = new MatchSettingsPO(driver);
     }
 
-    private void clearLocalStorage() {
-        ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("window.localStorage.clear();");
-    }
-    
     @BeforeEach
     public void navigateToMatchSettings() throws InterruptedException {
         navigateTo("/login");
