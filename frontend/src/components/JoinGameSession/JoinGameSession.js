@@ -214,18 +214,20 @@ const JoinGameSession = () => {
               <Spin tip="Looking for games..." />
             </div>
           ) : gameSession ? (
-            <GameSessionCard
-              name={gameSession.name}
-              time={gameSession.start_date}
-              joinState={joinState}
-              onJoin={handleJoin}
-            />
+            <div data-testid="game-session-card-container">
+              <GameSessionCard
+                name={gameSession.name}
+                time={gameSession.start_date}
+                joinState={joinState}
+                onJoin={handleJoin}
+              />
+            </div>
           ) : (
-            <div>
+            <div data-testid="no-game-session-container">
               <Empty
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
                 description={
-                  <Text type="secondary">
+                  <Text type="secondary" data-testid="no-game-session-message">
                     No sessions are currently open. Check back soon!
                   </Text>
                 }

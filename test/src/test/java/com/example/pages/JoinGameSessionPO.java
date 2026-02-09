@@ -8,6 +8,12 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+/**
+ * Page Object for the Join Game Session page (Student view)
+ * 
+ * Provides methods for students to view available game sessions,
+ * join sessions, and handle various session states.
+ */
 public class JoinGameSessionPO {
     private WebDriver driver;
     private WebDriverWait wait;
@@ -24,6 +30,29 @@ public class JoinGameSessionPO {
     
     private static final String ACTIVE_GAME_BANNER_ID = "//*[@id='active-game-reentry-banner']";
     private static final String CONTINUE_SESSION_BUTTON_ID = "//*[@id='active-game-reentry-button']";
+
+    // Page elements
+    private static final By PAGE_TITLE = By.xpath("//h2[contains(text(), 'Join an in-person Game Session')]");
+    private static final By BACK_TO_HOME_BUTTON = By.id("back-to-home-button");
+    
+    // Game Session Card elements
+    private static final By GAME_SESSION_CARD_CONTAINER = By.cssSelector("[data-testid='game-session-card-container']");
+    private static final By GAME_SESSION_NAME = By.cssSelector("[data-testid='game-session-name']");
+    private static final By GAME_STATUS_TAG = By.cssSelector("[data-testid='game-status-tag']");
+    private static final By JOIN_GAME_BUTTON = By.cssSelector("[data-testid='join-game-button']");
+    private static final By NEXT_GAME_LABEL = By.cssSelector("[data-testid='next-game-label']");
+    
+    // No game session elements
+    private static final By NO_GAME_SESSION_CONTAINER = By.cssSelector("[data-testid='no-game-session-container']");
+    private static final By NO_GAME_SESSION_MESSAGE = By.cssSelector("[data-testid='no-game-session-message']");
+    
+    // Loading spinner
+    private static final By LOADING_SPINNER = By.cssSelector(".ant-spin");
+    
+    // Error/Success messages
+    private static final By SUCCESS_MESSAGE = By.cssSelector(".ant-message-success");
+    private static final By WARNING_MESSAGE = By.cssSelector(".ant-message-warning");
+    private static final By ERROR_MESSAGE = By.cssSelector(".ant-message-error");
 
     public JoinGameSessionPO(WebDriver driver) {
         this.driver = driver;

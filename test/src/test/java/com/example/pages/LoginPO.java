@@ -17,6 +17,7 @@ public class LoginPO {
     private By devStudentButton = By.id("dev-student-btn");
     private By devStudent2Button = By.id("dev-student2-btn");
     private By devTeacherButton = By.id("dev-teacher-btn");
+    private By devAdminButton = By.id("dev-admin-btn");
     private By alertMessage = By.className("alert-message");
     
     public LoginPO(WebDriver driver) {
@@ -56,4 +57,8 @@ public class LoginPO {
         wait.until(ExpectedConditions.invisibilityOfElementLocated(devTeacherButton));
     }
 
+    public void loginAsPreconfiguredAdmin() {
+        wait.until(ExpectedConditions.elementToBeClickable(devAdminButton)).click(); 
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(devAdminButton));
+    }
 }
