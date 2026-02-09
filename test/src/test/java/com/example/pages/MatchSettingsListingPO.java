@@ -22,7 +22,7 @@ public class MatchSettingsListingPO {
     private By subheaderText = By.xpath("//span[contains(@class, 'ant-typography-secondary') and contains(text(), 'Browse, clone, edit, delete')]");
     
     // Locators for Filter Bar
-    private By filterLabel = By.xpath("//span[contains(@class, 'ant-typography')]//strong[text()='Filter:']");
+    private By filterLabel = By.xpath("//*[contains(normalize-space(.), 'Filter')]");
     private By filterAllRadio = By.xpath("//input[@type='radio' and @value='All']");
     private By filterReadyRadio = By.xpath("//input[@type='radio' and @value='Ready']");
     private By filterDraftRadio = By.xpath("//input[@type='radio' and @value='Draft']");
@@ -469,4 +469,7 @@ public class MatchSettingsListingPO {
             && isFilterLabelDisplayed() 
             && isTableDisplayed();
     }
+
+
+
 }
