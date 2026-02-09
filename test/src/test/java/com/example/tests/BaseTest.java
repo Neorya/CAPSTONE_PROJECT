@@ -71,6 +71,9 @@ public abstract class BaseTest {
         driver.get(BASE_URL + path);
     }
 
+    /**
+     * Clear the browser's local storage
+     */
     protected void clearLocalStorage() {
         ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("window.localStorage.clear();");
     }
