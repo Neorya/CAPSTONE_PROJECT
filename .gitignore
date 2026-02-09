@@ -32,3 +32,6 @@ Thumbs.db
 # Builds
 test/target/
 test/bin/
+
+test/test_logs
+test/run_all_tests.sh
