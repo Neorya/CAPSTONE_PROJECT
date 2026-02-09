@@ -67,16 +67,16 @@ const GameSessionCard = ({ name, time, joinState, onJoin }) => {
     <Card className="game-session-card">
       <div className="card-header-row">
         <div className="card-header-left">
-          <Text type="secondary" className="next-game-header" data-testid="next-game-label">
+          <Text type="secondary" className="next-game-header">
             Next scheduled game:
           </Text>
 
-          <Text strong className="card-title-large" data-testid="game-session-name">
+          <Text strong className="card-title-large">
             {name}
           </Text>
         </div>
 
-        <Tag color={statusColor} className="card-status-tag" data-testid="game-status-tag">
+        <Tag color={statusColor} className="card-status-tag">
           {statusText}
         </Tag>
       </div>
@@ -100,7 +100,6 @@ const GameSessionCard = ({ name, time, joinState, onJoin }) => {
           loading={loading}
           icon={<PlayCircleOutlined />}
           block
-          data-testid="join-game-button"
         >
           {label}
         </Button>

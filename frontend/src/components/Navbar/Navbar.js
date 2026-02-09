@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { Layout, Dropdown, Avatar, Space, Switch, Tooltip } from "antd";
-import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
+import { Layout, Dropdown, Avatar, Space, Switch, Tooltip, Button } from "antd";
+import { UserOutlined, LogoutOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import {
   logout,
@@ -71,6 +71,9 @@ const Navbar = () => {
     },
   ];
 
+  const handleArrowback = () => {
+    navigate("/");
+  }
   const handleMenuClick = ({ key }) => {
     if (key === "logout") {
       handleLogout();
@@ -82,10 +85,17 @@ const Navbar = () => {
   return (
     <Header className="navbar-header">
       <div className="navbar-content">
-        <div className="navbar-logo" onClick={() => navigate("/")} style={{ cursor: 'pointer' }}>
+        <div className="navbar-logo" onClick={handleArrowback} style={{ cursor: 'pointer' }}>
           <span>Codify</span>
         </div>
         <div className="navbar-right">
+          <Button
+            id="back-to-home-button"
+            icon={<ArrowLeftOutlined />}
+            onClick={handleArrowback}
+            shape="circle"
+            size="large"
+          />
           <Tooltip
             title={
               authEnabled
@@ -104,6 +114,7 @@ const Navbar = () => {
               />
             </div>
           </Tooltip>
+
           <Dropdown
             menu={{ items: menuItems, onClick: handleMenuClick }}
             placement="bottomRight"

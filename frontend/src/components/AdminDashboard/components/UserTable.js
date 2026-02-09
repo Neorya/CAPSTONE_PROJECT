@@ -18,12 +18,12 @@ const UserTable = ({ users, loading, handlePromote, handleDemote }) => {
             title: 'Role',
             dataIndex: 'role',
             key: 'role',
-            render: (role, record) => {
+            render: (role) => {
                 let color = 'geekblue';
                 if (role === 'admin') color = 'volcano';
                 if (role === 'teacher') color = 'green';
                 return (
-                    <Tag color={color} key={role} data-testid={`role-tag-${record.email}`}>
+                    <Tag color={color} key={role}>
                         {role.toUpperCase()}
                     </Tag>
                 );
@@ -40,14 +40,8 @@ const UserTable = ({ users, loading, handlePromote, handleDemote }) => {
                             onConfirm={() => handlePromote(record.id)}
                             okText="Yes"
                             cancelText="No"
-                            okButtonProps={{ 'data-testid': `confirm-promote-${record.email}` }}
                         >
-                            <Button 
-                                type="primary" 
-                                size="small" 
-                                icon={<RocketOutlined />}
-                                data-testid={`promote-button-${record.email}`}
-                            >
+                            <Button type="primary" size="small" icon={<RocketOutlined />}>
                                 Promote
                             </Button>
                         </Popconfirm>
@@ -58,14 +52,8 @@ const UserTable = ({ users, loading, handlePromote, handleDemote }) => {
                             onConfirm={() => handleDemote(record.id)}
                             okText="Yes"
                             cancelText="No"
-                            okButtonProps={{ 'data-testid': `confirm-demote-${record.email}` }}
                         >
-                            <Button 
-                                danger 
-                                size="small" 
-                                icon={<ArrowDownOutlined />}
-                                data-testid={`demote-button-${record.email}`}
-                            >
+                            <Button danger size="small" icon={<ArrowDownOutlined />}>
                                 Demote
                             </Button>
                         </Popconfirm>
@@ -82,7 +70,6 @@ const UserTable = ({ users, loading, handlePromote, handleDemote }) => {
             rowKey="id"
             loading={loading}
             pagination={{ pageSize: 10 }}
-            data-testid="user-table"
         />
     );
 };
