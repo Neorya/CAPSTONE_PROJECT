@@ -131,19 +131,39 @@ export const useAlgorithmMatchPhaseOne = () => {
 
             // Calculate the target end time from server's remaining_seconds
             // This is more accurate than using actual_start_date because it avoids clock sync issues
-            if (matchDetails.remaining_seconds !== undefined) {
-                if (matchDetails.remaining_seconds > 0) {
-                    const now = Date.now();
-                    const endTime = now + (matchDetails.remaining_seconds * 1000);
+            console.log('PhaseOne: remaining_seconds from server:', matchDetails.remaining_seconds, 'actual_start_date:', matchDetails.actual_start_date);
+            
+            if (matchDetails.remaining_seconds !== undefined && matchDetails.remaining_seconds > 0) {
+                const now = Date.now();
+                const endTime = now + (matchDetails.remaining_seconds * 1000);
 
-                    setPhaseOneEndTime(endTime);
-                    setTimerInitialized(true);
-                    console.log('PhaseOne: Phase will end at:', new Date(endTime).toISOString(), 'remaining_seconds:', matchDetails.remaining_seconds);
-                } else {
-                    // Phase 1 has already ended, redirect to phase 2
-                    console.log('PhaseOne: Phase 1 already ended (remaining_seconds=0), redirecting to phase 2');
-                    navigate(`/voting/${gameId}`);
-                    return;
+                setPhaseOneEndTime(endTime);
+                setTimerInitialized(true);
+                console.log('PhaseOne: Phase will end at:', new Date(endTime).toISOString(), 'remaining_seconds:', matchDetails.remaining_seconds);
+            } else if (matchDetails.remaining_seconds === 0 && matchDetails.actual_start_date) {
+                // Phase 1 has already ended (server confirms 0 remaining AND game was started)
+                // Only redirect if we're certain phase 1 has truly ended
+                console.log('PhaseOne: Phase 1 already ended (remaining_seconds=0), redirecting to phase 2');
+                navigate(`/voting?gameId=${gameId}`);
+                return;
+            } else {
+                // Fallback: use actual_start_date and duration_phase1 to calculate
+                // This handles cases where remaining_seconds might not be available
+                if (matchDetails.actual_start_date && matchDetails.duration_phase1 !== undefined) {
+                    const startTime = new Date(matchDetails.actual_start_date).getTime();
+                    const durationMs = matchDetails.duration_phase1 * 60 * 1000;
+                    const endTime = startTime + durationMs;
+                    const now = Date.now();
+                    
+                    if (endTime > now) {
+                        setPhaseOneEndTime(endTime);
+                        setTimerInitialized(true);
+                        console.log('PhaseOne (fallback): Phase will end at:', new Date(endTime).toISOString());
+                    } else {
+                        console.log('PhaseOne (fallback): Phase 1 already ended, redirecting to phase 2');
+                        navigate(`/voting?gameId=${gameId}`);
+                        return;
+                    }
                 }
             }
 
