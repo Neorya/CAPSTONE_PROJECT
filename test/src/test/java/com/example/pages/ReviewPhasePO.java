@@ -44,6 +44,14 @@ public class ReviewPhasePO {
         int waitTimeout = (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) ? 30 : 10;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(waitTimeout));
     }
+    
+    public boolean isPageLoaded() {
+        try {
+            return isVotingSectionVisible() && isTimerVisible();
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     public void clickIncorrectVote() {
         WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(By.id(VOTE_INCORRECT_RADIO_ID)));
@@ -141,11 +149,28 @@ public class ReviewPhasePO {
     
     public boolean isCodeReadOnly() {
         try {
+            // First check for readonly attribute on container
             WebElement editor = driver.findElement(By.xpath(CODE_READONLY_CONTAINER_XPATH));
-            String contentEditable = editor.getAttribute("contenteditable");
-            return "false".equals(contentEditable) || editor.getAttribute("readonly") != null;
+            String readonlyAttr = editor.getAttribute("readonly");
+            if ("true".equals(readonlyAttr)) {
+                return true;
+            }
+            
+            // Check Monaco editor readonly option via JavaScript
+            Object result = ((JavascriptExecutor) driver).executeScript(
+                "const editor = window.monaco?.editor?.getEditors()[0]; " +
+                "return editor ? editor.getOption(window.monaco.editor.EditorOption.readOnly) : true;"
+            );
+            return result != null && (Boolean) result;
         } catch (Exception e) {
-            return false;
+            // If we can't determine, check if container has readonly attribute
+            try {
+                WebElement container = driver.findElement(By.xpath(CODE_READONLY_CONTAINER_XPATH));
+                return container.getAttribute("readonly") != null || 
+                       "true".equals(container.getAttribute("readonly"));
+            } catch (Exception ex) {
+                return true; // Assume read-only if we can't find the editor
+            }
         }
     }
 

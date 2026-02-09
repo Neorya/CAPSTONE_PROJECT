@@ -425,6 +425,7 @@ VALUES
 INSERT INTO capstone_app.users (google_sub, email, first_name, last_name, role, score, profile_url)
 VALUES 
 ('dev_student_sub_123', 'dev.student@test.com', 'Dev', 'Student', 'student', 0, NULL),
+('dev_student2_sub_124', 'dev.student2@test.com', 'Dev', 'Student2', 'student', 0, NULL),
 ('dev_teacher_sub_456', 'dev.teacher@test.com', 'Dev', 'Teacher', 'teacher', 0, NULL),
 ('dev_admin_sub_789', 'dev.admin@test.com', 'Dev', 'Admin', 'admin', 0, NULL);
 
