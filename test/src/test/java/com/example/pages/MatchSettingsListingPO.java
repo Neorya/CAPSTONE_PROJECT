@@ -22,7 +22,7 @@ public class MatchSettingsListingPO {
     private By subheaderText = By.xpath("//span[contains(@class, 'ant-typography-secondary') and contains(text(), 'Browse, clone, edit, delete')]");
     
     // Locators for Filter Bar
-    private By filterLabel = By.xpath("//span[contains(@class, 'ant-typography')]//strong[text()='Filter:']");
+    private By filterLabel = By.xpath("//*[contains(normalize-space(.), 'Filter')]");
     private By filterAllRadio = By.xpath("//input[@type='radio' and @value='All']");
     private By filterReadyRadio = By.xpath("//input[@type='radio' and @value='Ready']");
     private By filterDraftRadio = By.xpath("//input[@type='radio' and @value='Draft']");
@@ -33,9 +33,9 @@ public class MatchSettingsListingPO {
     // Locators for Table
     private By matchSettingsTable = By.xpath("//div[contains(@class, 'match-settings-table')]");
     private By tableHeaders = By.xpath("//thead[@class='ant-table-thead']//th");
-    private By nameColumnHeader = By.xpath("//th[text()='Name']");
-    private By statusColumnHeader = By.xpath("//th[text()='Status']");
-    private By detailsColumnHeader = By.xpath("//th[text()='Details']");
+    private By nameColumnHeader = By.xpath("//thead[contains(@class,'ant-table-thead')]//th[contains(normalize-space(.), 'Name')]");
+    private By statusColumnHeader = By.xpath("//thead[contains(@class,'ant-table-thead')]//th[contains(normalize-space(.), 'Status')]");
+    private By detailsColumnHeader = By.xpath("//thead[contains(@class,'ant-table-thead')]//th[contains(normalize-space(.), 'Details')]");
     private By tableRows = By.xpath("//tbody[@class='ant-table-tbody']//tr");
     
     // Locators for Table Cells
@@ -469,4 +469,7 @@ public class MatchSettingsListingPO {
             && isFilterLabelDisplayed() 
             && isTableDisplayed();
     }
+
+
+
 }
