@@ -54,7 +54,7 @@ public class AdminPagePO {
             WebElement roleTag = wait.until(ExpectedConditions.visibilityOfElementLocated(roleTagSelector));
             return roleTag.getText();
         } catch (Exception e) {
-            return null;
+            throw new RuntimeException("Failed to get role for user with email: " + email, e);
         }
     }
     

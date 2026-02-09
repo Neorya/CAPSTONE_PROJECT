@@ -3,9 +3,12 @@ package com.example.tests;
 import com.example.pages.LoginPO;
 import com.example.pages.AdminPagePO;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class AdminPageTest extends BaseTest {
     private static LoginPO loginPO;
     private static AdminPagePO adminPagePO;
@@ -38,17 +41,20 @@ public class AdminPageTest extends BaseTest {
     }
 
     @Test
+    @Order(1)
     public void testAdminPageLoads() {
         assertTrue(adminPagePO.isPageLoaded(), "Admin page should load successfully");
     }
 
     @Test
+    @Order(2)
     public void testAdminPageElements() {
         assertTrue(adminPagePO.isPageLoaded(), "Admin page should load successfully");
         assertTrue(adminPagePO.isUserTableVisible(), "User table should be visible");
     }
     
     @Test
+    @Order(3)
     public void testPromoteStudentToTeacher() throws InterruptedException {
         assertTrue(adminPagePO.isPageLoaded(), "Admin page should be loaded");
         
@@ -69,6 +75,7 @@ public class AdminPageTest extends BaseTest {
     }
 
     @Test
+    @Order(4)
     public void testDemoteTeacherToStudent() throws InterruptedException {
         assertTrue(adminPagePO.isPageLoaded(), "Admin page should be loaded");
         
