@@ -1,9 +1,9 @@
 import React from 'react';
-import { Alert } from 'antd';
+import PopupAlert from '../../common/PopupAlert';
 
 /**
  * AlertNotification - Presentational component for displaying alerts
- * Simple wrapper around Ant Design Alert with consistent styling
+ * Simple wrapper around PopupAlert with consistent styling
  * 
  * @param {Object} props
  * @param {string} props.type - Alert type (success, error, info, warning)
@@ -13,14 +13,11 @@ import { Alert } from 'antd';
  */
 const AlertNotification = ({ type, message, onClose }) => {
   return (
-    <Alert
+    <PopupAlert
       id="match-alert"
-      data-alert-type={type}
       message={message}
       type={type}
-      closable
       onClose={onClose}
-      showIcon
       style={{ marginBottom: 24 }}
     />
   );

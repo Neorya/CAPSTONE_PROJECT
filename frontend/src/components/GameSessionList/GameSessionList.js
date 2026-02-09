@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Table, Button, Alert, Spin, Card, Typography, Tooltip, message } from 'antd';
+import { Table, Button, Spin, Card, Typography, Tooltip, message } from 'antd';
+import PopupAlert from '../common/PopupAlert';
 import dayjs from 'dayjs';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useGameSessions } from './hooks/useGameSessions';
@@ -28,16 +29,19 @@ const GameSessionList = () => {
 
   // Alert state (inline for simplicity, can use useAlert hook if needed)
   const [error, setError] = React.useState(null);
+  const [success, setSuccess] = React.useState(null);
 
   // Alert handlers
   const showAlert = useCallback((type, msg) => {
     if (type === 'error') {
       setError(msg);
+    } else if (type === 'success') {
+      setSuccess(msg);
     }
   }, []);
 
   const showSuccess = useCallback((msg) => {
-    message.success(msg);
+    setSuccess(msg);
   }, []);
 
   // Custom hooks for state management
@@ -151,13 +155,19 @@ const GameSessionList = () => {
 
         {/* Error Alert */}
         {error && (
-          <Alert
+          <PopupAlert
             message={error}
             type="error"
-            showIcon
-            closable
             onClose={() => setError(null)}
-            style={{ marginBottom: 16 }}
+          />
+        )}
+
+        {/* Success Alert */}
+        {success && (
+          <PopupAlert
+            message={success}
+            type="success"
+            onClose={() => setSuccess(null)}
           />
         )}
 
