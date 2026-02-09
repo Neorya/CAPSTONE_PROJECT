@@ -58,7 +58,32 @@ public class CreateGameSessionPO {
     }
 
     public WebElement getCheckBox(int row) {
-        return getElementAt(row, 2);
+        // Checkbox is in column 4 (Selected column) based on Ant Design table structure
+        return getElementAt(row, 4);
+    }
+    
+    /**
+     * Get the checkbox input element for a specific row (1-indexed)
+     */
+    public WebElement getCheckBoxInput(int row) {
+        WebElement checkboxCell = getCheckBox(row);
+        return checkboxCell.findElement(By.cssSelector("input.ant-checkbox-input"));
+    }
+    
+    /**
+     * Check if the checkbox for a specific row is selected
+     */
+    public boolean isCheckBoxSelected(int row) {
+        WebElement checkboxInput = getCheckBoxInput(row);
+        return checkboxInput.isSelected();
+    }
+    
+    /**
+     * Click the checkbox for a specific row (1-indexed)
+     */
+    public void clickCheckBox(int row) {
+        WebElement checkboxInput = getCheckBoxInput(row);
+        checkboxInput.click();
     }
 
     public WebElement getButton() {

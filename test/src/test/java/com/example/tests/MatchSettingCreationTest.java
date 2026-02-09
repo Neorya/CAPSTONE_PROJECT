@@ -28,8 +28,16 @@ public class MatchSettingCreationTest extends BaseTest {
         clearLocalStorage();
         driver.navigate().refresh(); // Refresh to apply cleared storage
         loginPO.loginAsPreconfiguredTeacher();
-        Thread.sleep(50);
-        System.out.println("Logged in");
+        
+        // Give extra time for page to load in CI environments
+        if (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        
         navigateTo("/match-settings/create");
     }
 

@@ -24,6 +24,7 @@ public class GameSessionMNGPO {
     private static final String DELETE_BUTTON = "//button[.//span[@aria-label='delete']]";
     private static final String VIEW_BUTTON = "//button[.//span[@aria-label='eye']]";
     private static final String UPDATE_BUTTON = "//button[.//span[@aria-label='edit']]";
+    private static final String START_BUTTON = "//button[.//span[@aria-label='play-circle']]";
     private static final String BACK_TO_HOME_BUTTON_ID = "//*[@id=\"back-to-home-button\"]";
 
     // POP UP - CLONE 
@@ -99,6 +100,10 @@ public class GameSessionMNGPO {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(TABLE_BODY_XPATH + "/tr[" +  Integer.toString(row) + "]" + UPDATE_BUTTON)));
     }
 
+    public WebElement getStartButtonAt(int row) {
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(TABLE_BODY_XPATH + "/tr[" +  Integer.toString(row) + "]" + START_BUTTON)));
+    }
+
     public WebElement takeRow(String gameSessionName) {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(TABLE_BODY_XPATH + "//tr[contains(., " + gameSessionName + ")]")));
     }
@@ -154,6 +159,14 @@ public class GameSessionMNGPO {
 
     public int gameSessionIndex(String gameSessionName) {
         return driver.findElements(By.xpath("//tr[contains(., '" + gameSessionName + "')]/preceding-sibling::tr")).size() + 1;
+    }
+    
+    public boolean gameSessionExists(String gameSessionName) {
+        try {
+            return !driver.findElements(By.xpath("//tr[contains(., '" + gameSessionName + "')]")).isEmpty();
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 

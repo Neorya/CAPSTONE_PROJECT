@@ -62,8 +62,22 @@ public class GameSessionMNGTest extends BaseTest{
         driver.navigate().refresh();
         loginPO.loginAsPreconfiguredTeacher();
         
+        // Give extra time for page to load in CI environments
+        if (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        
+        // Check if test game session already exists (e.g., from init.sql)
         if (!testDataCreated) {
-            createTestGameSession();
+            navigateTo("/game-sessions");
+            if (!gameSessionMNGPO.gameSessionExists(testRowName)) {
+                // Game session doesn't exist, create it
+                createTestGameSession();
+            }
             testDataCreated = true;
         }
         
@@ -77,8 +91,8 @@ public class GameSessionMNGTest extends BaseTest{
         createGameSessionPO.fillDurationPhaseOne("10");
         createGameSessionPO.fillDurationPhaseTwo("10");
         
-        WebElement checkbox = createGameSessionPO.getCheckBox(1).findElement(By.tagName("input"));
-        checkbox.click();
+        // Select first match using Ant Design checkbox
+        createGameSessionPO.clickCheckBox(1);
      
         createGameSessionPO.getButton().click();
         createGameSessionPO.waitSuccessAlert();
