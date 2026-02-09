@@ -376,8 +376,8 @@ VALUES
 -- Match Settings created by Teacher 5 (ID 31)
 INSERT INTO capstone_app.match_setting (title, description, is_ready, reference_solution, creator_id)
 VALUES 
-('Sum Vector Elements', 'Write a function that calculates the sum of all integers in a vector. The function should accept a vector of integers as a parameter and return a single integer representing the total sum of all elements using standard library algorithms.', TRUE, '#include <vector>\n#include <numeric>\n\nint sum_numbers(std::vector<int> args) { return std::accumulate(args.begin(), args.end(), 0); }', 31),
-('Implement Singly Linked List Node', 'Create a basic node structure for a singly linked list data structure. The structure should contain an integer data field and a pointer to the next node, with a constructor that initializes the data and sets the next pointer to null.', FALSE, 'struct Node { int data; Node* next; Node(int d) : data(d), next(nullptr) {} };', 31);
+('Sum Vector Elements', 'Write a function that calculates the sum of all integers in a vector. The function should accept a vector of integers as a parameter and return a single integer representing the total sum of all elements using standard library algorithms.', TRUE, '#include <vector>\n#include <numeric>\n\nint sum_numbers(std::vector<int> args) { return std::accumulate(args.begin(), args.end(), 0); }', 31);
+
 
 
 
