@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from "react-router-dom";
 import { Typography, message } from "antd";
 import {
@@ -12,28 +12,34 @@ import {
   FileAddOutlined,
   SafetyCertificateOutlined
 } from "@ant-design/icons";
-import { getUserProfile } from "../../services/userService";
+import { getToken } from "../../services/authService";
 import "./HomePage.css";
 import "../common/ActiveGame.css";
 import useActiveGame from "../../hooks/useActiveGame";
 
 const { Title, Paragraph } = Typography;
 
+/**
+ * Decode the role from the JWT access token stored in localStorage.
+ * The JWT payload contains { sub, email, role, exp, iat, type }.
+ * Returns the role string or null if the token is missing/invalid.
+ */
+const getRoleFromToken = () => {
+  try {
+    const token = getToken();
+    if (!token || token === "dev_mode_token") return null;
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.role || null;
+  } catch {
+    return null;
+  }
+};
+
 const HomePage = () => {
   const navigate = useNavigate();
-  const [profile, setProfile] = useState(null);
+  const role = getRoleFromToken();
   const { activeGame, timeLeft } = useActiveGame();
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const profile = await getUserProfile();
-        setProfile(profile);
-      } catch (err) {
-        console.log("err: ", err);
-      }
-    };
-    fetchProfile();
-  }, []);
+
   const bentoItems = [
     // Creation actions first
     {
@@ -121,9 +127,9 @@ const HomePage = () => {
     }
   ];
 
-  const filteredItems = profile?.role
-    ? bentoItems.filter((item) => item.roles.includes(profile.role))
-    : bentoItems;
+  const filteredItems = role
+    ? bentoItems.filter((item) => item.roles.includes(role))
+    : [];
 
   return (
     <div className="home-container">
