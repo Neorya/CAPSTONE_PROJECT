@@ -2,10 +2,6 @@
 
 CREATE SCHEMA capstone_app;
 
-
-
-
-
 CREATE TYPE user_role AS ENUM ('student', 'teacher', 'admin');
 
 -- The creation of combined users table with OAuth support: (User Story 5 / Authentication)
@@ -58,8 +54,6 @@ CREATE TABLE capstone_app.teacher (
 --    login_id   INTEGER REFERENCES capstone_app.login(login_id) NOT NULL  --- user story 5 for modification
 );
 
-
-
 -- Creation of Match Setting Table & fk match teacher: (User story 1)
 
 DROP TABLE IF EXISTS capstone_app.match_setting;
@@ -80,8 +74,6 @@ CREATE TABLE capstone_app.match_setting (
     creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id)
 );
 
-
-
 CREATE TYPE capstone_app.test_scope AS ENUM ('private', 'public');
 
 DROP TABLE IF EXISTS capstone_app.tests;
@@ -94,8 +86,6 @@ CREATE TABLE capstone_app.tests (
   
     match_set_id INTEGER REFERENCES capstone_app.match_setting(match_set_id) NOT NULL
 );
-
-
 
 -- Creation of Match Table & fk match teacher and match setting:  (User story 2)
 
@@ -113,8 +103,6 @@ CREATE TABLE capstone_app.match (
     
 );
 
-
-
 -- Creation of the game session table: (User story 3)
 
 DROP TABLE IF EXISTS capstone_app.game_session;
@@ -129,8 +117,6 @@ CREATE TABLE capstone_app.game_session (
     creator_id INTEGER REFERENCES capstone_app.teacher(teacher_id) NOT NULL
 );
 
-
-
 -- The creation of relationship between match and game session (User story 3)
 
 DROP TABLE IF EXISTS capstone_app.matches_for_game;
@@ -142,7 +128,6 @@ CREATE TABLE capstone_app.matches_for_game (
     game_id  INTEGER REFERENCES capstone_app.game_session(game_id) NOT NULL,
     CONSTRAINT uc_matches_for_game UNIQUE (match_id, game_id)
 );
-
 
 -- The creation of students table: (User Story 5)
 
@@ -232,10 +217,6 @@ CREATE TABLE capstone_app.student_review_vote (
     note TEXT DEFAULT NULL,
     CONSTRAINT uq_student_review_vote_assignment UNIQUE (student_assigned_review_id)
 );
-
-
-
-
 
 --Create a user for that schema: (User story 1)
 
@@ -599,3 +580,69 @@ INSERT INTO capstone_app.badge (name, description, icon_path, criteria_type) VAL
 ('Precision Player', 'Finished a session perfectly 10 times.', 'precision_player.png', 'flawless_10'),
 ('Perfectionist', 'Finished a session perfectly 15 times.', 'perfectionist.png', 'flawless_15'),
 ('Untouchable', 'Finished a session perfectly 20 times.', 'untouchable.png', 'flawless_20');
+
+
+-- ######################################
+-- MOCK DATA FOR SOLUTION RESULTS TESTS (solution_id = 1)
+-- ######################################
+
+-- Create a completed game session for testing
+INSERT INTO capstone_app.game_session (game_id, name, start_date, actual_start_date, duration_phase1, duration_phase2, creator_id)
+VALUES (1, 'Data Structures Challenge', NOW() - INTERVAL '2 hours', NOW() - INTERVAL '2 hours', 30, 30, 9);
+
+INSERT INTO capstone_app.matches_for_game (match_for_game_id, match_id, game_id)
+VALUES (1, 1, 1);
+
+INSERT INTO capstone_app.student_join_game (student_join_game_id, student_id, game_id, assigned_match_id, session_score)
+VALUES (1, 41, 1, 1, 85.00);
+
+INSERT INTO capstone_app.student_solutions (solution_id, code, has_passed, passed_test, match_for_game_id, student_id)
+VALUES (1, '#include <iostream>
+using namespace std;
+
+int main() {
+    int n;
+    if (cin >> n) {
+        cout << n * n;
+    }
+    return 0;
+}', TRUE, 6, 1, 41);
+
+INSERT INTO capstone_app.student_tests (test_id, test_in, test_out, match_for_game_id, student_id, reviewer_comment)
+VALUES 
+(1, '99', '9801', 1, 41, NULL),
+(2, '7', '49', 1, 41, NULL);
+
+INSERT INTO capstone_app.student_solution_tests (solution_id, teacher_test_id, student_test_id, test_output)
+VALUES
+(1, 1, NULL, '25'),
+(1, 6, NULL, '1'),
+(1, 2, NULL, '0'),
+(1, 3, NULL, '4'),
+(1, 4, NULL, '-9'),
+(1, 5, NULL, '100'),
+(1, 7, NULL, '25'),
+(1, 8, NULL, '10000'),
+(1, NULL, 1, '9801'),
+(1, NULL, 2, '49');
+
+INSERT INTO capstone_app.student_assigned_review (student_assigned_review_id, student_id, assigned_solution_id)
+VALUES
+(1, 1, 1),
+(2, 2, 1),
+(3, 3, 1);
+
+INSERT INTO capstone_app.student_review_vote (review_vote_id, student_assigned_review_id, vote, proof_test_in, proof_test_out, valid, note)
+VALUES
+(1, 1, 'correct', NULL, NULL, TRUE, 'Good solution, handles all cases correctly.'),
+(2, 2, 'correct', NULL, NULL, TRUE, 'Clean code and correct output.'),
+(3, 3, 'incorrect', '-3', '9', FALSE, 'Fails for negative numbers - outputs -9 instead of 9.');
+
+SELECT setval('capstone_app.game_session_game_id_seq', (SELECT MAX(game_id) FROM capstone_app.game_session));
+SELECT setval('capstone_app.matches_for_game_match_for_game_id_seq', (SELECT MAX(match_for_game_id) FROM capstone_app.matches_for_game));
+SELECT setval('capstone_app.student_join_game_student_join_game_id_seq', (SELECT MAX(student_join_game_id) FROM capstone_app.student_join_game));
+SELECT setval('capstone_app.student_solutions_solution_id_seq', (SELECT MAX(solution_id) FROM capstone_app.student_solutions));
+SELECT setval('capstone_app.student_tests_test_id_seq', (SELECT MAX(test_id) FROM capstone_app.student_tests));
+SELECT setval('capstone_app.student_solution_tests_student_solution_test_id_seq', (SELECT MAX(student_solution_test_id) FROM capstone_app.student_solution_tests));
+SELECT setval('capstone_app.student_assigned_review_student_assigned_review_id_seq', (SELECT MAX(student_assigned_review_id) FROM capstone_app.student_assigned_review));
+SELECT setval('capstone_app.student_review_vote_review_vote_id_seq', (SELECT MAX(review_vote_id) FROM capstone_app.student_review_vote));

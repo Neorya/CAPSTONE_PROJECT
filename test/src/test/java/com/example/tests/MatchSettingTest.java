@@ -15,7 +15,7 @@ public class MatchSettingTest extends BaseTest {
         loginPO = new LoginPO(driver);
         matchSettingsPage = new MatchSettingsPO(driver);
     }
-    
+
     @BeforeEach
     public void navigateToMatchSettings() throws InterruptedException {
         navigateTo("/login");
