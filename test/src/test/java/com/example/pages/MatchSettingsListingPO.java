@@ -33,9 +33,9 @@ public class MatchSettingsListingPO {
     // Locators for Table
     private By matchSettingsTable = By.xpath("//div[contains(@class, 'match-settings-table')]");
     private By tableHeaders = By.xpath("//thead[@class='ant-table-thead']//th");
-    private By nameColumnHeader = By.xpath("//th[text()='Name']");
-    private By statusColumnHeader = By.xpath("//th[text()='Status']");
-    private By detailsColumnHeader = By.xpath("//th[text()='Details']");
+    private By nameColumnHeader = By.xpath("//thead[contains(@class,'ant-table-thead')]//th[contains(normalize-space(.), 'Name')]");
+    private By statusColumnHeader = By.xpath("//thead[contains(@class,'ant-table-thead')]//th[contains(normalize-space(.), 'Status')]");
+    private By detailsColumnHeader = By.xpath("//thead[contains(@class,'ant-table-thead')]//th[contains(normalize-space(.), 'Details')]");
     private By tableRows = By.xpath("//tbody[@class='ant-table-tbody']//tr");
     
     // Locators for Table Cells
