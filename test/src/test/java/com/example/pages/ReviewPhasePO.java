@@ -19,7 +19,7 @@ public class ReviewPhasePO {
     private static final String PARTICIPANT_ID_XPATH = ".//span[contains(@class, 'participant-id')]";
     private static final String SUBMISSION_TIMESTAMP_XPATH = "//span[contains(@class, 'submission-timestamp')]";
     private static final String CODE_READONLY_CONTAINER_XPATH = "//div[contains(@id, 'code-editor-readonly')]";
-    private static final String VIEW_DETAILS_BUTTON_XPATH = "//span[contains(text(), 'View Details')]";
+    private static final String VIEW_DETAILS_BUTTON_XPATH = "//button[contains(@class, 'view-details-button')]";
     
     private static final String VOTE_CORRECT_RADIO_ID = "vote-correct";
     private static final String VOTE_INCORRECT_RADIO_ID = "vote-incorrect";
@@ -86,15 +86,16 @@ public class ReviewPhasePO {
     }
 
     public void clickViewDetails(int index) {
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(VIEW_DETAILS_BUTTON_XPATH)));
         List<WebElement> buttons = driver.findElements(By.xpath(VIEW_DETAILS_BUTTON_XPATH));
 
         if (index >= 0 && index < buttons.size()) {
-             buttons.get(index).click();
+            wait.until(ExpectedConditions.elementToBeClickable(buttons.get(index))).click();
         }
     }
     
     public void clickViewDetailsForId(String participantId) {
-        String xpath = String.format("//div[contains(@class, 'solution-item') and .//span[contains(@class, 'participant-id') and text()='%s']]//button[contains(text(), 'View Details')]", participantId);
+        String xpath = String.format("//div[contains(@class, 'solution-item') and .//span[contains(@class, 'participant-id') and contains(text(),'%s')]]//button[contains(@class, 'view-details-button')]", participantId);
         driver.findElement(By.xpath(xpath)).click();
     }
 

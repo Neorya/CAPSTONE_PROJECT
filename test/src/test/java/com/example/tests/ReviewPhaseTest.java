@@ -158,11 +158,12 @@ public class ReviewPhaseTest extends BaseTest {
             // Step 6: Wait for phase 1 to end and phase 2 to begin
             waitForPhaseTwo();
             
+            // Step 7: Navigate students to voting page ONCE after phase 1 has truly ended
+            navigateStudentToVoting(student1Driver, student1JoinPO);
+            navigateStudentToVoting(student2Driver, student2JoinPO);
+            
             testDataCreated = true;
         }
-        
-        // Navigate student 1 to voting page for tests
-        navigateStudentToVoting(student1Driver, student1JoinPO);
         
         // Skip tests if voting page is not available
         Assumptions.assumeTrue(student1ReviewPage.isVotingSectionVisible(), 
@@ -250,6 +251,20 @@ public class ReviewPhaseTest extends BaseTest {
         }
     }
     
+    // Correct solution for the match setting - sums all given inputs
+    private static final String CORRECT_SOLUTION_CODE = 
+        "#include <iostream>\n" +
+        "using namespace std;\n" +
+        "\n" +
+        "int main() {\n" +
+        "    int n, sum = 0;\n" +
+        "    while (cin >> n) {\n" +
+        "        sum += n;\n" +
+        "    }\n" +
+        "    cout << sum;\n" +
+        "    return 0;\n" +
+        "}";
+    
     private void studentsGoToPhaseOneAndWait() {
         // Student 1 goes to phase one
         navigateStudentToPhaseOne(student1Driver, student1JoinPO);
@@ -259,17 +274,42 @@ public class ReviewPhaseTest extends BaseTest {
         navigateStudentToPhaseOne(student2Driver, student2JoinPO);
         sleepForCI(2000);
         
-        // Students just wait in phase one - no submission needed
-        // They will be automatically redirected to phase 2 when timer expires
+        // Students must write correct code and run public tests to save their solutions
+        // Otherwise there will be no solutions to review in phase 2
+        System.out.println("Students writing code and running public tests to save solutions...");
+        
+        // Student 1 writes code and runs public tests
+        try {
+            student1MatchPage.setEditorCode(CORRECT_SOLUTION_CODE);
+            sleepForCI(1000);
+            student1MatchPage.clickRunPublicTests();
+            sleepForCI(5000);
+            System.out.println("Student 1 wrote code and ran public tests.");
+        } catch (Exception e) {
+            System.out.println("Student 1 could not run public tests: " + e.getMessage());
+        }
+        
+        // Student 2 writes code and runs public tests
+        try {
+            student2MatchPage.setEditorCode(CORRECT_SOLUTION_CODE);
+            sleepForCI(1000);
+            student2MatchPage.clickRunPublicTests();
+            sleepForCI(5000);
+            System.out.println("Student 2 wrote code and ran public tests.");
+        } catch (Exception e) {
+            System.out.println("Student 2 could not run public tests: " + e.getMessage());
+        }
+        
         System.out.println("Both students are in Phase 1. Waiting for timer to expire...");
     }
     
     private void waitForPhaseTwo() {
-        // Wait for phase 1 timer to expire (1 minute + buffer)
-        // Phase 1 is set to 1 minute, so we wait up to 90 seconds
-        System.out.println("Waiting for Phase 1 to end...");
-        sleepForCI(70000); // 70 seconds to be safe
-        System.out.println("Phase 1 should have ended. Proceeding to Phase 2.");
+        // Wait for phase 1 timer to expire (1 minute + generous buffer)
+        // Phase 1 is set to 1 minute, so we wait 80 seconds to be absolutely sure
+        // it has ended before navigating to voting page
+        System.out.println("Waiting for Phase 1 to end (80 seconds)...");
+        sleepForCI(80000);
+        System.out.println("Phase 1 timer should have expired. Ready to navigate to Phase 2.");
     }
     
     private void navigateStudentToPhaseOne(WebDriver studentDriver, JoinGameSessionPO joinPO) {
@@ -285,11 +325,6 @@ public class ReviewPhaseTest extends BaseTest {
     }
     
     private void navigateStudentToVoting(WebDriver studentDriver, JoinGameSessionPO joinPO) {
-        // First try to navigate directly to voting page
-        studentDriver.get(BASE_URL + "/voting");
-        sleepForCI(2000);
-        
-        // If we're not on the voting page, try through join page
         ReviewPhasePO reviewPage = new ReviewPhasePO(studentDriver);
         if (!reviewPage.isVotingSectionVisible()) {
             studentDriver.get(BASE_URL + "/join-game-session");
@@ -311,18 +346,10 @@ public class ReviewPhaseTest extends BaseTest {
     }
     
     private void sleepForCI(int milliseconds) {
-        if (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) {
-            try {
-                Thread.sleep(milliseconds);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        } else {
-            try {
-                Thread.sleep(Math.min(milliseconds, 1000));
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 
