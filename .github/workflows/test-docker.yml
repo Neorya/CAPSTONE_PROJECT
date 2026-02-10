@@ -37,15 +37,13 @@ jobs:
 
       - name: Create .env file from secrets
         run: |
-          cat << EOF > .env
-          JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY || 'test-jwt-secret-key-for-ci-testing-only' }}
-          SECRET_KEY=${{ secrets.SECRET_KEY || 'test-secret-key-for-ci-testing-only' }}
-          GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID || 'test-client-id' }}
-          GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET || 'test-client-secret' }}
-          GOOGLE_OAUTH_REDIRECT_URI=${{ secrets.GOOGLE_OAUTH_REDIRECT_URI || 'http://localhost:8000/auth/callback' }}
-          API_TESTING_MODE=true
-          REACT_APP_TESTING_MODE=true
-          EOF
+          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY || 'test-jwt-secret-key-for-ci-testing-only' }}" > .env
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY || 'test-secret-key-for-ci-testing-only' }}" >> .env
+          echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID || 'test-client-id' }}" >> .env
+          echo "GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET || 'test-client-secret' }}" >> .env
+          echo "GOOGLE_OAUTH_REDIRECT_URI=${{ secrets.GOOGLE_OAUTH_REDIRECT_URI || 'http://localhost:8000/auth/callback' }}" >> .env
+          echo "API_TESTING_MODE=true" >> .env
+          echo "REACT_APP_TESTING_MODE=true" >> .env
 
       - name: Start services with Docker Compose
         run: |
