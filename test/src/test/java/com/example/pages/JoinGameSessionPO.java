@@ -17,6 +17,19 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class JoinGameSessionPO {
     private WebDriver driver;
     private WebDriverWait wait;
+    
+    private static final String PAGE_TITLE_XPATH = "//h2[contains(@class, 'ant-typography')]";
+    private static final String BACK_TO_HOME_BUTTON_ID = "//*[@id='back-to-home-button']";
+    
+    private static final String GAME_SESSION_CARD_XPATH = "//div[contains(@class, 'game-session-card')]";
+    private static final String JOIN_BUTTON_XPATH = "//button[contains(., 'Join Game') or contains(., 'Enter')]";
+    private static final String GAME_SESSION_NAME_XPATH = "//div[contains(@class, 'game-session-card')]//h4 | //div[contains(@class, 'game-session-card')]//span[contains(@class, 'ant-typography')]";
+    
+    private static final String LOADING_SPINNER_XPATH = "//span[contains(@class, 'ant-spin')]";
+    private static final String EMPTY_STATE_XPATH = "//div[contains(@class, 'ant-empty')]";
+    
+    private static final String ACTIVE_GAME_BANNER_ID = "//*[@id='active-game-reentry-banner']";
+    private static final String CONTINUE_SESSION_BUTTON_ID = "//*[@id='active-game-reentry-button']";
 
     // Page elements
     private static final By PAGE_TITLE = By.xpath("//h2[contains(text(), 'Join an in-person Game Session')]");
@@ -46,202 +59,143 @@ public class JoinGameSessionPO {
         int waitTimeout = (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) ? 30 : 10;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(waitTimeout));
     }
-
-    /**
-     * Check if the Join Game Session page is loaded
-     * @return true if the page is loaded, false otherwise
-     */
+    
+    public WebElement getPageTitle() {
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(PAGE_TITLE_XPATH)));
+    }
+    
+    public WebElement getBackToHomeButton() {
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(BACK_TO_HOME_BUTTON_ID)));
+    }
+    
     public boolean isPageLoaded() {
         try {
-            return wait.until(ExpectedConditions.visibilityOfElementLocated(PAGE_TITLE)).isDisplayed();
+            return getPageTitle().isDisplayed() && 
+                   getPageTitle().getText().contains("Join");
         } catch (Exception e) {
             return false;
         }
     }
-
-    /**
-     * Wait for the page to finish loading (spinner disappears)
-     */
-    public void waitForPageLoad() {
+    
+    public void waitForLoadingComplete() {
         try {
-            // Wait for spinner to disappear if present
-            wait.until(ExpectedConditions.invisibilityOfElementLocated(LOADING_SPINNER));
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(LOADING_SPINNER_XPATH)));
         } catch (Exception e) {
-            // Spinner might not be present, continue
         }
     }
-
-    /**
-     * Check if a game session card is visible (meaning a session is available)
-     * @return true if a game session card is displayed, false otherwise
-     */
+    
     public boolean isGameSessionAvailable() {
         try {
-            waitForPageLoad();
-            return driver.findElement(GAME_SESSION_CARD_CONTAINER).isDisplayed();
+            waitForLoadingComplete();
+            return driver.findElements(By.xpath(GAME_SESSION_CARD_XPATH)).size() > 0 ||
+                   driver.findElements(By.xpath(JOIN_BUTTON_XPATH)).size() > 0;
         } catch (Exception e) {
             return false;
         }
     }
-
-    /**
-     * Check if the "no game sessions" message is displayed
-     * @return true if no game sessions message is visible, false otherwise
-     */
-    public boolean isNoGameSessionsMessageVisible() {
+    
+    public boolean isNoSessionAvailable() {
         try {
-            waitForPageLoad();
-            return driver.findElement(NO_GAME_SESSION_CONTAINER).isDisplayed();
+            waitForLoadingComplete();
+            return driver.findElements(By.xpath(EMPTY_STATE_XPATH)).size() > 0;
         } catch (Exception e) {
             return false;
         }
     }
-
-    /**
-     * Get the "no game sessions" message text
-     * @return the message text or null if not visible
-     */
-    public String getNoGameSessionsMessageText() {
-        try {
-            return wait.until(ExpectedConditions.visibilityOfElementLocated(NO_GAME_SESSION_MESSAGE)).getText();
-        } catch (Exception e) {
-            return null;
-        }
+    
+    public WebElement getJoinButton() {
+        return wait.until(ExpectedConditions.elementToBeClickable(By.xpath(JOIN_BUTTON_XPATH)));
     }
-
-    /**
-     * Get the name of the available game session
-     * @return the session name or null if not visible
-     */
+    
+    public void clickJoinButton() {
+        getJoinButton().click();
+    }
+    
     public String getGameSessionName() {
         try {
-            return wait.until(ExpectedConditions.visibilityOfElementLocated(GAME_SESSION_NAME)).getText();
+            WebElement nameElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(GAME_SESSION_NAME_XPATH)));
+            return nameElement.getText();
         } catch (Exception e) {
-            return null;
+            return "";
         }
     }
-
-    /**
-     * Get the status tag text (e.g., "Open", "Joined", "Joining...")
-     * @return the status text or null if not visible
-     */
-    public String getGameStatusText() {
+    
+    public boolean hasActiveGameBanner() {
         try {
-            return wait.until(ExpectedConditions.visibilityOfElementLocated(GAME_STATUS_TAG)).getText();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    /**
-     * Check if the Join button is visible and enabled
-     * @return true if the join button can be clicked
-     */
-    public boolean isJoinButtonEnabled() {
-        try {
-            WebElement button = wait.until(ExpectedConditions.visibilityOfElementLocated(JOIN_GAME_BUTTON));
-            return button.isEnabled() && !button.getAttribute("class").contains("ant-btn-loading");
+            return driver.findElements(By.xpath(ACTIVE_GAME_BANNER_ID)).size() > 0;
         } catch (Exception e) {
             return false;
         }
     }
-
-    /**
-     * Get the text of the Join button (e.g., "Join Game", "Enter", "Joining...")
-     * @return the button text or null if not visible
-     */
-    public String getJoinButtonText() {
-        try {
-            return wait.until(ExpectedConditions.visibilityOfElementLocated(JOIN_GAME_BUTTON)).getText();
-        } catch (Exception e) {
-            return null;
-        }
+    
+    public void clickContinueSession() {
+        WebElement continueButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(CONTINUE_SESSION_BUTTON_ID)));
+        continueButton.click();
     }
-
-    /**
-     * Click the Join Game button
-     */
-    public void clickJoinButton() {
+    
+    public boolean waitForLobbyRedirect() {
         try {
-            WebElement button = wait.until(ExpectedConditions.elementToBeClickable(JOIN_GAME_BUTTON));
-            button.click();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to click Join Game button", e);
-        }
-    }
-
-    /**
-     * Click the back to home button
-     */
-    public void clickBackToHome() {
-        try {
-            WebElement button = wait.until(ExpectedConditions.elementToBeClickable(BACK_TO_HOME_BUTTON));
-            button.click();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to click Back to Home button", e);
-        }
-    }
-
-    /**
-     * Wait for a success message to appear
-     * @return true if success message appeared, false otherwise
-     */
-    public boolean waitForSuccessMessage() {
-        try {
-            return wait.until(ExpectedConditions.visibilityOfElementLocated(SUCCESS_MESSAGE)).isDisplayed();
+            wait.until(ExpectedConditions.urlContains("/lobby"));
+            return true;
         } catch (Exception e) {
             return false;
         }
     }
-
-    /**
-     * Wait for a warning/error message to appear
-     * @return true if warning message appeared, false otherwise
-     */
-    public boolean waitForWarningMessage() {
+    
+    public boolean waitForSessionAvailable(int timeoutSeconds) {
+        long startTime = System.currentTimeMillis();
+        long timeout = timeoutSeconds * 1000L;
+        
+        while (System.currentTimeMillis() - startTime < timeout) {
+            waitForLoadingComplete();
+            if (isGameSessionAvailable()) {
+                return true;
+            }
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+            driver.navigate().refresh();
+        }
+        return false;
+    }
+    
+    public boolean isGameSessionAvailableByName(String sessionName) {
         try {
-            return wait.until(ExpectedConditions.visibilityOfElementLocated(WARNING_MESSAGE)).isDisplayed();
+            waitForLoadingComplete();
+            return driver.findElements(By.xpath("//*[contains(text(), '" + sessionName + "')]")).size() > 0;
         } catch (Exception e) {
             return false;
         }
     }
-
-    /**
-     * Wait for an error message to appear
-     * @return true if error message appeared, false otherwise
-     */
-    public boolean waitForErrorMessage() {
-        try {
-            return wait.until(ExpectedConditions.visibilityOfElementLocated(ERROR_MESSAGE)).isDisplayed();
-        } catch (Exception e) {
-            return false;
-        }
+    
+    public void clickJoinButtonForSession(String sessionName) {
+        // Find the card or row containing the session name and click its join button
+        WebElement joinButton = wait.until(ExpectedConditions.elementToBeClickable(
+            By.xpath("//*[contains(text(), '" + sessionName + "')]/ancestor::div[contains(@class, 'ant-card') or contains(@class, 'game-session')]//button[contains(., 'Join') or contains(., 'Enter')] | //tr[contains(., '" + sessionName + "')]//button[contains(., 'Join') or contains(., 'Enter')]")
+        ));
+        joinButton.click();
     }
-
-    /**
-     * Get the warning message text
-     * @return the warning message text or null
-     */
-    public String getWarningMessageText() {
-        try {
-            WebElement msg = wait.until(ExpectedConditions.visibilityOfElementLocated(WARNING_MESSAGE));
-            return msg.getText();
-        } catch (Exception e) {
-            return null;
+    
+    public boolean waitForSessionAvailableByName(String sessionName, int timeoutSeconds) {
+        long startTime = System.currentTimeMillis();
+        long timeout = timeoutSeconds * 1000L;
+        
+        while (System.currentTimeMillis() - startTime < timeout) {
+            waitForLoadingComplete();
+            if (isGameSessionAvailableByName(sessionName)) {
+                return true;
+            }
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+            driver.navigate().refresh();
         }
-    }
-
-    /**
-     * Join a game session and wait for confirmation
-     * This is a complete workflow method
-     */
-    public void joinGameSession() {
-        clickJoinButton();
-        // Wait briefly for the API call to complete
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        return false;
     }
 }

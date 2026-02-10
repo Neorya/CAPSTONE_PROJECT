@@ -50,6 +50,7 @@ export const useAlgorithmMatchPhaseOne = () => {
     });
     const [timeLeft, setTimeLeft] = useState(null); // null until loaded from backend
     const [timerInitialized, setTimerInitialized] = useState(false);
+    const [timerHasStarted, setTimerHasStarted] = useState(false); // Track if timer ever had a positive value
     const [phaseOneEndTime, setPhaseOneEndTime] = useState(null); // Target end time in milliseconds
     const [publicTests, setPublicTests] = useState([]);
     const [customTests, setCustomTests] = useState([]);
@@ -73,6 +74,12 @@ export const useAlgorithmMatchPhaseOne = () => {
         const updateTimer = () => {
             const now = Date.now();
             const remaining = Math.max(0, Math.floor((phaseOneEndTime - now) / 1000));
+            
+            // Mark timer as having started if remaining time is positive
+            if (remaining > 0) {
+                setTimerHasStarted(true);
+            }
+            
             setTimeLeft(remaining);
         };
 
@@ -87,12 +94,15 @@ export const useAlgorithmMatchPhaseOne = () => {
 
     // Redirect to phase two when time runs out
     useEffect(() => {
-        // Only redirect if timer was initialized (not null) and has reached 0
-        if (timerInitialized && timeLeft === 0) {
+        // Only redirect if:
+        // 1. Timer was initialized (data loaded from backend)
+        // 2. Timer has started (had a positive value at some point)
+        // 3. Time has now reached 0
+        if (timerInitialized && timerHasStarted && timeLeft === 0) {
             console.log('Phase One: Time is up! Redirecting to phase two...');
             navigate(`/voting?gameId=${gameId}`);
         }
-    }, [timeLeft, timerInitialized, navigate, gameId]);
+    }, [timeLeft, timerInitialized, timerHasStarted, navigate, gameId]);
 
     useEffect(() => {
         const storageKey = `phase_one_user_code_${gameId}`;
@@ -119,15 +129,42 @@ export const useAlgorithmMatchPhaseOne = () => {
                 setCode(matchDetails.student_code || DEFAULT_CODE);
             }
 
-            // Calculate the target end time from actual_start_date and duration_phase1
-            if (matchDetails.actual_start_date && matchDetails.duration_phase1 !== undefined) {
-                const startTime = new Date(matchDetails.actual_start_date).getTime();
-                const durationMs = matchDetails.duration_phase1 * 60 * 1000; // Convert minutes to milliseconds
-                const endTime = startTime + durationMs;
+            // Calculate the target end time from server's remaining_seconds
+            // This is more accurate than using actual_start_date because it avoids clock sync issues
+            console.log('PhaseOne: remaining_seconds from server:', matchDetails.remaining_seconds, 'actual_start_date:', matchDetails.actual_start_date);
+            
+            if (matchDetails.remaining_seconds !== undefined && matchDetails.remaining_seconds > 0) {
+                const now = Date.now();
+                const endTime = now + (matchDetails.remaining_seconds * 1000);
 
                 setPhaseOneEndTime(endTime);
                 setTimerInitialized(true);
-                console.log('PhaseOne: Phase will end at:', new Date(endTime).toISOString());
+                console.log('PhaseOne: Phase will end at:', new Date(endTime).toISOString(), 'remaining_seconds:', matchDetails.remaining_seconds);
+            } else if (matchDetails.remaining_seconds === 0 && matchDetails.actual_start_date) {
+                // Phase 1 has already ended (server confirms 0 remaining AND game was started)
+                // Only redirect if we're certain phase 1 has truly ended
+                console.log('PhaseOne: Phase 1 already ended (remaining_seconds=0), redirecting to phase 2');
+                navigate(`/voting?gameId=${gameId}`);
+                return;
+            } else {
+                // Fallback: use actual_start_date and duration_phase1 to calculate
+                // This handles cases where remaining_seconds might not be available
+                if (matchDetails.actual_start_date && matchDetails.duration_phase1 !== undefined) {
+                    const startTime = new Date(matchDetails.actual_start_date).getTime();
+                    const durationMs = matchDetails.duration_phase1 * 60 * 1000;
+                    const endTime = startTime + durationMs;
+                    const now = Date.now();
+                    
+                    if (endTime > now) {
+                        setPhaseOneEndTime(endTime);
+                        setTimerInitialized(true);
+                        console.log('PhaseOne (fallback): Phase will end at:', new Date(endTime).toISOString());
+                    } else {
+                        console.log('PhaseOne (fallback): Phase 1 already ended, redirecting to phase 2');
+                        navigate(`/voting?gameId=${gameId}`);
+                        return;
+                    }
+                }
             }
 
 

@@ -37,6 +37,15 @@ public class CreateGameSessionTest extends BaseTest  {
         driver.navigate().refresh();
         loginPO.loginAsPreconfiguredTeacher();
         
+        // Give extra time for page to load in CI environments
+        if (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        
         // Navigate to the create game session page before each test
         navigateTo("/create-game-session");
     }
@@ -71,17 +80,19 @@ public class CreateGameSessionTest extends BaseTest  {
         createGameSessionPage.fillDurationPhaseOne("10");
         createGameSessionPage.fillDurationPhaseTwo("10");
 
-
-        WebElement c1 = createGameSessionPage.getCheckBox(1).findElement(By.tagName("input"));
-        WebElement c2 = createGameSessionPage.getCheckBox(2).findElement(By.tagName("input"));
-        assertFalse(c1.isSelected());
-
-        assertFalse(c2.isSelected());
-        c1.click();
-        assertTrue(c1.isSelected());
-        assertFalse(c2.isSelected());
-        c2.click();
-        assertTrue(c2.isSelected());
+        // Verify checkboxes are not selected initially
+        assertFalse(createGameSessionPage.isCheckBoxSelected(1));
+        assertFalse(createGameSessionPage.isCheckBoxSelected(2));
+        
+        // Click first checkbox and verify state
+        createGameSessionPage.clickCheckBox(1);
+        assertTrue(createGameSessionPage.isCheckBoxSelected(1));
+        assertFalse(createGameSessionPage.isCheckBoxSelected(2));
+        
+        // Click second checkbox and verify state
+        createGameSessionPage.clickCheckBox(2);
+        assertTrue(createGameSessionPage.isCheckBoxSelected(2));
+        
         createGameSessionPage.getButton().click();      
 
         WebElement alert = createGameSessionPage.waitSuccessAlert();
@@ -93,10 +104,9 @@ public class CreateGameSessionTest extends BaseTest  {
     @Order(4)
     @DisplayName("Verify that the game session creation fails without selecting any match")
     public void testGameSessionCreationFails() {
-        WebElement c1 = createGameSessionPage.getCheckBox(1).findElement(By.tagName("input"));
-        WebElement c2 = createGameSessionPage.getCheckBox(2).findElement(By.tagName("input"));
-        assertFalse(c1.isSelected());
-        assertFalse(c2.isSelected());
+        // Verify checkboxes are not selected initially
+        assertFalse(createGameSessionPage.isCheckBoxSelected(1));
+        assertFalse(createGameSessionPage.isCheckBoxSelected(2));
         assertFalse(createGameSessionPage.getButton().isEnabled(), "Button should be disabled");
     }
 }

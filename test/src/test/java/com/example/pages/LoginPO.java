@@ -15,6 +15,7 @@ public class LoginPO {
     private Actions actions;
 
     private By devStudentButton = By.id("dev-student-btn");
+    private By devStudent2Button = By.id("dev-student2-btn");
     private By devTeacherButton = By.id("dev-teacher-btn");
     private By devAdminButton = By.id("dev-admin-btn");
     private By alertMessage = By.className("alert-message");
@@ -45,6 +46,10 @@ public class LoginPO {
 
     public void loginAsPreconfiguredStudent() {
         wait.until(ExpectedConditions.elementToBeClickable(devStudentButton)).click();
+    }
+    
+    public void loginAsPreconfiguredStudent2() {
+        wait.until(ExpectedConditions.elementToBeClickable(devStudent2Button)).click();
     }
 
     public void loginAsPreconfiguredTeacher() {

@@ -134,6 +134,17 @@ const Login = () => {
                 <Button
                   type="dashed"
                   size="large"
+                  onClick={() => handleDevLogin('student2')}
+                  block
+                  loading={isLoading}
+                  className="dev-login-btn dev-student2-btn"
+                  id="dev-student2-btn"
+                >
+                  🎓 Login as Student 2 (Dev)
+                </Button>
+                <Button
+                  type="dashed"
+                  size="large"
                   onClick={() => handleDevLogin('teacher')}
                   block
                   loading={isLoading}

@@ -24,8 +24,9 @@ public class HallOfFameTest extends BaseTest {
     private static LoginPO loginPO;
     
     @BeforeAll
-    public static void setUpHallOfFame() {
-        setUp(); // Call parent setUp
+    public static void setUpTest() {
+        // BaseTest.setUp() is automatically called by JUnit due to @BeforeAll in parent class
+        // Just initialize Page Objects here
         hallOfFamePage = new HallOfFamePO(driver);
         loginPO = new LoginPO(driver);
     }
@@ -35,13 +36,39 @@ public class HallOfFameTest extends BaseTest {
         navigateTo("/login");
         ((org.openqa.selenium.JavascriptExecutor) driver).executeScript("window.localStorage.clear();");
         driver.navigate().refresh();
+        
+        // Give time for page to stabilize after clearing storage
+        sleepForCI(1000);
+        
         loginPO.loginAsPreconfiguredStudent();
         
-        // Navigate to Hall of Fame page
-        hallOfFamePage.navigateToHallOfFame(BASE_URL);
+        // Give extra time for login to complete and redirect
+        sleepForCI(3000);
+        
+        // Navigate to Hall of Fame page directly using full URL
+        driver.get(BASE_URL + "/hall-of-fame");
+        
+        // Wait for page to fully load
+        sleepForCI(2000);
         
         // Wait for page to load
         assertTrue(hallOfFamePage.isPageLoaded(), "Hall of Fame page should be loaded");
+    }
+    
+    private void sleepForCI(int milliseconds) {
+        if (System.getenv("CI") != null || "true".equals(System.getProperty("headless"))) {
+            try {
+                Thread.sleep(milliseconds);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        } else {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
     }
     
     // ========================================
@@ -111,6 +138,9 @@ public class HallOfFameTest extends BaseTest {
     @Order(6)
     @DisplayName("Players should be sorted by score in descending order")
     public void testPlayersSortedByScore() {
+        // Verify we're on the right page first
+        assertTrue(hallOfFamePage.isPageLoaded(), "Should be on Hall of Fame page");
+        
         // Get players and verify they are sorted by score
         PlayerData player1 = hallOfFamePage.getPlayerDataAtRow(0);
         PlayerData player2 = hallOfFamePage.getPlayerDataAtRow(1);
@@ -133,6 +163,9 @@ public class HallOfFameTest extends BaseTest {
     @Order(7)
     @DisplayName("Fourth ranked player should exist")
     public void testFourthPlayerExists() {
+        // Verify we're on the right page first
+        assertTrue(hallOfFamePage.isPageLoaded(), "Should be on Hall of Fame page");
+        
         // Get 4th player (index 3)
         PlayerData fourthPlayer = hallOfFamePage.getPlayerDataAtRow(3);
         assertNotNull(fourthPlayer, "Fourth player should exist");
@@ -358,14 +391,19 @@ public class HallOfFameTest extends BaseTest {
     @Order(19)
     @DisplayName("Drawer should close when clicking overlay")
     public void testDrawerClosesWithOverlay() {
+        // Verify we're on the right page first
+        assertTrue(hallOfFamePage.isPageLoaded(), "Should be on Hall of Fame page");
+        
         // Open drawer again
         hallOfFamePage.clickFloatingButton();
+        sleepForCI(500);
         hallOfFamePage.waitForDrawerState(true);
         
         assertTrue(hallOfFamePage.isDrawerOpen(), "Drawer should be open");
         
         // Click overlay to close
         hallOfFamePage.closeDrawerByOverlay();
+        sleepForCI(500);
         
         // Wait for drawer to close (explicit wait)
         hallOfFamePage.waitForDrawerState(false);
@@ -373,6 +411,9 @@ public class HallOfFameTest extends BaseTest {
         // Verify drawer is closed
         assertFalse(hallOfFamePage.isDrawerOpen(), 
             "Drawer should be closed after clicking overlay");
+        
+        // Verify we're still on the same page
+        assertTrue(hallOfFamePage.isPageLoaded(), "Should still be on Hall of Fame page after closing drawer");
     }
     
     // ========================================

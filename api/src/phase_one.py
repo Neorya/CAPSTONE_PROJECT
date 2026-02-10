@@ -740,6 +740,12 @@ def get_match_details(
         phase1_end_time = start_dt.timestamp() + (game_session.duration_phase1 * 60)
         now = datetime.now(timezone.utc).timestamp()
         remaining_seconds = max(0, int(phase1_end_time - now))
+        
+        print(f"[match_details] student_id={target_student_id}, game_id={game_id}, "
+              f"actual_start_date={start_dt.isoformat()}, duration_phase1={game_session.duration_phase1}min, "
+              f"phase1_end_time={phase1_end_time}, now={now}, remaining_seconds={remaining_seconds}")
+    else:
+        print(f"[match_details] student_id={target_student_id}, game_id={game_id}, actual_start_date=None")
 
     return MatchDetailsResponse(
         title=match_entry.title,
