@@ -163,6 +163,20 @@
   }
 }
 
+.highlight-flash {
+  animation: flashHighlight 0.5s ease-in-out 3;
+}
+
+@keyframes flashHighlight {
+  0%, 100% {
+    background: rgba(24, 144, 255, 0.08);
+  }
+  50% {
+    background: rgba(24, 144, 255, 0.35);
+    box-shadow: inset 6px 0 0 #1890ff;
+  }
+}
+
 .table-header-container {
   display: flex;
   justify-content: space-between;

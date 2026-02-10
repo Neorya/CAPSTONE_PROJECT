@@ -55,24 +55,42 @@ const HallOfFameContainer = () => {
         setCurrentPage(page);
     };
 
-    // Scroll to current user's position
+    // Scroll to current user's position based on their student_id/name
     const handleWhereAmI = () => {
         if (!currentUserRank) {
             message.info('Your rank information is not available');
             return;
         }
 
-        const userPage = Math.ceil(currentUserRank.rank / pageSize);
+        // Use the position (1-based index) instead of rank to handle tied ranks correctly
+        const userPosition = currentUserRank.position;
+        if (!userPosition) {
+            message.info('Your position information is not available');
+            return;
+        }
+
+        const userPage = Math.ceil(userPosition / pageSize);
 
         if (userPage !== currentPage) {
             setCurrentPage(userPage);
-            message.info(`Navigating to page ${userPage}...`);
-        } else {
+            message.info(`Found you! Navigating to page ${userPage}...`);
+        }
+
+        // Scroll to the table and highlight the row after a short delay to allow re-render
+        setTimeout(() => {
             if (tableRef.current) {
                 tableRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
-            message.info('You are on this page!');
-        }
+
+            // Flash-highlight the current user's row
+            const userRow = tableRef.current?.querySelector(
+                `tr[data-row-key="${currentStudentId}"]`
+            );
+            if (userRow) {
+                userRow.classList.add('highlight-flash');
+                setTimeout(() => userRow.classList.remove('highlight-flash'), 2000);
+            }
+        }, userPage !== currentPage ? 500 : 100);
     };
 
     // Render rank with medal icons for top 3

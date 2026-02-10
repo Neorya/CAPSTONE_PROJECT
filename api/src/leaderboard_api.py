@@ -45,7 +45,10 @@ class CurrentUserRank(BaseModel):
     Response model for current user's rank information.
     """
     rank: int = Field(..., description="Current user's rank")
+    position: int = Field(..., description="1-based position index in the full sorted leaderboard (accounts for ties)")
     score: float = Field(..., description="Current user's score")
+    username: str = Field("", description="Current user's display name")
+    student_id: int = Field(0, description="Current user's student ID")
     points_to_next_rank: Optional[float] = Field(None, description="Points needed to reach next rank (null if rank 1)")
 
 
@@ -224,7 +227,7 @@ def get_leaderboard(
         current_user_rank_info = None
         if student_id is not None:
             # Find the student in the full leaderboard (O(n) but unavoidable)
-            for entry in full_leaderboard:
+            for idx, entry in enumerate(full_leaderboard):
                 if entry.student_id == student_id:
                     # Find points to next rank efficiently
                     points_to_next = None
@@ -233,7 +236,10 @@ def get_leaderboard(
                     
                     current_user_rank_info = CurrentUserRank(
                         rank=entry.rank,
+                        position=idx + 1,  # 1-based position
                         score=entry.score,
+                        username=entry.username,
+                        student_id=entry.student_id,
                         points_to_next_rank=points_to_next
                     )
                     break
