@@ -33,9 +33,9 @@ public class MatchSettingsListingPO {
     // Locators for Table
     private By matchSettingsTable = By.xpath("//div[contains(@class, 'match-settings-table')]");
     private By tableHeaders = By.xpath("//thead[@class='ant-table-thead']//th");
-    private By nameColumnHeader = By.xpath("//thead[contains(@class,'ant-table-thead')]//th[contains(normalize-space(.), 'Name')]");
-    private By statusColumnHeader = By.xpath("//thead[contains(@class,'ant-table-thead')]//th[contains(normalize-space(.), 'Status')]");
-    private By detailsColumnHeader = By.xpath("//thead[contains(@class,'ant-table-thead')]//th[contains(normalize-space(.), 'Details')]");
+    private By nameColumnHeader = By.xpath("//thead//th[normalize-space(.)='Name']");
+    private By statusColumnHeader = By.xpath("//thead//th[normalize-space(.)='Status']");
+    private By actionsColumnHeader = By.xpath("//thead//th[normalize-space(.)='Actions']");
     private By tableRows = By.xpath("//tbody[@class='ant-table-tbody']//tr");
     
     // Locators for Table Cells
@@ -168,9 +168,9 @@ public class MatchSettingsListingPO {
         return driver.findElement(statusColumnHeader).isDisplayed();
     }
 
-    public boolean isDetailsColumnHeaderDisplayed() {
+    public boolean isActionsColumnHeaderDisplayed() {
         try {
-            return driver.findElement(detailsColumnHeader).isDisplayed();
+            return driver.findElement(actionsColumnHeader).isDisplayed();
         } catch (Exception e) {
             return false;
         }
@@ -209,12 +209,12 @@ public class MatchSettingsListingPO {
     }
     
     public WebElement getRowBySettingName(String settingName) {
-        By rowLocator = By.xpath("//tbody[@class='ant-table-tbody']//tr[.//strong[text()='" + settingName + "']]");
+        By rowLocator = By.xpath("//tbody[@class='ant-table-tbody']//tr[.//strong[normalize-space(text())='" + settingName.trim() + "']]");
         return wait.until(ExpectedConditions.presenceOfElementLocated(rowLocator));
     }
     
     public String getStatusBySettingName(String settingName) {
-        By statusLocator = By.xpath("//tbody[@class='ant-table-tbody']//tr[.//strong[text()='" + settingName + "']]//td[2]//span[contains(@class, 'ant-tag')]");
+        By statusLocator = By.xpath("//tbody[@class='ant-table-tbody']//tr[.//strong[normalize-space(text())='" + settingName.trim() + "']]//td[2]//span[contains(@class, 'ant-tag')]");
         return driver.findElement(statusLocator).getText();
     }
     
