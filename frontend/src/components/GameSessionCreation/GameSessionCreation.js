@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Typography, Table, message, Checkbox, Tooltip, Input, DatePicker } from "antd";
+import { Button, Card, Typography, Table, Checkbox, Tooltip, Input, DatePicker } from "antd";
+import PopupAlert from '../common/PopupAlert';
 import { ArrowLeftOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import "./GameSessionCreation.css";
 import { getUserProfile } from '../../services/userService';
@@ -28,6 +29,7 @@ const GameSessionCreation = () => {
   const [sessionNameError, setSessionNameError] = useState("");
   const [startDateError, setStartDateError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [alert, setAlert] = useState(null);
 
   const [sortOrder, setSortOrder] = useState({ field: 'match_id', order: 'descend' }); // Default sort to Latest created
 
@@ -161,15 +163,15 @@ const GameSessionCreation = () => {
     setStartDateError(dateError);
 
     if (nameError) {
-      message.warning(nameError);
+      setAlert({ type: 'warning', message: nameError });
       return;
     }
     if (dateError) {
-      message.warning(dateError);
+      setAlert({ type: 'warning', message: dateError });
       return;
     }
     if (selectedRows.length === 0) {
-      message.warning("Please select at least one match to create a game session");
+      setAlert({ type: 'warning', message: "Please select at least one match to create a game session" });
       return;
     }
 
@@ -178,7 +180,7 @@ const GameSessionCreation = () => {
       const data = await getUserProfile();
       const creatorId = data.user_id;
       await createGameSession(selectedRows, creatorId, sessionName.trim(), startDate.toDate().toISOString(), firstPhase, secondPhase);
-      message.success("The game session has been created successfully!");
+      setAlert({ type: 'success', message: "The game session has been created successfully!" });
       // Reset form after successful creation
       setSessionName("");
       setStartDate(null);
@@ -187,7 +189,7 @@ const GameSessionCreation = () => {
       setStartDateError("");
     } catch (error) {
       console.error("Failed to create game session:", error);
-      message.error("Failed to create game session. Please try again.");
+      setAlert({ type: 'error', message: "Failed to create game session. Please try again." });
     } finally {
       setCreating(false);
     }
@@ -254,6 +256,15 @@ const GameSessionCreation = () => {
             Create a new Game Session selecting your desired matches
           </Text>
         </div>
+
+        {/* Alert */}
+        {alert && (
+          <PopupAlert
+            message={alert.message}
+            type={alert.type}
+            onClose={() => setAlert(null)}
+          />
+        )}
 
         {/* Session Details Section */}
         <div className="session-details-section">

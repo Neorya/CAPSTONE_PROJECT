@@ -391,6 +391,7 @@ const useCreateMatchSetting = () => {
             handleInputChangeRow,
             handleRemoveInputRow,
             handleAddInputRow,
+            handleDismissAlert: () => setAlert(null),
             onBack: () => navigate('/home'),
         }
     };

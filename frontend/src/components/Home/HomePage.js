@@ -45,6 +45,17 @@ const HomePage = () => {
       accent: "#6366f1",
       roles: ["teacher"]
     },
+    // 2. Match Settings (View/Manage)
+    {
+      id: "match-settings",
+      title: "Match Settings",
+      description: "Browse and manage all available match settings",
+      icon: <SettingOutlined />,
+      route: "/match-settings",
+      accent: "#10b981",
+      roles: ["teacher"]
+    },
+    // 3. Create New Match
     {
       id: "create-match",
       title: "Create New Match",
@@ -63,16 +74,7 @@ const HomePage = () => {
       accent: "#f59e0b",
       roles: ["teacher"]
     },
-    // View/manage actions below
-    {
-      id: "match-settings",
-      title: "Match Settings",
-      description: "Browse and manage all available match settings",
-      icon: <SettingOutlined />,
-      route: "/match-settings",
-      accent: "#10b981",
-      roles: ["teacher"]
-    },
+    // 5. View Game Sessions
     {
       id: "view-sessions",
       title: "View Game Sessions",
@@ -82,7 +84,17 @@ const HomePage = () => {
       accent: "#8b5cf6",
       roles: ["teacher"]
     },
-    // Student cards
+    // 6. Hall of Fame
+    {
+      id: "hall-of-fame",
+      title: "Hall of Fame",
+      description: "View the leaderboard and top performers",
+      icon: <TrophyOutlined />,
+      route: "/hall-of-fame",
+      accent: "#eab308",
+      roles: ["teacher", "student"]
+    },
+    // Student specific cards (Student checks use filtering so order here matters less for mixed roles, but good to keep organized)
     {
       id: "join-session",
       title: "Join Game Sessions",
@@ -100,15 +112,6 @@ const HomePage = () => {
       route: "/lobby",
       accent: "#06b6d4",
       roles: ["student"]
-    },
-    {
-      id: "hall-of-fame",
-      title: "Hall of Fame",
-      description: "View the leaderboard and top performers",
-      icon: <TrophyOutlined />,
-      route: "/hall-of-fame",
-      accent: "#eab308",
-      roles: ["teacher", "student"]
     },
     {
       id: "admin-dashboard",

@@ -1,9 +1,9 @@
-import React from 'react';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Button, Tooltip } from 'antd';
 import MatchDetails from './components/MatchDetails';
 import TestCases from './components/TestCases';
 import ProfessorConfig from './components/ProfessorConfig';
+import PopupAlert from '../common/PopupAlert';
 import './CreateMatchSetting.css';
 
 const CreateMatchSettingView = ({
@@ -35,11 +35,21 @@ const CreateMatchSettingView = ({
         handleTry,
         handlePublish,
         handleSaveDraft,
+        handleDismissAlert,
         onBack,
     } = handlers;
 
     return (
         <div className="create-match-setting-container">
+            {/* Alert Popup */}
+            {alert && (
+                <PopupAlert
+                    message={alert.message}
+                    type={alert.type}
+                    onClose={handleDismissAlert}
+                />
+            )}
+
             <div className="create-match-setting-card">
                 {/* Header */}
                 <div className="page-header">
@@ -54,13 +64,6 @@ const CreateMatchSettingView = ({
                         />
                     </Tooltip>
                 </div>
-
-                {/* Alert */}
-                {alert && (
-                    <div className={`alert-message ${alert.type}`}>
-                        {alert.message}
-                    </div>
-                )}
 
                 {/* Match Details */}
                 <MatchDetails
