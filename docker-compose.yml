@@ -70,7 +70,7 @@ services:
       # REACT_APP_TESTING_MODE=true disables authentication for tests/local dev
       # Falls back to REACT_APP_AUTH_ENABLED for backwards compatibility
       - REACT_APP_TESTING_MODE=${REACT_APP_TESTING_MODE:-false}
-      - REACT_APP_AUTH_ENABLED=${REACT_APP_AUTH_ENABLED:-false}
+      - REACT_APP_AUTH_ENABLED=${REACT_APP_AUTH_ENABLED:-true}
       - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:8000}
     depends_on:
       - api
