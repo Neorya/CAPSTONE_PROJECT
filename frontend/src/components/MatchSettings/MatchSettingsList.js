@@ -1,12 +1,13 @@
 import React, { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Radio, Space, Table, Tag, Typography, Tooltip, message, Alert, Input } from "antd";
+import { Button, Card, Radio, Space, Table, Tag, Typography, Tooltip, Alert, Input } from "antd";
 import { ArrowLeftOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import { useMatchSettings } from "./hooks/useMatchSettings";
 import MatchSettingDetailsPopup from "./components/MatchSettingDetailsPopup";
 import MatchSettingActionButtons from "./components/MatchSettingActionButtons";
 import MatchSettingEditModal from "./components/MatchSettingEditModal";
 import "./MatchSettingsList.css";
+import PopupAlert from '../common/PopupAlert';
 
 const { Title, Text } = Typography;
 
@@ -21,13 +22,14 @@ const STATUS_COLOR = {
  */
 const MatchSettingsList = () => {
   const navigate = useNavigate();
-  
+
   // Local state for search and sort (not provided by useMatchSettings hook)
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState({ field: 'id', order: 'descend' });
 
   // Error state
-  const [error, setError] = useState(null);
+  const [error, setError] = React.useState(null);
+  const [success, setSuccess] = React.useState(null);
 
   // Edit modal state
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -38,11 +40,13 @@ const MatchSettingsList = () => {
   const showAlert = useCallback((type, msg) => {
     if (type === 'error') {
       setError(msg);
+    } else if (type === 'success') {
+      setSuccess(msg);
     }
   }, []);
 
   const showSuccess = useCallback((msg) => {
-    message.success(msg);
+    setSuccess(msg);
   }, []);
 
   // Custom hooks
@@ -60,13 +64,6 @@ const MatchSettingsList = () => {
     openPopup,
     closePopup
   } = useMatchSettings(showAlert, showSuccess);
-
-  // const {
-  //   selectedMatchSetting,
-  //   isPopupVisible,
-  //   openPopup,
-  //   closePopup
-  // } = useMatchSettingDetails();
 
   // Edit handlers
   const handleOpenEdit = useCallback((matchSetting) => {
@@ -195,15 +192,22 @@ const MatchSettingsList = () => {
 
         {/* Error Alert */}
         {error && (
-          <Alert
+          <PopupAlert
             message={error}
             type="error"
-            showIcon
-            closable
             onClose={() => setError(null)}
-            style={{ marginBottom: 16 }}
           />
         )}
+
+        {/* Success Alert */}
+        {success && (
+          <PopupAlert
+            message={success}
+            type="success"
+            onClose={() => setSuccess(null)}
+          />
+        )}
+
 
         <div className="filter-bar">
           <div className="filter-controls">
