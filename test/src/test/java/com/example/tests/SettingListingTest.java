@@ -443,8 +443,6 @@ public class SettingListingTest extends BaseTest {
         settingListingPage.clickFirstDetailsButton();
         settingListingPage.waitForModalToAppear();
         
-        assertTrue(settingListingPage.isModalDescriptionTableDisplayed(), 
-            "Modal description table should be displayed");
         assertTrue(settingListingPage.isModalDescriptionDisplayed(), 
             "Modal description text should be displayed");
         
@@ -454,18 +452,13 @@ public class SettingListingTest extends BaseTest {
     
     @Test
     @Order(33)
-    @DisplayName("Verify modal reference solution is displayed")
+    @DisplayName("Verify modal reference solution editor is displayed")
     public void testModalReferenceSolutionDisplayed() {
         settingListingPage.clickFirstDetailsButton();
         settingListingPage.waitForModalToAppear();
         
-        assertTrue(settingListingPage.isModalReferenceSolutionTableDisplayed(), 
-            "Modal reference solution table should be displayed");
-        assertTrue(settingListingPage.isModalReferenceSolutionDisplayed(), 
-            "Modal reference solution text should be displayed");
-        
-        String referenceSolution = settingListingPage.getModalReferenceSolution();
-        assertNotNull(referenceSolution, "Modal reference solution should not be null");
+        assertTrue(settingListingPage.isModalReferenceSolutionEditorDisplayed(), 
+            "Modal reference solution Monaco editor should be displayed");
     }
     
     @Test

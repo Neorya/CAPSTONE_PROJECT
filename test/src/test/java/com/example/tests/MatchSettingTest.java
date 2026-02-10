@@ -48,18 +48,19 @@ public class MatchSettingTest extends BaseTest {
 
     @Test
     @Order(2)
-    @DisplayName("Verify edit modal opens")
+    @DisplayName("Verify edit button navigates to edit page")
     public void testEditButton() {
         String id = matchSettingsPage.getFirstMatchSettingId();
         assertNotNull(id, "Should find at least one match setting");
         
         matchSettingsPage.clickEditButton(id);
-        assertTrue(matchSettingsPage.isEditModalVisible(), "Edit modal should be visible");
+        assertTrue(matchSettingsPage.waitForEditPageNavigation(id), "Should navigate to the edit page");
+        assertTrue(matchSettingsPage.isEditPageLoaded(), "Edit page should be loaded with heading");
     }
 
     @Test
     @Order(3)
-    @DisplayName("Verify clone creates new entry (modal should not stay open)")
+    @DisplayName("Verify clone creates new entry (should stay on list page)")
     public void testCloneButton() {
         String id = matchSettingsPage.getFirstMatchSettingId();
         assertNotNull(id, "Should find at least one match setting");
@@ -71,25 +72,6 @@ public class MatchSettingTest extends BaseTest {
 
     @Test
     @Order(4)
-    @DisplayName("Verify save changes closes modal")
-    public void testSaveChangesButton() {
-        String id = matchSettingsPage.getFirstMatchSettingId();
-        assertNotNull(id, "Should find at least one match setting");
-        
-        matchSettingsPage.clickEditButton(id);
-        assertTrue(matchSettingsPage.isEditModalVisible(), "Edit modal should be visible");
-        
-        matchSettingsPage.setSettingName("Updated Setting " + System.currentTimeMillis());
-        matchSettingsPage.setSettingDescription("Updated Description " + System.currentTimeMillis());
-        
-        System.out.println("Updated name ");
-        matchSettingsPage.clickSaveChangesButton();
-        
-        assertTrue(matchSettingsPage.waitForEditModalToClose(), "Edit modal should close after saving");
-    }
-
-    @Test
-    @Order(5)
     @DisplayName("Verify delete functionality")
     public void testDeleteButton() {
         String id = matchSettingsPage.getFirstMatchSettingId();

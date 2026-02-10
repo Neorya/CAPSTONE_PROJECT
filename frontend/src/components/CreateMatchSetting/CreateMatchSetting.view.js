@@ -54,7 +54,7 @@ const CreateMatchSettingView = ({
                 {/* Header */}
                 <div className="page-header">
                     <h2>{isEditMode ? 'Edit Match Setting' : 'Create Match Setting'}</h2>
-                    <Tooltip title="Back to Home">
+                    <Tooltip title="Go Back">
                         <Button
                             id="back-to-home-button"
                             icon={<ArrowLeftOutlined />}
@@ -97,24 +97,94 @@ const CreateMatchSettingView = ({
                 />
 
                 {/* Validation Results */}
-                {validationResults && (
-                    <div className={`validation-results ${validationResults.success ? '' : 'error'}`}>
-                        <h4>{validationResults.message}</h4>
-                        {validationResults.compilation_error && (
-                            <pre style={{ fontSize: '12px', color: '#ff4d4f' }}>
-                                {validationResults.compilation_error}
-                            </pre>
-                        )}
-                        {validationResults.test_results && validationResults.test_results.map((result, index) => (
-                            <div key={index} className={`test-result-item ${result.passed ? 'passed' : 'failed'}`}>
-                                <strong>Test {index + 1}:</strong> {result.passed ? '✓ Passed' : '✗ Failed'}
-                                <br />
-                                <small>Input: {result.test_in || 'None'} | Expected: {result.test_out} | Got: {result.actual_output}</small>
-                                {result.error && <div style={{ color: '#ff4d4f', fontSize: '12px' }}>{result.error}</div>}
+                {validationResults && (() => {
+                    const isCompileError = !!validationResults.compilation_error;
+                    const hasTests = validationResults.test_results && validationResults.test_results.length > 0;
+                    const isWarning = !hasTests && !isCompileError;
+                    const passedCount = hasTests ? validationResults.test_results.filter(r => r.passed).length : 0;
+                    const totalCount = hasTests ? validationResults.test_results.length : 0;
+
+                    const stateClass = isCompileError ? 'error' : isWarning ? 'warning' : validationResults.success ? 'success' : 'error';
+
+                    return (
+                        <div className="validation-results-container">
+                            {/* Summary Banner */}
+                            <div className={`vr-summary-banner ${stateClass}`}>
+                                <div className="vr-summary-icon">
+                                    {isCompileError ? '✗' : isWarning ? '⚠' : validationResults.success ? '✓' : '✗'}
+                                </div>
+                                <div className="vr-summary-text">
+                                    <span className="vr-summary-title">{validationResults.message}</span>
+                                    {hasTests && (
+                                        <span className="vr-summary-count">{passedCount}/{totalCount} tests passed</span>
+                                    )}
+                                </div>
                             </div>
-                        ))}
-                    </div>
-                )}
+
+                            {/* Compilation Error */}
+                            {isCompileError && (
+                                <div className="vr-compile-error">
+                                    <div className="vr-compile-error-label">Compilation Output</div>
+                                    <pre className="vr-compile-error-pre">{validationResults.compilation_error}</pre>
+                                </div>
+                            )}
+
+                            {/* Warning: No test cases */}
+                            {isWarning && (
+                                <div className="vr-warning-body">
+                                    <div className="vr-warning-icon">📋</div>
+                                    <div className="vr-warning-content">
+                                        <div className="vr-warning-title">No test cases to run</div>
+                                        <div className="vr-warning-desc">Your code compiled without errors, but there are no test cases to validate the output. Add public or private test cases above, then try again.</div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Test Result Cards */}
+                            {hasTests && (() => {
+                                const cols = totalCount <= 4
+                                    ? `repeat(${totalCount}, 1fr)`
+                                    : 'repeat(auto-fill, minmax(260px, 1fr))';
+                                return (
+                                    <div className="vr-test-list" style={{ gridTemplateColumns: cols }}>
+                                        {validationResults.test_results.map((result, index) => (
+                                            <div key={index} className={`vr-test-card ${result.passed ? 'passed' : 'failed'}`}>
+                                                <div className="vr-test-header">
+                                                    <div className="vr-test-name-group">
+                                                        <span className="vr-test-name">Test {index + 1}</span>
+                                                        <span className={`vr-scope-tag ${result.scope}`}>
+                                                            {result.scope === 'private' ? ' Private' : ' Public'}
+                                                        </span>
+                                                    </div>
+                                                    <span className={`vr-test-badge ${result.passed ? 'passed' : 'failed'}`}>
+                                                        {result.passed ? '✓ Passed' : '✗ Failed'}
+                                                    </span>
+                                                </div>
+                                                <div className="vr-test-details">
+                                                    <div className="vr-test-field">
+                                                        <span className="vr-test-label">Input</span>
+                                                        <span className="vr-test-value">{result.test_in || '—'}</span>
+                                                    </div>
+                                                    <div className="vr-test-field">
+                                                        <span className="vr-test-label">Expected</span>
+                                                        <span className="vr-test-value">{result.test_out}</span>
+                                                    </div>
+                                                    <div className={`vr-test-field ${!result.passed ? 'mismatch' : ''}`}>
+                                                        <span className="vr-test-label">Got</span>
+                                                        <span className="vr-test-value">{result.actual_output}</span>
+                                                    </div>
+                                                </div>
+                                                {result.error && (
+                                                    <div className="vr-test-error">{result.error}</div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                );
+                            })()}
+                        </div>
+                    );
+                })()}
 
                 {/* Action Buttons */}
                 <div className="action-buttons">

@@ -157,6 +157,35 @@ const useCreateMatchSetting = () => {
             ...privateTests.map(t => ({ ...t, scope: 'private' })),
         ];
 
+        // No test cases: still compile to check for errors, but warn user
+        if (allTests.length === 0) {
+            try {
+                const result = await tryMatchSetting({
+                    reference_solution: formData.reference_solution,
+                    language: formData.language,
+                    tests: allTests,
+                });
+
+                if (result.compilation_error) {
+                    setValidationResults(result);
+                    setAlert({ type: 'error', message: 'Compilation failed' });
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    setValidationResults({ ...result, message: 'Code compiled successfully' });
+                    setAlert({
+                        type: 'warning',
+                        message: 'Code compiled successfully, but no test cases to run. Add test cases to validate your solution.',
+                    });
+                }
+            } catch (error) {
+                setAlert({ type: 'error', message: error.message });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } finally {
+                setIsTrying(false);
+            }
+            return;
+        }
+
         try {
             const result = await tryMatchSetting({
                 reference_solution: formData.reference_solution,
@@ -164,13 +193,21 @@ const useCreateMatchSetting = () => {
                 tests: allTests,
             });
 
+            // Enrich results with scope info (backend doesn't return it)
+            if (result.test_results) {
+                result.test_results = result.test_results.map((r, i) => ({
+                    ...r,
+                    scope: allTests[i]?.scope || 'public',
+                }));
+            }
+
             setValidationResults(result);
 
             if (result.success) {
-                setAlert({ type: 'success', message: 'All tests passed!' });
+                setAlert(null);
             } else {
-                setAlert({ type: 'error', message: result.message });
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                // Don't show a top alert or scroll — the summary banner is enough
+                setAlert(null);
             }
         } catch (error) {
             setAlert({ type: 'error', message: error.message });
@@ -392,7 +429,7 @@ const useCreateMatchSetting = () => {
             handleRemoveInputRow,
             handleAddInputRow,
             handleDismissAlert: () => setAlert(null),
-            onBack: () => navigate('/home'),
+            onBack: () => navigate(-1),
         }
     };
 };
