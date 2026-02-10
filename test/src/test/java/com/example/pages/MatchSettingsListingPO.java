@@ -22,7 +22,7 @@ public class MatchSettingsListingPO {
     private By subheaderText = By.xpath("//span[contains(@class, 'ant-typography-secondary') and contains(text(), 'Browse, clone, edit, delete')]");
     
     // Locators for Filter Bar
-    private By filterLabel = By.xpath("//*[contains(normalize-space(.), 'Filter')]");
+    private By filterLabel = By.xpath("//span[contains(@class, 'ant-typography')]//strong[text()='Filter Status:']");
     private By filterAllRadio = By.xpath("//input[@type='radio' and @value='All']");
     private By filterReadyRadio = By.xpath("//input[@type='radio' and @value='Ready']");
     private By filterDraftRadio = By.xpath("//input[@type='radio' and @value='Draft']");
@@ -50,22 +50,23 @@ public class MatchSettingsListingPO {
     // Locators for View Details Button (dynamic ID pattern: btn-view-{id})
     private By detailsButtons = By.xpath("//button[starts-with(@id, 'btn-view-')]");
     
-    // Locators for Details Popup/Modal
+    // Locators for Details Popup/Modal (updated for new popup structure)
     private By modal = By.xpath("//div[contains(@class, 'ant-modal-content')]");
     private By modalHeader = By.id("popup-header-title");
     private By modalCloseButton = By.xpath("//button[@aria-label='Close']");
     private By modalStatusTag = By.id("popup-status-tag");
     private By modalDescriptionText = By.id("popup-description-text");
-    private By modalDescriptionTable = By.id("popup-description-table");
-    private By modalReferenceSolutionTable = By.id("popup-reference-solution-table");
-    private By modalReferenceSolutionText = By.id("popup-reference-solution-text");
     
-    // Locators for Public Tests Section
-    private By publicTestsSection = By.xpath("//div[@class='tests-section'][.//h4[text()='Public Tests']]");
+    // Reference Solution is now a Monaco Editor (read-only)
+    private By modalReferenceSolutionEditor = By.id("popup-reference-solution-editor");
+    
+    // Student Boilerplate editor
+    private By modalStudentCodeEditor = By.id("popup-student-code-editor");
+    
+    // Test sections (updated for new layout: side-by-side columns)
+    private By publicTestsLabel = By.xpath("//div[contains(@class, 'popup-section-label') and contains(text(), 'Public Tests')]");
+    private By privateTestsLabel = By.xpath("//div[contains(@class, 'popup-section-label') and contains(text(), 'Private Tests')]");
     private By publicTestCards = By.xpath("//div[starts-with(@id, 'public-test-card-')]");
-    
-    // Locators for Private Tests Section  
-    private By privateTestsSection = By.xpath("//div[@class='tests-section'][.//h4[text()='Private Tests']]");
     
     // Constructor
     public MatchSettingsListingPO(WebDriver driver) {
@@ -268,7 +269,6 @@ public class MatchSettingsListingPO {
     public void clickDetailsButtonByIndex(int index) {
         List<WebElement> buttons = getDetailsButtons();
         if (index >= 0 && index < buttons.size()) {
-            // Get the button ID to create a proper By locator for fresh element lookup
             String buttonId = buttons.get(index).getAttribute("id");
             By buttonLocator = By.id(buttonId);
             wait.until(ExpectedConditions.elementToBeClickable(buttonLocator)).click();
@@ -350,29 +350,23 @@ public class MatchSettingsListingPO {
         }
     }
     
-    public boolean isModalDescriptionTableDisplayed() {
+    /**
+     * Checks if the reference solution Monaco editor is displayed in the modal.
+     */
+    public boolean isModalReferenceSolutionEditorDisplayed() {
         try {
-            return driver.findElement(modalDescriptionTable).isDisplayed();
+            return wait.until(ExpectedConditions.visibilityOfElementLocated(modalReferenceSolutionEditor)).isDisplayed();
         } catch (Exception e) {
             return false;
         }
     }
     
-    public String getModalReferenceSolution() {
-        return driver.findElement(modalReferenceSolutionText).getText();
-    }
-    
-    public boolean isModalReferenceSolutionDisplayed() {
+    /**
+     * Checks if the student code Monaco editor is displayed in the modal.
+     */
+    public boolean isModalStudentCodeEditorDisplayed() {
         try {
-            return driver.findElement(modalReferenceSolutionText).isDisplayed();
-        } catch (Exception e) {
-            return false;
-        }
-    }
-    
-    public boolean isModalReferenceSolutionTableDisplayed() {
-        try {
-            return driver.findElement(modalReferenceSolutionTable).isDisplayed();
+            return driver.findElement(modalStudentCodeEditor).isDisplayed();
         } catch (Exception e) {
             return false;
         }
@@ -380,7 +374,7 @@ public class MatchSettingsListingPO {
     
     public boolean isPublicTestsSectionDisplayed() {
         try {
-            return driver.findElement(publicTestsSection).isDisplayed();
+            return driver.findElement(publicTestsLabel).isDisplayed();
         } catch (Exception e) {
             return false;
         }
@@ -388,7 +382,7 @@ public class MatchSettingsListingPO {
     
     public boolean isPrivateTestsSectionDisplayed() {
         try {
-            return driver.findElement(privateTestsSection).isDisplayed();
+            return driver.findElement(privateTestsLabel).isDisplayed();
         } catch (Exception e) {
             return false;
         }
@@ -429,11 +423,16 @@ public class MatchSettingsListingPO {
         }
     }
     
+    /**
+     * Verifies the key elements of the view modal are present.
+     * Updated: no longer checks for Descriptions tables; checks for
+     * Monaco editors and test section labels instead.
+     */
     public boolean verifyModalElements() {
         return isModalTitleDisplayed() 
             && isModalStatusTagDisplayed() 
-            && isModalDescriptionTableDisplayed() 
-            && isModalReferenceSolutionTableDisplayed()
+            && isModalDescriptionDisplayed()
+            && isModalReferenceSolutionEditorDisplayed()
             && isPublicTestsSectionDisplayed() 
             && isPrivateTestsSectionDisplayed()
             && isModalCloseButtonDisplayed();
@@ -442,18 +441,10 @@ public class MatchSettingsListingPO {
     // Verification Methods
     public boolean isPageLoaded() {
         try {
-            // Wait for the page title first
             wait.until(ExpectedConditions.visibilityOfElementLocated(pageTitle));
-            
-            // Wait for back button to be visible
             wait.until(ExpectedConditions.visibilityOfElementLocated(backToHomeButton));
-            
-            // Wait for the table container (even if empty)
             wait.until(ExpectedConditions.presenceOfElementLocated(matchSettingsTable));
-            
-            // Additional check to ensure back button is interactive
             wait.until(ExpectedConditions.elementToBeClickable(backToHomeButton));
-            
             return true;
         } catch (Exception e) {
             System.err.println("Page load failed: " + e.getMessage());

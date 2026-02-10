@@ -15,12 +15,9 @@ public class MatchSettingsPO {
     private WebDriverWait wait;
 
     private static final String PAGE_TITLE_ID = "page-title";
-    private static final String EDIT_MODAL_CLASS = "match-setting-edit-modal";
-    private static final String INPUT_TITLE_ID = "title";
-    private static final String SAVE_BUTTON_XPATH = "//button[span[text()='Save Changes']]";
-    private static final String POPCONFIRM_OK_XPATH = "//div[contains(@class, 'ant-popover-buttons')]//button[contains(@class, 'ant-btn-primary')]";
     private static final String TABLE_ROWS_XPATH = "//tbody[@class='ant-table-tbody']//tr";
     private static final String EDIT_BUTTONS_XPATH = "//button[starts-with(@id, 'btn-edit-')]";
+    private static final String POPCONFIRM_OK_XPATH = "//div[contains(@class, 'ant-popover-buttons')]//button[contains(@class, 'ant-btn-primary')]";
 
     public MatchSettingsPO(WebDriver driver) {
         this.driver = driver;
@@ -40,8 +37,6 @@ public class MatchSettingsPO {
         try {
             wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(TABLE_ROWS_XPATH)));
         } catch (Exception e) {
-            // It's possible the table is empty, which is also a valid state if no data exists
-            // But usually we expect data for these tests
             System.out.println("Warning: Timeout waiting for table rows or table is empty.");
         }
     }
@@ -58,25 +53,50 @@ public class MatchSettingsPO {
         }
     }
 
-    public boolean isEditModalVisible() {
-        try {
-            return wait.until(ExpectedConditions.visibilityOfElementLocated(By.className(EDIT_MODAL_CLASS))).isDisplayed();
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public boolean waitForEditModalToClose() {
-        try {
-            return wait.until(ExpectedConditions.invisibilityOfElementLocated(By.className(EDIT_MODAL_CLASS)));
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
+    /**
+     * Clicks the edit button for the given match setting ID.
+     * This navigates to /match-settings/{id}/edit (the full edit page),
+     * NOT a modal.
+     */
     public void clickEditButton(String id) {
         WebElement editBtn = wait.until(ExpectedConditions.elementToBeClickable(By.id("btn-edit-" + id)));
         editBtn.click();
+    }
+
+    /**
+     * Waits for the edit page to load after clicking edit.
+     * The edit page reuses the CreateMatchSetting component,
+     * so we look for its heading and editor.
+     */
+    public boolean isEditPageLoaded() {
+        try {
+            // The edit page shows "Edit Match Setting" in an h2
+            By editHeading = By.xpath("//h2[text()='Edit Match Setting']");
+            wait.until(ExpectedConditions.visibilityOfElementLocated(editHeading));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Checks that the current URL matches the edit page pattern.
+     */
+    public boolean isOnEditPage(String id) {
+        String currentUrl = driver.getCurrentUrl();
+        return currentUrl.contains("/match-settings/" + id + "/edit");
+    }
+
+    /**
+     * Waits for the URL to contain the edit path.
+     */
+    public boolean waitForEditPageNavigation(String id) {
+        try {
+            wait.until(ExpectedConditions.urlContains("/match-settings/" + id + "/edit"));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public void clickCloneButton(String id) {
@@ -101,28 +121,5 @@ public class MatchSettingsPO {
             WebElement okBtn = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[span[text()='Yes']]")));
             okBtn.click();
         }
-    }
-
-    public void setSettingName(String name) {
-        WebElement titleInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(INPUT_TITLE_ID)));
-        titleInput.click(); // Click first to ensure focus
-        titleInput.clear();
-        titleInput.sendKeys(Keys.CONTROL + "a");
-        titleInput.sendKeys(Keys.BACK_SPACE);
-        titleInput.sendKeys(name);
-    }
-    
-    public void setSettingDescription(String description) {
-        WebElement descInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("description")));
-        descInput.click();
-        descInput.clear();
-        descInput.sendKeys(Keys.CONTROL + "a");
-        descInput.sendKeys(Keys.BACK_SPACE);
-        descInput.sendKeys(description);
-    }
-
-    public void clickSaveChangesButton() {
-        WebElement saveBtn = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(SAVE_BUTTON_XPATH)));
-        saveBtn.click();
     }
 }

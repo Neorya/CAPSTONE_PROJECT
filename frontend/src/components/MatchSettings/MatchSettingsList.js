@@ -5,7 +5,6 @@ import { ArrowLeftOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import { useMatchSettings } from "./hooks/useMatchSettings";
 import MatchSettingDetailsPopup from "./components/MatchSettingDetailsPopup";
 import MatchSettingActionButtons from "./components/MatchSettingActionButtons";
-import MatchSettingEditModal from "./components/MatchSettingEditModal";
 import "./MatchSettingsList.css";
 import PopupAlert from '../common/PopupAlert';
 
@@ -30,11 +29,6 @@ const MatchSettingsList = () => {
   // Error state
   const [error, setError] = React.useState(null);
   const [success, setSuccess] = React.useState(null);
-
-  // Edit modal state
-  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [selectedForEdit, setSelectedForEdit] = useState(null);
-  const [editLoading, setEditLoading] = useState(false);
 
   // Alert handlers
   const showAlert = useCallback((type, msg) => {
@@ -65,25 +59,10 @@ const MatchSettingsList = () => {
     closePopup
   } = useMatchSettings(showAlert, showSuccess);
 
-  // Edit handlers
+  // Edit handler — navigate to full edit page
   const handleOpenEdit = useCallback((matchSetting) => {
-    setSelectedForEdit(matchSetting);
-    setIsEditModalVisible(true);
-  }, []);
-
-  const handleCloseEdit = useCallback(() => {
-    setIsEditModalVisible(false);
-    setSelectedForEdit(null);
-  }, []);
-
-  const handleSaveEdit = useCallback(async (id, values) => {
-    setEditLoading(true);
-    const success = await updateMatchSetting(id, values);
-    setEditLoading(false);
-    if (success) {
-      handleCloseEdit();
-    }
-  }, [updateMatchSetting, handleCloseEdit]);
+    navigate(`/match-settings/${matchSetting.id}/edit`);
+  }, [navigate]);
 
   // Handle table change (sorting)
   const handleTableChange = (pagination, filters, sorter) => {
@@ -273,15 +252,6 @@ const MatchSettingsList = () => {
         visible={isPopupVisible}
         onClose={closePopup}
         matchSetting={selectedMatchSetting}
-      />
-
-      {/* Edit Modal */}
-      <MatchSettingEditModal
-        visible={isEditModalVisible}
-        matchSetting={selectedForEdit}
-        loading={editLoading}
-        onSave={handleSaveEdit}
-        onCancel={handleCloseEdit}
       />
     </div>
   );
