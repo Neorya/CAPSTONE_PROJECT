@@ -14,13 +14,8 @@ import { API_BASE_URL } from "./config";
  *
  * IMPORTANT: CRA/Vite style env vars are baked at build time; changing them requires rebuild.
  */
-const AUTH_ENABLED_OVERRIDE_KEY = "auth_enabled_override";
-
-// Check REACT_APP_TESTING_MODE first (inverted logic - testing mode means auth disabled)
-// Fall back to REACT_APP_AUTH_ENABLED for backwards compatibility
-const TESTING_MODE = process.env.REACT_APP_TESTING_MODE === 'true';
-const AUTH_ENABLED_LEGACY = process.env.REACT_APP_AUTH_ENABLED !== 'false';
-const AUTH_ENABLED_DEFAULT = TESTING_MODE ? false : AUTH_ENABLED_LEGACY;
+// Auth enabled by default
+const AUTH_ENABLED_DEFAULT = true;
 
 /**
  * Dev mode flag key in localStorage
@@ -32,26 +27,9 @@ const DEV_MODE_KEY = "dev_mode_bypass";
  * If auth is disabled, route guards and token validation will be bypassed.
  */
 export const isAuthEnabled = () => {
-  const override = localStorage.getItem(AUTH_ENABLED_OVERRIDE_KEY);
-  if (override === "true") return true;
-  if (override === "false") return false;
   return AUTH_ENABLED_DEFAULT;
 };
 
-/**
- * Persist a runtime override for whether auth is enabled.
- * This is useful for local development and test environments.
- */
-export const setAuthEnabledOverride = (enabled) => {
-  localStorage.setItem(AUTH_ENABLED_OVERRIDE_KEY, enabled ? "true" : "false");
-};
-
-/**
- * Clear the runtime override and fall back to the build-time env default.
- */
-export const clearAuthEnabledOverride = () => {
-  localStorage.removeItem(AUTH_ENABLED_OVERRIDE_KEY);
-};
 
 /**
  * Check if dev mode bypass is enabled
