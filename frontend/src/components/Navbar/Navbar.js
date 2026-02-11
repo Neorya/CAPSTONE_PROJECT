@@ -1,12 +1,11 @@
-import React, { useMemo, useState, useEffect } from "react";
-import { Layout, Dropdown, Avatar, Space, Switch, Tooltip, Button } from "antd";
-import { UserOutlined, LogoutOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import React, { useState, useEffect } from "react";
+import { Layout, Dropdown, Avatar, Space, Button } from "antd";
+import { UserOutlined, LogoutOutlined, HomeOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import {
   logout,
   isDevModeEnabled,
   isAuthEnabled,
-  setAuthEnabledOverride,
   disableDevMode,
   removeToken,
 } from "../../services/authService";
@@ -18,8 +17,8 @@ const { Header } = Layout;
 const Navbar = () => {
   const navigate = useNavigate();
   const isDevMode = isDevModeEnabled();
-  const authEnabled = useMemo(() => isAuthEnabled(), []);
-  console.log("authEnabled", authEnabled);
+  const authEnabled = isAuthEnabled();
+
   const [profile, setProfile] = useState(null);
 
   useEffect(() => {
@@ -41,21 +40,7 @@ const Navbar = () => {
     navigate("/login");
   };
 
-  const handleAuthToggle = (checked) => {
-    // Persist override and reload so route guards pick it up immediately.
-    setAuthEnabledOverride(checked);
 
-    // If enabling auth, clear any bypass token/dev mode so user must login properly.
-    if (checked) {
-      disableDevMode();
-      removeToken();
-      window.location.href = "/login";
-      return;
-    }
-
-    // If disabling auth, go back to home.
-    window.location.href = "/";
-  };
 
   const menuItems = [
     {
@@ -71,9 +56,9 @@ const Navbar = () => {
     },
   ];
 
-  const handleArrowback = () => {
+  const handleHomeClick = () => {
     navigate("/");
-  }
+  };
   const handleMenuClick = ({ key }) => {
     if (key === "logout") {
       handleLogout();
@@ -85,35 +70,18 @@ const Navbar = () => {
   return (
     <Header className="navbar-header">
       <div className="navbar-content">
-        <div className="navbar-logo" onClick={handleArrowback} style={{ cursor: 'pointer' }}>
+        <div className="navbar-logo" onClick={handleHomeClick} style={{ cursor: 'pointer' }}>
           <span>Codify</span>
         </div>
         <div className="navbar-right">
           <Button
             id="back-to-home-button"
-            icon={<ArrowLeftOutlined />}
-            onClick={handleArrowback}
+            icon={<HomeOutlined />}
+            onClick={handleHomeClick}
             shape="circle"
             size="large"
           />
-          <Tooltip
-            title={
-              authEnabled
-                ? "Authentication is ON (Google login + route protection active)"
-                : "Authentication is OFF (bypasses route protection + token validation)"
-            }
-          >
-            <div className="auth-toggle">
-              {!authEnabled && <span className="auth-off-badge">AUTH OFF</span>}
-              <Switch
-                checked={authEnabled}
-                onChange={handleAuthToggle}
-                checkedChildren="Auth"
-                unCheckedChildren="Auth"
-                aria-label="Toggle authentication"
-              />
-            </div>
-          </Tooltip>
+
 
           <Dropdown
             menu={{ items: menuItems, onClick: handleMenuClick }}
