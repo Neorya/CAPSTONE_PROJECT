@@ -22,6 +22,13 @@ const EditorPanel = ({
 }) => {
     const [showMiniGame, setShowMiniGame] = React.useState(false);
 
+    // Close mini-game when timer runs out
+    React.useEffect(() => {
+        if (timeLeft === 0) {
+            setShowMiniGame(false);
+        }
+    }, [timeLeft]);
+
     // Mapping runResults to Collapse items
     const collapseItems = [
         {
@@ -155,6 +162,7 @@ const EditorPanel = ({
                 <Button
                     onClick={() => setShowMiniGame(true)}
                     size="large"
+                    disabled={timeLeft === 0}
                 >
                    Open mini-game
                 </Button>

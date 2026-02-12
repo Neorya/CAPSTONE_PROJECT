@@ -20,17 +20,18 @@ const DodgeTheBugsGame = ({ onClose, visible }) => {
     const bugs = useRef([]);
     const spawnTimer = useRef(0);
     const difficultyTimer = useRef(0);
+    const lastScoreUpdate = useRef(0);
     
     // Constants
     const CAN_WIDTH = 400;
     const CAN_HEIGHT = 400;
     const PLAYER_SIZE = 20;
     const BUG_SIZE = 20;
-    const INITIAL_SPAWN_RATE = 1000; // ms
+    const INITIAL_SPAWN_RATE = 600; // ms
     
     const settings = useRef({
         spawnRate: INITIAL_SPAWN_RATE,
-        bugSpeed: 150, // px/s
+        bugSpeed: 100, // px/s
         canvasWidth: CAN_WIDTH,
         canvasHeight: CAN_HEIGHT
     });
@@ -50,13 +51,13 @@ const DodgeTheBugsGame = ({ onClose, visible }) => {
         });
     };
 
-    const update = (deltaTime) => {
+    const update = (deltaTime, time) => {
         // Update Difficulty
         difficultyTimer.current += deltaTime;
         if (difficultyTimer.current > 5000) { // Every 5 seconds
             settings.current.spawnRate = Math.max(200, settings.current.spawnRate * 0.95);
             settings.current.bugSpeed *= 1.05;
-            difficultyTimer.current = 0;
+            difficultyTimer.current -= 5000; // Subtract instead of reset to avoid time drif
         }
 
         // Spawn Bugs
@@ -100,7 +101,12 @@ const DodgeTheBugsGame = ({ onClose, visible }) => {
 
         // Score
         scoreRef.current += deltaTime / 1000;
-        setScore(scoreRef.current);
+        
+        // Throttle score state update to every 100ms prevents React visual glitches/GC
+        if (time - lastScoreUpdate.current > 100) {
+            setScore(scoreRef.current);
+            lastScoreUpdate.current = time;
+        }
     };
 
     const draw = (ctx) => {
@@ -133,7 +139,7 @@ const DodgeTheBugsGame = ({ onClose, visible }) => {
         const deltaTime = time - lastTimeRef.current;
         lastTimeRef.current = time;
 
-        update(deltaTime);
+        update(deltaTime, time);
         
         const canvas = canvasRef.current;
         if (canvas) {
@@ -149,6 +155,7 @@ const DodgeTheBugsGame = ({ onClose, visible }) => {
         setScore(0);
         scoreRef.current = 0;
         lastTimeRef.current = 0;
+        lastScoreUpdate.current = 0;
         
         // Reset Entities
         player.current = { x: CAN_WIDTH / 2 - PLAYER_SIZE / 2, y: CAN_HEIGHT - 40, width: PLAYER_SIZE, height: PLAYER_SIZE, speed: 300 };
