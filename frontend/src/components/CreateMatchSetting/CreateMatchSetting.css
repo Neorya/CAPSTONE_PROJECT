@@ -12,15 +12,17 @@
 }
 
 .page-header {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
+  gap: 12px;
   margin-bottom: 24px;
 }
 
 .page-header h2 {
   margin: 0;
   color: #1a1a1a;
+  text-align: center;
 }
 
 .match-details-section {
