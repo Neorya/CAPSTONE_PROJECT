@@ -21,10 +21,6 @@ from models import Match, Teacher, MatchSetting
 
 
 class MatchCreate(BaseModel):
-    """
-    Request model for creating a new match.
-    """
-
     title: str = Field(..., description="Title of the match")
     match_set_id: int = Field(..., description="ID of the parent Match Setting")
     creator_id: int = Field(..., description="ID of the teacher creating this match")
@@ -34,10 +30,6 @@ class MatchCreate(BaseModel):
     duration_phase2: int = Field(..., description="Estimated duration of phase 2 in minutes", ge=1)
 
 class MatchResponse(BaseModel):
-    """
-    Response model for a single match
-    """
-
     match_id: int = Field(..., description="Unique identifier for the match")
     title: str = Field(..., description="Title of the match")
     match_set_id: int = Field(..., description="ID of the parent Match Setting")

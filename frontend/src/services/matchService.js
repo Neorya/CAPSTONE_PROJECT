@@ -1,18 +1,6 @@
 import { API_BASE_URL, API_ENDPOINTS } from './config';
 import { apiFetch } from './api';
 
-/**
- * Create a new match
- * @param {Object} matchData - Match creation data
- * @param {string} matchData.title - Match title
- * @param {number} matchData.match_set_id - Match setting ID
- * @param {number} matchData.creator_id - Teacher/creator ID
- * @param {number} matchData.difficulty_level - Difficulty level (1=Easy, 2=Medium, 3=Hard)
- * @param {number} matchData.review_number - Number of reviewers
- * @param {number} matchData.duration_phase1 - Duration of first phase in minutes
- * @param {number} matchData.duration_phase2 - Duration of second phase in minutes
- * @returns {Promise<Object>} Created match object
- */
 export const createMatch = async (matchData) => {
   try {
     const url = `${API_BASE_URL}${API_ENDPOINTS.MATCHES}`;
@@ -72,11 +60,6 @@ export const createMatch = async (matchData) => {
   }
 };
 
-/**
- * TODO: Delete this function after removal of all the usages of it
- * Fetch the list of matches
- * @returns {Promise<Array<Object>>} List of match objects
- */
 export const getMatches = async () => {
   try {
     const response = await apiFetch(`${API_BASE_URL}${API_ENDPOINTS.MATCHES}`, {

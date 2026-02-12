@@ -1,286 +1,144 @@
-# Tutorial Student – Complete Guide for Students
+# Codify User Guide
 
-## Introduction
+# 👩‍🎓 Student Guide
 
-Welcome to **Codify**, the gamified coding platform! This guide will walk you through all the features to participate in programming competitions and improve your skills.
+## Getting Started
 
----
+To use Codify, you simply need:
 
-## Prerequisites
+* A link provided by your teacher
+* An active game session created by your teacher
 
-Before starting, make sure that:
-
-* You have access to the URL: `http://localhost:3000`
-* Your teacher has created an available Game Session
+Open the platform in your browser and log in with your student account.
 
 ---
 
-## 1. Login as Student
+## Student Home Page
 
-### Step 1.1: Access the login page
+After logging in, you will see your dashboard with three main options:
 
-1. Open your browser and go to `http://localhost:3000/login`
-2. You will see the Codify login screen with the logo and the slogan "Master the Code. Dominate the Leaderboard."
+* **Join Game Sessions**
+* **Lobby**
+* **Hall of Fame**
 
-### Step 1.2: Log in
-
-**In development mode:**
-
-1. Scroll down to the "Developer Access (DEV MODE ONLY)" section
-2. Click the **" Login as Student (Dev)"** button
-3. You will be automatically authenticated as a student and redirected to the Home page
+(Home page dashboard with main student options)[images/student-home-dashboard.png]
 
 ---
 
-## 2. Home Page – Student Dashboard
+## Joining a Game Session
 
-After logging in, you will see the home page with the following options:
+1. Click **Join Game Sessions**.
+2. If a session is available, you will see its name and start time.
+3. Click **Join**.
 
-| Card                   | Color | Description                                    |
-| ---------------------- | ----- | ---------------------------------------------- |
-| **Join Game Sessions** | Pink  | Join available game sessions                   |
-| **Lobby**              | Cyan  | View the lobby of the game you are enrolled in |
-| **Hall of Fame**       | Gold  | View the global leaderboard                    |
+(Available session card with Join button)[images/student-join-session.png]
 
----
+If you already joined, the button will show **Enter Lobby** instead.
 
-## 3. Joining a Game Session
-
-### Step 3.1: Find available sessions
-
-1. From the home page, click **"Join Game Sessions"**
-2. The page will show:
-
-   * **Available session**: If there is an open session, you will see its details
-   * **No session**: If there are no sessions, you will see "No sessions are currently open. Check back soon!"
-
-### Step 3.2: Join a session
-
-1. If there is an available session, you will see a card with:
-
-   * Session name
-   * Start date and time
-   * Action button
-2. Click **"Join"** to enroll
-3. A "Joined successfully!" message will confirm the enrollment
-4. You will be automatically redirected to the **Lobby**
-
-### Step 3.3: Already enrolled?
-
-If you have already enrolled, the button will show **"Enter Lobby"**, and clicking it will take you directly into the lobby.
+If no session is available, you will see a message telling you to check back later.
 
 ---
 
-## 4. The Lobby – Waiting Room
+## The Lobby (Waiting Room)
 
-### What you will see in the Lobby
+After joining, you enter the **Lobby**.
 
-1. Title: "Lobby"
-2. Subtitle: "Waiting for the game to start..."
-3. A loading indicator while the system checks whether the game has started
+(Lobby screen with waiting message and loading indicator)[images/student-lobby.png]
 
-### What happens?
+Here you:
 
-* The page automatically checks every 2 seconds whether the teacher has started the session
-* When the game starts, you will see the message **"Game session has started!"**
-* You will be automatically redirected to **Phase 1** of the game
+* Wait for the teacher to start the game
+* Stay on the page until the challenge begins
 
-### Important note
+When the session starts, you will automatically move to the coding phase.
 
-**Do not close or refresh the page** while you are in the lobby! You would lose the connection and need to rejoin.
+Do not close the page while waiting.
 
 ---
 
-## 5. Phase 1 – Coding Challenge
+## Phase 1 – Coding Challenge
 
-### Step 5.1: Phase 1 interface
+When the game begins, you will see:
 
-When the game starts, you will see a screen divided into two panels:
-
-**Left Panel:**
-
-* "Problem Description" tab: Description of the problem to solve
-* "Tests (Public & Mine)" tab: List of test cases
-
-**Right Panel:**
-
+* Problem description
+* Test cases
 * Code editor
-* Language selector
-* Run buttons
-* Output area
+* Timer at the top
 
-**At the top:**
+(Coding challenge interface with problem description and editor)[images/student-phase1-editor.png]
 
-* Countdown timer with remaining time
+### What to Do
 
-### Step 5.2: Read the problem
+1. Carefully read the problem.
+2. Review the public test cases.
+3. Write your solution in the editor.
+4. Click **Run Public Tests** to check your code.
+5. Fix errors and test again.
 
-1. In the "Problem Description" tab, carefully read:
+You can also:
 
-   * The problem **title**
-   * The full **description** with requirements
-   * **Examples** of input/output (if present)
+* Add your own test cases
+* Run custom tests to verify edge cases
 
-### Step 5.3: Analyze the test cases
+Your code saves automatically.
 
-1. Switch to the "Tests (Public & Mine)" tab
-2. You will see:
-
-   * **Public tests**: Provided by the teacher, use them to verify your solution
-   * **Your tests**: Tests you can create yourself
-
-### Step 5.4: Write the solution
-
-1. In the right panel, write your code in the editor
-2. Use the selector to choose the language (if multiple options are available)
-3. The code is saved automatically
-
-### Step 5.5: Run the tests
-
-1. Click **"Run Public Tests"** to run the teacher’s public tests
-2. In the output you will see:
-
-   * Passed tests (green)
-   * Failed tests (red) with error details
-3. Fix the code and repeat until all tests pass
-
-### Step 5.6: Add custom tests (Optional but recommended!)
-
-1. Click **"Add Test"** in the tests tab
-2. Enter:
-
-   * **Input**: The test input data
-   * **Expected Output**: The expected output
-3. Click **"Add"** to save
-4. Use **"Run Custom Tests"** to run your tests
-
-### Step 5.7: Submit the solution
-
-* Your solution is **automatically saved** while you write
-* When the timer reaches 00:00, Phase 1 ends automatically
-* Your last solution will be the one evaluated
+When the timer ends, your latest version will be submitted automatically.
 
 ---
 
-## 6. Phase 2 – Peer Review
+## Phase 2 – Peer Review
 
-### Step 6.1: Transition to Phase 2
+After Phase 1 ends, you will review other students’ solutions.
 
-* When Phase 1 ends, you will be automatically redirected to the review page
-* You will see a new screen with a two-column layout
+(Peer review interface with solution list and voting options)[images/student-phase2-review.png]
 
-### Step 6.2: Review interface
+### How to Review
 
-**Left Panel:**
+1. Select a solution from the list.
+2. Read the code carefully.
+3. Choose one option:
 
-* List of solutions to review
-* Countdown timer for Phase 2
-* Icon to expand/collapse the panel
+* **Correct** – if the solution works.
+* **Incorrect** – if you find a mistake (you must provide a failing test case).
+* **Skip** – if you cannot evaluate it.
 
-**Right Panel:**
+4. Submit your vote.
+5. Continue reviewing until time runs out.
 
-* Code of the selected solution
-* Voting options
-* Test case form (if needed)
-* Additional notes
-
-### Step 6.3: Select a solution
-
-1. In the left panel, click one of the assigned solutions
-2. The code will appear in the right panel
-
-### Step 6.4: Evaluate the solution
-
-You have three voting options:
-
-#### Option A: Correct
-
-If you think the solution is correct:
-
-1. Select **"Correct"**
-2. (Optional) Add a note
-3. Click **"Submit Vote"**
-
-#### Option B: Incorrect
-
-If you find an error in the solution:
-
-1. Select **"Incorrect"**
-2. **You must provide a test case** that makes the solution fail:
-
-   * **Input**: The input data that causes the error
-   * **Expected Output**: The correct output that the solution does not produce
-3. (Optional) Add a note explaining the error found
-4. Click **"Submit Vote"**
-
-#### Option C: Skip
-
-If you are unable to evaluate the solution:
-
-1. Select **"Skip"**
-2. (Optional) Add a note
-3. Click **"Submit Vote"**
-
-### Step 6.5: Continue with other solutions
-
-1. After voting, the solution will be marked as completed
-2. Move on to the next solution in the list
-3. Continue until all assigned solutions are reviewed or time runs out
-
-### Step 6.6: End of Phase 2
-
-* When the timer reaches 00:00, you will see a **"Phase Ended"** overlay
-* You will no longer be able to submit votes
-* Scores will be calculated
+When the timer ends, voting stops automatically.
 
 ---
 
-## 7. Hall of Fame – Leaderboard
+## Hall of Fame
 
-### Step 7.1: Access the leaderboard
+To see rankings, click **Hall of Fame**.
 
-1. From the home page, click **"Hall of Fame"**
-2. Or go directly to `/hall-of-fame`
+(Global leaderboard screen)[images/student-leaderboard.png]
 
-### Step 7.2: What you will see
+You can:
 
-* **Global leaderboard** of all students
-* For each student:
-
-  * Position
-  * Full name
-  * Total score
-
-### Step 7.3: Find your name
-
-* Use the search function to find yourself or your classmates
-* Sort the leaderboard by score
+* See your position
+* Compare scores
+* Search for classmates
 
 ---
 
-## 8. Profile Management
+## Your Profile
 
-### Step 8.1: Access the profile
+Click your profile icon (top right) to view:
 
-1. Click the profile icon in the navbar (top right)
-2. Or go directly to `/profile`
-
-### Step 8.2: View your information
-
-* First and last name
+* Name
 * Email
-* Role (Student)
-* Optional profile picture (from Google)
+* Role
+* Profile picture (if available)
+
+(Profile page screen)[images/student-profile.png]
 
 ---
 
-## Final Notes
+## What Matters Most as a Student
 
-As a student, your main goals are:
-
-1. **Solve** algorithmic challenges effectively
-2. **Collaborate** through peer review
-3. **Improve** your skills over time
-4. **Compete** for the top positions on the leaderboard
-
-**Master the Code. Dominate the Leaderboard.**
+* Solve problems carefully.
+* Test your code thoroughly.
+* Review others fairly.
+* Improve with every session.

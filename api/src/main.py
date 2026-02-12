@@ -35,7 +35,6 @@ app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "your-s
 # Validate required environment variables at startup
 @app.on_event("startup")
 def validate_config():
-    """Validate that all required authentication environment variables are set."""
     validate_required_env_vars()
 
 app.include_router(match_settings_router)
@@ -55,7 +54,6 @@ app.include_router(admin_router)
 
 @app.get("/")
 def read_root():
-    # Reads the database URL from the environment variable
     db_url = os.getenv("DATABASE_URL", "DATABASE_URL not set")
     return {
         "message": "FastAPI server is running",

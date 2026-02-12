@@ -28,15 +28,12 @@ import TutorialPage from './components/Tutorials/TutorialPage';
 import './App.css';
 
 function App() {
-  // Simple token extraction on app load if present in URL (from OAuth callback)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('access_token');
     if (token) {
       setToken(token);
-      // Clear URL params and redirect to home (root)
       window.history.replaceState({}, document.title, '/');
-      // Force a page reload to trigger route protection check
       window.location.href = '/';
     }
   }, []);
