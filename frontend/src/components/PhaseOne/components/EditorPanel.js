@@ -2,6 +2,7 @@ import React from 'react';
 import { Select, Button, Flex, Collapse, Typography, Table, Tag } from 'antd';
 import { CaretRightOutlined } from '@ant-design/icons';
 import Editor from '@monaco-editor/react';
+import DodgeTheBugsGame from './DodgeTheBugsGame';
 
 const { Option } = Select;
 const { Text } = Typography;
@@ -19,6 +20,8 @@ const EditorPanel = ({
     setShowOutput,
     runResults
 }) => {
+    const [showMiniGame, setShowMiniGame] = React.useState(false);
+
     // Mapping runResults to Collapse items
     const collapseItems = [
         {
@@ -149,6 +152,12 @@ const EditorPanel = ({
                 >
                     Test My Custom Inputs
                 </Button>
+                <Button
+                    onClick={() => setShowMiniGame(true)}
+                    size="large"
+                >
+                   Open mini-game
+                </Button>
             </Flex>
 
             <Collapse
@@ -159,6 +168,8 @@ const EditorPanel = ({
                 size="small"
                 className="results-collapse"
             />
+            
+            <DodgeTheBugsGame visible={showMiniGame} onClose={() => setShowMiniGame(false)} />
         </Flex>
     );
 };
