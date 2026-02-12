@@ -14,15 +14,12 @@ from phase_one import router as phase_one_router
 from phase_two import router as phase_two_router
 from user_api import router as user_router
 from badges_api import router as badges_router
+from admin_api import router as admin_router
 from authentication.config import validate_required_env_vars
 
 app = FastAPI()
 
-# Add SessionMiddleware first (applied last, so inner)
-# In production, use a secure secret key from environment variables
-app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "your-secret-key"))
-
-# Configure CORS last (applied first, so outer)
+# Configure CORS first (applied first, so outer)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],  # Frontend URL
@@ -31,10 +28,13 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
+# Add SessionMiddleware after CORS (applied last, so inner)
+# In production, use a secure secret key from environment variables
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "your-secret-key"))
+
 # Validate required environment variables at startup
 @app.on_event("startup")
 def validate_config():
-    """Validate that all required authentication environment variables are set."""
     validate_required_env_vars()
 
 app.include_router(match_settings_router)
@@ -49,10 +49,10 @@ app.include_router(phase_one_router)
 app.include_router(phase_two_router)
 app.include_router(user_router)
 app.include_router(badges_router)
+app.include_router(admin_router)
 
 @app.get("/")
 def read_root():
-    # Reads the database URL from the environment variable
     db_url = os.getenv("DATABASE_URL", "DATABASE_URL not set")
     return {
         "message": "FastAPI server is running",
