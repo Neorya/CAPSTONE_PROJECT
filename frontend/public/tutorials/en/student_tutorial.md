@@ -52,16 +52,6 @@ Here you:
 
 When the session starts, you will automatically move to the coding phase.
 
-### Mini-Game
-
-While waiting in the lobby, you can play a mini-game to pass the time!
-
-![Mini-game available in the lobby](/tutorials/images/mini-game-student.png)
-
-If your game ends, you will see the game over screen:
-
-![Mini-game game over screen](/tutorials/images/mini-game-gameover-student.png)
-
 Do not close the page while waiting.
 
 ---

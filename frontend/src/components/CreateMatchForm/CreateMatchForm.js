@@ -57,7 +57,7 @@ const CreateMatchForm = () => {
     resetForm(resetAlert);
   };
 
-  const backRoute = (isEditMode || isViewMode) ? '/matches' : '/home';
+  const backRoute = '/home';
 
   return (
     <div className="create-match-container">
@@ -65,7 +65,7 @@ const CreateMatchForm = () => {
         {/* Page Header */}
         <div className="page-header">
           <Title level={2}>{pageTitle}</Title>
-          <Tooltip title={isEditMode || isViewMode ? "Back to Matches" : "Back to Home"}>
+          <Tooltip title="Back to Home">
             <Button
               id="back-to-home-button"
               icon={<ArrowLeftOutlined />}

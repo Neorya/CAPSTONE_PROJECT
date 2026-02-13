@@ -99,24 +99,3 @@ export const updateMatch = async (matchId, matchData) => {
   }
   return response.json();
 };
-
-export const deleteMatch = async (matchId) => {
-  const response = await apiFetch(`${API_BASE_URL}${API_ENDPOINTS.MATCHES}/${matchId}`, {
-    method: 'DELETE',
-  });
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: response.statusText }));
-    throw new Error(error.detail || 'Failed to delete match');
-  }
-};
-
-export const cloneMatch = async (matchId) => {
-  const response = await apiFetch(`${API_BASE_URL}${API_ENDPOINTS.MATCHES}/${matchId}/clone`, {
-    method: 'POST',
-  });
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: response.statusText }));
-    throw new Error(error.detail || 'Failed to clone match');
-  }
-  return response.json();
-};

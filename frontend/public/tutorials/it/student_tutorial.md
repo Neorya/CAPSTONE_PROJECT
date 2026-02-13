@@ -52,16 +52,6 @@ Qui devi:
 
 Quando la sessione parte, verrai reindirizzato automaticamente alla fase di programmazione.
 
-### Mini-Gioco
-
-Mentre aspetti nella lobby, puoi giocare a un mini-gioco per passare il tempo!
-
-![Mini-gioco disponibile nella lobby](/tutorials/images/mini-game-student.png)
-
-Se il gioco finisce, vedrai la schermata di game over:
-
-![Schermata game over del mini-gioco](/tutorials/images/mini-game-gameover-student.png)
-
 Non chiudere la pagina durante l'attesa.
 
 ---
