@@ -23,6 +23,7 @@ import { SolutionReview } from './components/SolutionReview';
 import SolutionResults from './components/SolutionResults';
 import Profile from './components/Profile';
 import AdminDashboard from './components/AdminDashboard/AdminDashboard';
+import TutorialPage from './components/Tutorials/TutorialPage';
 
 import './App.css';
 
@@ -245,6 +246,16 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tutorials"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <TutorialPage />
+                  </AppLayout>
                 </ProtectedRoute>
               }
             />

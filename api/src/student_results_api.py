@@ -134,13 +134,17 @@ def _calculate_student_session_score(db: Session, student_id: int, game_id: int)
     
     Uses the same scoring logic as the leaderboard:
     - 50% Implementation: (total_points * 0.5) * (passed_tests / total_tests)
-    - 50% Reviews:
-        - Correct "incorrect" vote (found error): +2 * base_review_points
-        - Correct "correct" vote (confirmed solution): +1 * base_review_points
-        - Wrong vote: -1 * base_review_points (penalty)
+    - 50% Reviews (weighted system):
+        - Ground truth: Correct solution (passed all teacher tests) vs Buggy (failed some)
+        - Weights: Correct solution = 1, Buggy solution = 2
+        - Unit value = (total_points * 0.5) / sum(weights)
+        - Correct "correct" vote (confirmed a correct solution): +1 * unit_value
+        - Correct "incorrect" vote (identified a buggy solution): +2 * unit_value
+        - Wrong vote (vote doesn't match ground truth): -1 * unit_value (penalty)
         - Skip: 0 points
     
-    where base_review_points = (total_points * 0.5) / review_count
+    Review correctness is determined by comparing the student's vote against the
+    ground truth (whether the solution passed all teacher tests).
     
     Scores are capped at minimum 0 (no negative total scores).
     
@@ -267,6 +271,7 @@ def _calculate_student_session_score(db: Session, student_id: int, game_id: int)
             unit_value = review_points_pool / total_weight
             
         # Apply Scores
+        # Determine review correctness by comparing the actual vote against the ground truth
         for r in review_data:
             if r.vote == VoteType.skip:
                 continue
@@ -274,16 +279,26 @@ def _calculate_student_session_score(db: Session, student_id: int, game_id: int)
             passed = r.passed_test if r.passed_test is not None else 0
             is_correct_sol = (passed == total_tests) and (total_tests > 0)
             
-            if r.valid is True:
+            # A vote is correct if it matches the ground truth:
+            #   - Voted "correct" and solution IS correct (passed all teacher tests)
+            #   - Voted "incorrect" and solution IS buggy (failed some teacher tests)
+            if r.vote == VoteType.correct:
+                vote_is_correct = is_correct_sol
+            elif r.vote == VoteType.incorrect:
+                vote_is_correct = not is_correct_sol
+            else:
+                continue
+            
+            if vote_is_correct:
                 if is_correct_sol:
-                    # Correct review of Correct Solution -> weight 1
+                    # Correctly voted "correct" on a correct solution -> weight 1
                     total_score += 1 * unit_value
                 else:
-                    # Correct review of Buggy Solution -> weight 2
+                    # Correctly voted "incorrect" on a buggy solution -> weight 2
                     total_score += 2 * unit_value
-            elif r.valid is False:
-                 # Invalid review -> Penalty -1 * unit_value
-                 total_score += -1 * unit_value
+            else:
+                # Wrong vote -> Penalty -1 * unit_value
+                total_score += -1 * unit_value
     
     # Cap minimum score at 0
     return round(max(0.0, min(total_score, solution_data.total_points)), 2)

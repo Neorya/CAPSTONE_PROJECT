@@ -138,3 +138,68 @@ async def get_matches(db: Session = Depends(get_db)) -> List[MatchResponse]:
     """
     return db.query(Match).all()
 
+
+@router.get(
+    "/matches/{match_id}",
+    response_model=MatchResponse,
+    summary="Get a single match",
+    description="Retrieve a single match by its ID.",
+)
+async def get_match(match_id: int, db: Session = Depends(get_db)) -> MatchResponse:
+    """
+    Retrieve a single match by ID.
+    """
+    match = db.query(Match).filter(Match.match_id == match_id).first()
+    if not match:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Match not found.",
+        )
+    return match
+
+
+@router.put(
+    "/matches/{match_id}",
+    response_model=MatchResponse,
+    summary="Update a match",
+    description="Update an existing match.",
+)
+async def update_match(
+    match_id: int, match: MatchCreate, db: Session = Depends(get_db)
+) -> MatchResponse:
+    """
+    Update an existing match.
+    """
+    existing = db.query(Match).filter(Match.match_id == match_id).first()
+    if not existing:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Match not found.",
+        )
+
+    teacher = db.query(Teacher).filter(Teacher.teacher_id == match.creator_id).first()
+    setting = (
+        db.query(MatchSetting)
+        .filter(MatchSetting.match_set_id == match.match_set_id)
+        .first()
+    )
+    if not teacher or not setting:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid creator_id or match_set_id.",
+        )
+
+    try:
+        for key, value in match.model_dump().items():
+            setattr(existing, key, value)
+        db.commit()
+        db.refresh(existing)
+        return existing
+    except Exception as e:
+        db.rollback()
+        logging.error(f"Failed to update match: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An internal error occurred while updating the match.",
+        )
+

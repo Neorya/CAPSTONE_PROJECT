@@ -10,7 +10,8 @@ import {
   AppstoreOutlined,
   TrophyOutlined,
   FileAddOutlined,
-  SafetyCertificateOutlined
+  SafetyCertificateOutlined,
+  ReadOutlined
 } from "@ant-design/icons";
 import { getToken } from "../../services/authService";
 import "./HomePage.css";
@@ -99,6 +100,16 @@ const HomePage = () => {
       route: "/hall-of-fame",
       accent: "#eab308",
       roles: ["teacher", "student"]
+    },
+    // 7. Tutorials
+    {
+      id: "tutorials",
+      title: "Tutorials",
+      description: "Learn how to use the platform with step-by-step guides",
+      icon: <ReadOutlined />,
+      route: "/tutorials",
+      accent: "#14b8a6", // Teal color
+      roles: ["teacher", "student", "admin"]
     },
     // Student specific cards (Student checks use filtering so order here matters less for mixed roles, but good to keep organized)
     {

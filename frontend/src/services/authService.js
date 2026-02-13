@@ -14,8 +14,10 @@ import { API_BASE_URL } from "./config";
  *
  * IMPORTANT: CRA/Vite style env vars are baked at build time; changing them requires rebuild.
  */
-// Auth enabled by default
-const AUTH_ENABLED_DEFAULT = true;
+// Auth enabled by default unless testing mode is on or explicitly disabled
+const AUTH_ENABLED_DEFAULT = process.env.REACT_APP_TESTING_MODE === 'true' 
+  ? false 
+  : (process.env.REACT_APP_AUTH_ENABLED === 'false' ? false : true);
 
 /**
  * Dev mode flag key in localStorage
