@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ConfigProvider } from 'antd';
 import HomePage from './components/Home';
 import { CreateMatchForm } from './components/CreateMatchForm';
+import { MatchList } from './components/MatchList';
 import { MatchSettingsList } from './components/MatchSettings';
 import CreateMatchSetting from './components/CreateMatchSetting';
 import { GameSessionCreation } from './components/GameSessionCreation';
@@ -84,6 +85,36 @@ function App() {
             {/* Protected routes - require authentication */}
             <Route
               path="/create-match"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <CreateMatchForm />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/matches"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <MatchList />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/matches/:id/edit"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <CreateMatchForm />
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/matches/:id/view"
               element={
                 <ProtectedRoute>
                   <AppLayout>

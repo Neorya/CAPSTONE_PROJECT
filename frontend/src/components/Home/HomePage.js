@@ -73,6 +73,15 @@ const HomePage = () => {
       roles: ["teacher"]
     },
     {
+      id: "matches",
+      title: "Matches",
+      description: "Browse, clone, edit, delete, or view your created matches",
+      icon: <UnorderedListOutlined />,
+      route: "/matches",
+      accent: "#0ea5e9",
+      roles: ["teacher"]
+    },
+    {
       id: "create-session",
       title: "Create Game Session",
       description: "Create a new game session for students to join",

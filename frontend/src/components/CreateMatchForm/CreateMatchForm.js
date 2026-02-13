@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Form, Button, Card, Tooltip, Typography } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useAlert } from './hooks/useAlert';
@@ -25,7 +25,20 @@ const { Title } = Typography;
  */
 const CreateMatchForm = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const location = useLocation();
   const [form] = Form.useForm();
+
+  // Determine mode from route
+  const isViewMode = location.pathname.includes('/view');
+  const isEditMode = location.pathname.includes('/edit') && !!id;
+  const matchId = id ? parseInt(id, 10) : null;
+
+  const pageTitle = isViewMode
+    ? 'View Match'
+    : isEditMode
+      ? 'Edit Match'
+      : 'Create New Match';
 
   // Custom hooks for state management
   const { alert, showAlert, hideAlert, resetAlert } = useAlert();
@@ -37,8 +50,16 @@ const CreateMatchForm = () => {
     handleFormChange,
     handleMatchSettingChange,
     handleSubmit,
-    handleReset: resetForm
-  } = useMatchForm(form, showAlert);
+    handleReset: resetForm,
+    loadMatch,
+  } = useMatchForm(form, showAlert, isEditMode, matchId);
+
+  // Load match data when editing or viewing
+  useEffect(() => {
+    if ((isEditMode || isViewMode) && matchId) {
+      loadMatch(matchId);
+    }
+  }, [isEditMode, isViewMode, matchId, loadMatch]);
 
   /**
    * Handles form reset including alert state
@@ -47,17 +68,19 @@ const CreateMatchForm = () => {
     resetForm(resetAlert);
   };
 
+  const backRoute = (isEditMode || isViewMode) ? '/matches' : '/home';
+
   return (
     <div className="create-match-container">
       <Card className="create-match-card">
         {/* Page Header */}
         <div className="page-header">
-          <Title level={2}>Create New Match</Title>
-          <Tooltip title="Back to Home">
+          <Title level={2}>{pageTitle}</Title>
+          <Tooltip title={isEditMode || isViewMode ? "Back to Matches" : "Back to Home"}>
             <Button
               id="back-to-home-button"
               icon={<ArrowLeftOutlined />}
-              onClick={() => navigate('/home')}
+              onClick={() => navigate(backRoute)}
               shape="circle"
               size="large"
             />
@@ -80,6 +103,7 @@ const CreateMatchForm = () => {
             isLoading={isLoading}
             selectedValue={selectedMatchSetting}
             onChange={handleMatchSettingChange}
+            disabled={isViewMode}
           />
 
           <MatchFormFields
@@ -89,6 +113,8 @@ const CreateMatchForm = () => {
             onReset={handleReset}
             isSubmitting={isSubmitting}
             isFormValid={isFormValid}
+            isViewMode={isViewMode}
+            isEditMode={isEditMode}
           />
         </div>
       </Card>

@@ -75,4 +75,48 @@ export const getMatches = async () => {
   } catch (error) {
     throw error;
   }
-}
+};
+
+export const getMatch = async (matchId) => {
+  const response = await apiFetch(`${API_BASE_URL}${API_ENDPOINTS.MATCHES}/${matchId}`, {
+    method: 'GET',
+  });
+  if (!response.ok) {
+    throw new Error(`Error fetching match: ${response.statusText}`);
+  }
+  return response.json();
+};
+
+export const updateMatch = async (matchId, matchData) => {
+  const response = await apiFetch(`${API_BASE_URL}${API_ENDPOINTS.MATCHES}/${matchId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(matchData),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: response.statusText }));
+    throw new Error(error.detail || 'Failed to update match');
+  }
+  return response.json();
+};
+
+export const deleteMatch = async (matchId) => {
+  const response = await apiFetch(`${API_BASE_URL}${API_ENDPOINTS.MATCHES}/${matchId}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: response.statusText }));
+    throw new Error(error.detail || 'Failed to delete match');
+  }
+};
+
+export const cloneMatch = async (matchId) => {
+  const response = await apiFetch(`${API_BASE_URL}${API_ENDPOINTS.MATCHES}/${matchId}/clone`, {
+    method: 'POST',
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: response.statusText }));
+    throw new Error(error.detail || 'Failed to clone match');
+  }
+  return response.json();
+};
