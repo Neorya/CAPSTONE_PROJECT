@@ -1,3 +1,13 @@
+"""
+Student Results and Scoring API Module
+
+Provides endpoints for:
+- Getting all test results for a student's solution in a game session
+- Getting scores for students in a game session
+
+Related User Story: Display test results with pass/fail indicators and calculate student scores
+"""
+
 from typing import List, Optional, Dict, Annotated, Tuple
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.orm import Session
@@ -31,6 +41,9 @@ from database import get_db
 # ============================================================================
 
 class TestResultResponse(BaseModel):
+    """
+    Response model for individual test case result.
+    """
     test_id: int = Field(..., description="ID of the test")
     test_type: str = Field(..., description="Type of test: 'teacher' or 'student'")
     provider: str = Field(..., description="Test provider: 'teacher' or 'student'")
@@ -43,6 +56,9 @@ class TestResultResponse(BaseModel):
 
 
 class SolutionTestResultsResponse(BaseModel):
+    """
+    Response model for all test results of a student's solution.
+    """
     solution_id: int = Field(..., description="ID of the student's solution")
     student_id: int = Field(..., description="ID of the student")
     student_name: str = Field(..., description="Full name of the student")

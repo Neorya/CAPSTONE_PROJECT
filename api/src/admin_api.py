@@ -63,6 +63,7 @@ async def promote_to_teacher(
         
     user.role = UserRoleEnum.teacher
     
+    # Ensure Teacher record exists
     teacher = db.query(Teacher).filter(Teacher.email == user.email).first()
     if not teacher:
         new_teacher = Teacher(
@@ -95,6 +96,7 @@ async def demote_to_student(
         
     user.role = UserRoleEnum.student
     
+    # Ensure Student record exists
     student = db.query(Student).filter(Student.email == user.email).first()
     if not student:
         new_student = Student(

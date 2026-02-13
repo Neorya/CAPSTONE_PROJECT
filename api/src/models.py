@@ -18,6 +18,7 @@ from sqlalchemy import UniqueConstraint
 
 from database import Base
 
+# Note: The 'capstone_app' schema is specified here
 SCHEMA_NAME = "capstone_app"
 
 class TestScope(enum.Enum):
@@ -25,6 +26,10 @@ class TestScope(enum.Enum):
     public = "public"
 
 class Teacher(Base):
+    """
+    SQLAlchemy model for the 'teacher' table.
+    
+    """
     __tablename__ = "teacher"
     __table_args__ = {'schema': SCHEMA_NAME}
 
@@ -36,12 +41,16 @@ class Teacher(Base):
     email = Column(String(150), unique=True, nullable=False) 
     user_id = Column(Integer, ForeignKey(f"{SCHEMA_NAME}.users.id"), nullable=False) 
 
+    # Relationships: A teacher can create many...
     match_settings = relationship("MatchSetting", back_populates="creator")
     matches = relationship("Match", back_populates="creator")
     game_sessions = relationship("GameSession", back_populates="creator")
 
 
 class MatchSetting(Base):
+    """
+    SQLAlchemy model for the 'match_setting' table.
+    """
     __tablename__ = "match_setting"
     __table_args__ = {'schema': SCHEMA_NAME}
 
@@ -63,7 +72,12 @@ class MatchSetting(Base):
     matches = relationship("Match", back_populates="match_setting")
     tests = relationship("Test", back_populates="match_setting", cascade="all, delete-orphan")
 
+
+
 class Test(Base):
+    """
+    SQLAlchemy model for the 'tests' table.
+    """
     __tablename__ = "tests"
     __table_args__ = {'schema': SCHEMA_NAME}
 

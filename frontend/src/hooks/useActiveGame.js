@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { getStudentGameStatus } from "../services/phaseOneService";
 
+/**
+ * Custom hook to manage active game status and countdown timer.
+ * @returns {Object} { activeGame, timeLeft, loading, refreshActiveGame }
+ */
 const useActiveGame = () => {
     const [activeGame, setActiveGame] = useState(null);
     const [timeLeft, setTimeLeft] = useState(null);
@@ -29,6 +33,7 @@ const useActiveGame = () => {
         fetchActiveGame();
     }, []);
 
+    // Countdown timer effect
     useEffect(() => {
         if (timeLeft === null || timeLeft <= 0) return;
 

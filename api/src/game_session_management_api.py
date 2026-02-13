@@ -1,3 +1,14 @@
+"""
+Game Session Management API Module
+
+Provides endpoints for:
+- Retrieving game session details with students and matches
+- Retrieving all joined students for a game session
+- Starting a game session (activating and assigning students to matches)
+
+User Story 3: Teacher starts game session and views joined students and matches
+"""
+
 from typing import List, Dict, Any, Annotated
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, status, Depends
@@ -52,6 +63,7 @@ def _distribute_students_to_matches(
     
     assignments = []
     for idx, student_id in enumerate(student_ids):
+        # Round-robin: assign student to match based on index modulo number of matches
         match_index = idx % len(match_ids)
         assignments.append({
             "student_id": student_id,
@@ -121,6 +133,7 @@ async def get_game_session_full_details(
             ))
     
     # Get matches for this game session
+    # TODO: Replace with database join query
     match_ids = db.query(Match).join(MatchesForGame, Match.match_id == MatchesForGame.match_id).filter(MatchesForGame.game_id == game_id).all()
     matches = []
 

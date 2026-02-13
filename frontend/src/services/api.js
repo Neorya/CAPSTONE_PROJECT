@@ -35,6 +35,7 @@ export const apiFetch = async (url, options = {}) => {
     try {
         const response = await fetch(url, config);
 
+        // If auth is globally disabled, do not attempt refresh/redirect flows.
         if (!isAuthEnabled()) {
             return response;
         }
