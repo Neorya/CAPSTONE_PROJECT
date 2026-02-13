@@ -291,20 +291,6 @@ def _calculate_student_session_score(db: Session, student_id: int, game_id: int)
 def _calculate_and_save_session_scores(db: Session, game_id: int, force_recalculate: bool = False) -> tuple[Dict[int, float], bool]:
     """
     Calculate and save scores for all students in a game session.
-    
-    This should be called after Phase 2 ends to persist scores in the database.
-    Optimized to skip calculation if scores are already calculated (idempotent).
-    
-    Uses database-level locking (SELECT FOR UPDATE) to prevent race conditions
-    when multiple students hit this endpoint simultaneously.
-    
-    Args:
-        db: Database session
-        game_id: ID of the game session
-        force_recalculate: If True, recalculate even if scores already exist
-    
-    Returns:
-        Tuple of (Dictionary mapping student_id to their session score, was_already_calculated)
     """
     # FOR UPDATE prevents race condition when multiple
     student_joins = db.query(StudentJoinGame).filter(
@@ -376,17 +362,6 @@ def get_solution_test_results(
 ) -> SolutionTestResultsResponse:
     """
     Get all test results for a specific student solution.
-    
-    Args:
-        current_user: Authenticated user from JWT token
-        solution_id: ID of the student solution
-        db: Database session
-    
-    Returns:
-        SolutionTestResultsResponse with all test results and score information
-    
-    Raises:
-        HTTPException: If solution not found or user not authorized
     """
     authenticated_student_id = int(current_user["sub"])
     
@@ -586,17 +561,6 @@ def get_solution_peer_reviews(
 ) -> SolutionPeerReviewsResponse:
     """
     Get all peer reviews for a specific student solution.
-    
-    Args:
-        current_user: Authenticated user from JWT token
-        solution_id: ID of the student solution
-        db: Database session
-    
-    Returns:
-        SolutionPeerReviewsResponse with all peer reviews
-    
-    Raises:
-        HTTPException: If solution not found or user not authorized
     """
     authenticated_student_id = int(current_user["sub"])
     
@@ -695,18 +659,6 @@ def get_student_solution_id(
 ) -> StudentSolutionIdResponse:
     """
     Get the solution ID for a specific student in a game session.
-    
-    Args:
-        current_user: Authenticated user from JWT token
-        student_id: ID of the student
-        game_id: ID of the game session
-        db: Database session
-    
-    Returns:
-        StudentSolutionIdResponse with solution ID if exists
-    
-    Raises:
-        HTTPException: If student or game session not found, student not in game, or not authorized
     """
     authenticated_student_id = int(current_user["sub"])
     
@@ -836,17 +788,6 @@ def calculate_and_save_game_session_scores(
 ) -> CalculateSessionScoresResponse:
     """
     Calculate and save scores for all students in a game session.
-    
-    Args:
-        current_user: Authenticated user from JWT token
-        game_id: ID of the game session
-        db: Database session
-    
-    Returns:
-        CalculateSessionScoresResponse with all calculated scores
-    
-    Raises:
-        HTTPException: If game session not found
     """
     # Authentication is required, but any authenticated user can trigger score calculation
     # This is called when Phase 2 ends and students navigate to results
@@ -967,17 +908,6 @@ def get_all_game_session_scores(
 ) -> List[Tuple[int, str, float]]:
     """
     Get all session scores for a specific game session.
-    
-    Args:
-        current_user: Authenticated user from JWT token
-        game_id: ID of the game session
-        db: Database session
-    
-    Returns:
-        List of tuples (student_id, username, score)
-    
-    Raises:
-        HTTPException: If game session not found
     """
     return get_game_session_scores_list(db, game_id)
 
@@ -1005,18 +935,6 @@ def get_student_session_score(
 ) -> StudentSessionScoreResponse:
     """
     Get the session score for a specific student in a game session.
-    
-    Args:
-        current_user: Authenticated user from JWT token
-        student_id: ID of the student
-        game_id: ID of the game session
-        db: Database session
-    
-    Returns:
-        StudentSessionScoreResponse with session score if calculated
-    
-    Raises:
-        HTTPException: If not authorized to view this student's score
     """
     authenticated_student_id = int(current_user["sub"])
     
