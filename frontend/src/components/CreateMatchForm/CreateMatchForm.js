@@ -12,17 +12,6 @@ import './CreateMatchForm.css';
 
 const { Title } = Typography;
 
-/**
- * CreateMatchForm - Main component for creating new matches
- * Orchestrates child components and custom hooks to manage form state and submission
- * 
- * Architecture:
- * - Uses custom hooks for state management (useAlert, useMatchSettings, useMatchForm)
- * - Delegates UI rendering to presentational components
- * - Maintains single responsibility: orchestration only
- * 
- * @returns {JSX.Element} Create match form page
- */
 const CreateMatchForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();

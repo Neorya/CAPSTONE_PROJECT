@@ -13,7 +13,7 @@ import re
 
 # Import the database dependency and ORM models
 from database import get_db
-from models import Match, GameSession, MatchesForGame, Teacher, StudentJoinGame, StudentTest, StudentSolution, StudentSolutionTest, StudentAssignedReview, StudentReviewVote
+from models import Match, GameSession, MatchesForGame, Teacher, StudentJoinGame, StudentTest, StudentSolution, StudentSolutionTest, StudentAssignedReview, StudentReviewVote, StudentBadge
 
 # ============================================================================
 # Pydantic Models
@@ -338,6 +338,9 @@ async def delete_game_session(
         
         # Delete matches_for_game records
         db.query(MatchesForGame).filter(MatchesForGame.game_id == game_id).delete(synchronize_session=False)
+        
+        # Delete student badges earned in this game session
+        db.query(StudentBadge).filter(StudentBadge.game_session_id == game_id).delete(synchronize_session=False)
         
         # Delete the game session
         db.delete(game_session)

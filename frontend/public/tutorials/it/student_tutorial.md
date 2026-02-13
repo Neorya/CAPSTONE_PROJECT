@@ -1,239 +1,144 @@
-# Tutorial Student - Guida Completa per Studenti
+# Guida Utente Codify
 
-## Introduzione
+# 👩‍🎓 Guida Studente
 
-Benvenuto in **Codify**, la piattaforma di coding gamificato! Questa guida ti accompagnerà attraverso tutte le funzionalità per partecipare alle gare di programmazione e migliorare le tue competenze.
+## Per Iniziare
 
----
+Per usare Codify ti serve solo:
 
-## Prerequisiti
+* Un link fornito dal docente
+* Una sessione di gioco attiva creata dal docente
 
-Prima di iniziare, assicurati che:
-- Accesso all'URL: `http://localhost:3000`
-- Il tuo docente abbia creato una Game Session disponibile
-
----
-
-## 1. Login come Student
-
-### Passo 1.1: Accedi alla pagina di login
-1. Apri il browser e vai su `http://localhost:3000/login`
-2. Vedrai la schermata di login di Codify con il logo e il motto "Master the Code. Dominate the Leaderboard."
-
-### Passo 1.2: Effettua il login
-**In modalità sviluppo:**
-1. Scorri verso il basso fino alla sezione "Developer Access (DEV MODE ONLY)"
-2. Clicca sul pulsante **" Login as Student (Dev)"**
-3. Verrai automaticamente autenticato come studente e reindirizzato alla Home
-
+Apri la piattaforma nel browser ed effettua il login con il tuo account studente.
 
 ---
 
-## 2. Home Page - Dashboard Studente
+## Pagina Principale Studente
 
-Dopo il login, vedrai la home page con le seguenti opzioni:
+Dopo il login vedrai la tua dashboard con tre sezioni principali:
 
-| Card | Colore | Descrizione |
-|------|--------|-------------|
-| **Join Game Sessions** | Rosa | Partecipa a sessioni di gioco disponibili |
-| **Lobby** | Ciano | Visualizza la lobby del gioco a cui sei iscritto |
-| **Hall of Fame** | Oro | Consulta la classifica globale |
+* **Partecipa alle Sessioni**
+* **Lobby**
+* **Hall of Fame**
 
----
-
-## 3. Partecipare a una Game Session
-
-### Passo 3.1: Trova sessioni disponibili
-1. Dalla home, clicca su **"Join Game Sessions"**
-2. La pagina mostrerà:
-   - **Sessione disponibile**: Se c'è una sessione aperta, vedrai i dettagli
-   - **Nessuna sessione**: Se non ci sono sessioni, vedrai "No sessions are currently open. Check back soon!"
-
-### Passo 3.2: Iscriviti a una sessione
-1. Se c'è una sessione disponibile, vedrai una card con:
-   - Nome della sessione
-   - Data e ora di inizio
-   - Pulsante di azione
-2. Clicca su **"Join"** per iscriverti
-3. Un messaggio "Joined successfully!" confermerà l'iscrizione
-4. Verrai reindirizzato automaticamente alla **Lobby**
-
-### Passo 3.3: Già iscritto?
-Se hai già effettuato l'iscrizione, il pulsante mostrerà **"Enter Lobby"** e cliccandoci sopra entrerai direttamente nella lobby.
+(Dashboard principale studente con le sezioni disponibili)[images/student-home-dashboard.png]
 
 ---
 
-## 4. La Lobby - Sala d'attesa
+## Partecipare a una Sessione
 
-### Cosa vedrai nella Lobby
-1. Titolo: "Lobby"
-2. Sottotitolo: "Waiting for the game to start..."
-3. Un indicatore di caricamento mentre il sistema verifica se il gioco è iniziato
+1. Clicca su **Partecipa alle Sessioni**.
+2. Se è disponibile una sessione, vedrai nome e orario di inizio.
+3. Clicca su **Partecipa**.
 
-### Cosa succede?
-- La pagina controlla automaticamente ogni 2 secondi se il docente ha avviato la sessione
-- Quando il gioco inizia, vedrai il messaggio **"Game session has started!"**
-- Verrai automaticamente reindirizzato alla **Fase 1** del gioco
+(Scheda sessione disponibile con pulsante Partecipa)[images/student-join-session.png]
 
-### Nota importante
-**Non chiudere o aggiornare la pagina** mentre sei in lobby! Perderesti la connessione e dovresti rientrare.
+Se ti sei già registrato, il pulsante mostrerà **Entra nella Lobby**.
+
+Se non ci sono sessioni attive, verrà mostrato un messaggio informativo.
 
 ---
 
-## 5. Fase 1 - Coding Challenge
+## Lobby (Sala d’Attesa)
 
-### Passo 5.1: Interfaccia della Fase 1
-Quando il gioco inizia, vedrai una schermata divisa in due pannelli:
+Dopo aver partecipato, entrerai nella **Lobby**.
 
-**Pannello Sinistro:**
-- Tab "Problem Description": Descrizione del problema da risolvere
-- Tab "Tests (Public & Mine)": Lista dei test cases
+(Schermata lobby con messaggio di attesa e indicatore di caricamento)[images/student-lobby.png]
 
-**Pannello Destro:**
-- Editor di codice
-- Selettore del linguaggio
-- Pulsanti di esecuzione
-- Area output
+Qui devi:
 
-**In alto:**
-- Timer countdown con tempo rimanente
+* Attendere che il docente avvii la sessione
+* Restare sulla pagina fino all’inizio
 
-### Passo 5.2: Leggi il problema
-1. Nel tab "Problem Description", leggi attentamente:
-   - **Titolo** del problema
-   - **Descrizione** completa con i requisiti
-   - **Esempi** di input/output (se presenti)
+Quando la sessione parte, verrai reindirizzato automaticamente alla fase di programmazione.
 
-### Passo 5.3: Analizza i test cases
-1. Passa al tab "Tests (Public & Mine)"
-2. Vedrai:
-   - **Test pubblici**: Forniti dal docente, usali per verificare la tua soluzione
-   - **I tuoi test**: Test che puoi creare tu stesso
-
-### Passo 5.4: Scrivi la soluzione
-1. Nel pannello destro, scrivi il tuo codice nell'editor
-2. Usa il selettore per scegliere il linguaggio (se disponibili più opzioni)
-3. Il codice viene salvato automaticamente
-
-### Passo 5.5: Esegui i test
-1. Clicca **"Run Public Tests"** per eseguire i test pubblici del docente
-2. Vedrai nell'output:
-   -  Test passati (verde)
-   -  Test falliti (rosso) con dettagli dell'errore
-3. Correggi il codice e ripeti fino a passare tutti i test
-
-### Passo 5.6: Aggiungi test personalizzati (Opzionale ma consigliato!)
-1. Clicca su **"Add Test"** nel tab dei test
-2. Inserisci:
-   - **Input**: I dati di input del test
-   - **Expected Output**: L'output atteso
-3. Clicca **"Add"** per salvare
-4. Usa **"Run Custom Tests"** per eseguire i tuoi test
-
-### Passo 5.7: Invia la soluzione
-- La tua soluzione viene **automaticamente salvata** mentre scrivi
-- Quando il timer raggiunge 00:00, la Fase 1 termina automaticamente
-- La tua ultima soluzione sarà quella valutata
+Non chiudere la pagina durante l’attesa.
 
 ---
 
-## 6. Fase 2 - Peer Review
+## Fase 1 – Sfida di Programmazione
 
-### Passo 6.1: Transizione alla Fase 2
-- Quando la Fase 1 termina, verrai automaticamente reindirizzato alla pagina di review
-- Vedrai una nuova schermata con layout a due colonne
+All’inizio del gioco vedrai:
 
-### Passo 6.2: Interfaccia della Review
-**Pannello Sinistro:**
-- Lista delle soluzioni da recensire
-- Timer countdown per la Fase 2
-- Icona per espandere/comprimere il pannello
+* Descrizione del problema
+* Test pubblici
+* Editor di codice
+* Timer in alto
 
-**Pannello Destro:**
-- Codice della soluzione selezionata
-- Opzioni di voto
-- Form per test case (se necessario)
-- Note aggiuntive
+(Interfaccia della sfida con descrizione e editor di codice)[images/student-phase1-editor.png]
 
-### Passo 6.3: Seleziona una soluzione
-1. Nel pannello sinistro, clicca su una delle soluzioni assegnate
-2. Il codice apparirà nel pannello destro
+### Cosa Fare
 
-### Passo 6.4: Valuta la soluzione
-Hai tre opzioni di voto:
+1. Leggi attentamente il problema.
+2. Analizza i test pubblici.
+3. Scrivi la soluzione nell’editor.
+4. Clicca su **Esegui Test Pubblici** per verificare il codice.
+5. Correggi eventuali errori e riprova.
 
-#### Opzione A: Correct 
-Se pensi che la soluzione sia corretta:
-1. Seleziona **"Correct"**
-2. (Opzionale) Aggiungi una nota
-3. Clicca **"Submit Vote"**
+Puoi anche:
 
-#### Opzione B: Incorrect 
-Se trovi un errore nella soluzione:
-1. Seleziona **"Incorrect"**
-2. **Devi fornire un test case** che faccia fallire la soluzione:
-   - **Input**: I dati di input che causano l'errore
-   - **Expected Output**: L'output corretto che la soluzione non produce
-3. (Opzionale) Aggiungi una nota spiegando l'errore trovato
-4. Clicca **"Submit Vote"**
+* Aggiungere test personali
+* Eseguire test personalizzati
 
-#### Opzione C: Skip 
-Se non riesci a valutare la soluzione:
-1. Seleziona **"Skip"**
-2. (Opzionale) Aggiungi una nota
-3. Clicca **"Submit Vote"**
+Il codice viene salvato automaticamente.
 
-### Passo 6.5: Prosegui con le altre soluzioni
-1. Dopo aver votato, la soluzione sarà marcata come completata
-2. Passa alla prossima soluzione nella lista
-3. Continua fino a recensire tutte le soluzioni assegnate o fino allo scadere del tempo
-
-### Passo 6.6: Fine della Fase 2
-- Quando il timer raggiunge 00:00, vedrai un overlay **"Phase Ended"**
-- Non potrai più inviare voti
-- I punteggi verranno calcolati
+Alla fine del tempo, l’ultima versione verrà inviata automaticamente.
 
 ---
 
-## 7. Hall of Fame - Classifica
+## Fase 2 – Peer Review (Revisione tra Pari)
 
-### Passo 7.1: Accedi alla classifica
-1. Dalla home, clicca su **"Hall of Fame"**
-2. Oppure accedi direttamente a `/hall-of-fame`
+Dopo la Fase 1 inizierà la revisione delle soluzioni degli altri studenti.
 
-### Passo 7.2: Cosa vedrai
-- **Classifica globale** di tutti gli studenti
-- Per ogni studente:
-  - Posizione
-  - Nome completo
-  - Punteggio totale
+(Interfaccia di revisione con elenco soluzioni e opzioni di voto)[images/student-phase2-review.png]
 
-### Passo 7.3: Cerca il tuo nome
-- Usa la funzione di ricerca per trovare te stesso o i tuoi compagni
-- Ordina la classifica per punteggio
+### Come Valutare
 
----
+1. Seleziona una soluzione.
+2. Leggi attentamente il codice.
+3. Scegli una delle opzioni:
 
-## 8. Gestione del Profilo
+* **Corretta** – se funziona
+* **Non Corretta** – se trovi un errore (devi inserire un test che fallisce)
+* **Salta** – se non riesci a valutarla
 
-### Passo 8.1: Accedi al profilo
-1. Clicca sull'icona del profilo nella navbar (in alto a destra)
-2. Oppure vai direttamente a `/profile`
+4. Invia il voto.
+5. Continua finché il tempo non termina.
 
-### Passo 8.2: Visualizza le tue informazioni
-- Nome e cognome
-- Email
-- Ruolo (Student)
-- Eventuale foto profilo (da Google)
+Allo scadere del timer, la fase termina automaticamente.
 
 ---
 
-## Note Finali
+## Hall of Fame
 
-Come docente, il tuo obiettivo principale è:
-1. **Preparare** contenuti didattici (match settings e match)
-2. **Organizzare** sessioni di gioco per le tue classi
-3. **Monitorare** lo svolgimento delle gare
-4. **Valutare** i progressi attraverso la classifica
+Clicca su **Hall of Fame** per vedere la classifica.
 
-**Master the Code. Dominate the Leaderboard.** 
+(Schermata classifica globale)[images/student-leaderboard.png]
+
+Puoi:
+
+* Vedere la tua posizione
+* Confrontarti con i compagni
+* Cercare uno studente specifico
+
+---
+
+## Il Tuo Profilo
+
+Clicca sull’icona profilo in alto a destra per vedere:
+
+* Nome
+* Email
+* Ruolo
+* Foto profilo (se disponibile)
+
+(Schermata profilo utente)[images/student-profile.png]
+
+---
+
+## Cosa Conta Davvero
+
+* Scrivi codice chiaro e corretto.
+* Testa bene la soluzione.
+* Valuta in modo onesto.
+* Migliora a ogni sessione.
