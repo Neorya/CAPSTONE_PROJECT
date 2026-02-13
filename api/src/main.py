@@ -52,7 +52,6 @@ app.include_router(user_router)
 app.include_router(badges_router)
 app.include_router(admin_router)
 
-
 @app.get("/")
 def read_root():
     # Reads the database URL from the environment variable

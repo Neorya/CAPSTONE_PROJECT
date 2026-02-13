@@ -263,7 +263,7 @@ def evaluate_badges(game_session_id: int, db: Session = Depends(get_db)):
         if rank <= 10:
             _award_badge_if_not_exists(db, student_id, "Rising Star", game_session_id)
 
-    # 2. Bug Hunter (Cumulative failing tests found)
+    # 2. Bug Hunter
     # Count valid 'incorrect' votes (which means reviewer found a bug in someone else's code)
     bug_counts = db.query(
         StudentAssignedReview.student_id,

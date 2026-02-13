@@ -15,7 +15,6 @@ public class WaitingRoomPO {
     private static final String GAME_TIMER_XPATH    = "//div[@class='timer-display']//span[@class='ant-typography css-dev-only-do-not-override-hofb1t']/strong";
     private static final String STUDENT_LIST_TITLE  =  "//div[@id='root']/div[@class='App']/div[@class='pre-start-session-container']/div[@class='ant-card ant-card-bordered session-card css-dev-only-do-not-override-hofb1t']/div[@class='ant-card-body']/div[2]/span[1]/strong";
     private static final String UNORDERED_LIST      = "//ul[@class='ant-list-items']";
-    private static final String MATCH_LIST          = "//div[@class='matches-list']"; 
     private static final String START_GAME_BUTTON   = "//*[@id='start_game_button']";
     private static final String BACK_TO_HOME_BUTTON_ID = "//*[@id=\"back-to-home-button\"]";
 
@@ -40,10 +39,6 @@ public class WaitingRoomPO {
 
     public WebElement getUnorderedList() {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(UNORDERED_LIST)));
-    }
-
-    public WebElement getMatchList() {
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(MATCH_LIST)));
     }
     
     public WebElement getStartGameButton() {
