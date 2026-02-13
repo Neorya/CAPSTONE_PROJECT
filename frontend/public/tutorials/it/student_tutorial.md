@@ -21,7 +21,7 @@ Dopo il login vedrai la tua dashboard con tre sezioni principali:
 * **Lobby**
 * **Hall of Fame**
 
-![Dashboard principale studente con le sezioni disponibili](../images/student-home.png)
+![Dashboard principale studente con le sezioni disponibili](/tutorials/images/student-home.png)
 
 ---
 
@@ -31,7 +31,7 @@ Dopo il login vedrai la tua dashboard con tre sezioni principali:
 2. Se è disponibile una sessione, vedrai nome e orario di inizio.
 3. Clicca su **Partecipa**.
 
-![Scheda sessione disponibile con pulsante Partecipa](../images/join-game-session-student.png)
+![Scheda sessione disponibile con pulsante Partecipa](/tutorials/images/join-game-session-student.png)
 
 Se ti sei già registrato, il pulsante mostrerà **Entra nella Lobby**.
 
@@ -43,7 +43,7 @@ Se non ci sono sessioni attive, verrà mostrato un messaggio informativo.
 
 Dopo aver partecipato, entrerai nella **Lobby**.
 
-![Schermata lobby con messaggio di attesa e indicatore di caricamento](../images/lobby-student.png)
+![Schermata lobby con messaggio di attesa e indicatore di caricamento](/tutorials/images/lobby-student.png)
 
 Qui devi:
 
@@ -56,11 +56,11 @@ Quando la sessione parte, verrai reindirizzato automaticamente alla fase di prog
 
 Mentre aspetti nella lobby, puoi giocare a un mini-gioco per passare il tempo!
 
-![Mini-gioco disponibile nella lobby](../images/mini-game-student.png)
+![Mini-gioco disponibile nella lobby](/tutorials/images/mini-game-student.png)
 
 Se il gioco finisce, vedrai la schermata di game over:
 
-![Schermata game over del mini-gioco](../images/mini-game-gameover-student.png)
+![Schermata game over del mini-gioco](/tutorials/images/mini-game-gameover-student.png)
 
 Non chiudere la pagina durante l'attesa.
 
@@ -75,7 +75,7 @@ All'inizio del gioco vedrai:
 * Editor di codice
 * Timer in alto
 
-![Interfaccia della sfida con descrizione e editor di codice](../images/phase1-student.png)
+![Interfaccia della sfida con descrizione e editor di codice](/tutorials/images/phase1-student.png)
 
 ### Cosa Fare
 
@@ -89,7 +89,7 @@ All'inizio del gioco vedrai:
 
 Puoi aggiungere i tuoi test per verificare i casi limite:
 
-![Aggiunta di un test case personalizzato](../images/add-test-case-phase1-student.png)
+![Aggiunta di un test case personalizzato](/tutorials/images/add-test-case-phase1-student.png)
 
 ### Risultati dei Test
 
@@ -97,17 +97,17 @@ Dopo aver eseguito i test, vedrai i risultati:
 
 * Se i test **passano**, vedrai un messaggio di successo:
 
-![Test superati con successo](../images/phase1-passed-student.png)
+![Test superati con successo](/tutorials/images/phase1-passed-student.png)
 
 * Se i test **falliscono**, vedrai gli errori:
 
-![Test falliti con dettagli degli errori](../images/phase1-failed-student.png)
+![Test falliti con dettagli degli errori](/tutorials/images/phase1-failed-student.png)
 
 ### Soluzione Corretta
 
 Quando il tuo codice passa tutti i test correttamente:
 
-![Soluzione corretta del codice](../images/correct-code-phase1-student.png)
+![Soluzione corretta del codice](/tutorials/images/correct-code-phase1-student.png)
 
 Il codice viene salvato automaticamente.
 
@@ -119,7 +119,7 @@ Alla fine del tempo, l'ultima versione verrà inviata automaticamente.
 
 Dopo la Fase 1 inizierà la revisione delle soluzioni degli altri studenti.
 
-![Interfaccia di revisione con elenco soluzioni](../images/solution-review-student.png)
+![Interfaccia di revisione con elenco soluzioni](/tutorials/images/solution-review-student.png)
 
 ### Come Valutare
 
@@ -129,15 +129,15 @@ Dopo la Fase 1 inizierà la revisione delle soluzioni degli altri studenti.
 
 * **Corretta** – se funziona:
 
-![Voto corretto per una soluzione](../images/phase2-correct-vote-student.png)
+![Voto corretto per una soluzione](/tutorials/images/phase2-correct-vote-student.png)
 
 * **Non Corretta** – se trovi un errore (devi inserire un test che fallisce):
 
-![Voto non corretto per una soluzione](../images/phase2-incorrect-vote-student.png)
+![Voto non corretto per una soluzione](/tutorials/images/phase2-incorrect-vote-student.png)
 
 * **Salta** – se non riesci a valutarla:
 
-![Saltare la revisione di una soluzione](../images/phase2-skip-vote-student.png)
+![Saltare la revisione di una soluzione](/tutorials/images/phase2-skip-vote-student.png)
 
 4. Invia il voto.
 5. Continua finché il tempo non termina.
@@ -150,7 +150,7 @@ Allo scadere del timer, la fase termina automaticamente.
 
 Clicca su **Hall of Fame** per vedere la classifica.
 
-![Schermata classifica globale](../images/hall-of-fame-student.png)
+![Schermata classifica globale](/tutorials/images/hall-of-fame-student.png)
 
 Puoi:
 
@@ -169,7 +169,7 @@ Clicca sull'icona profilo in alto a destra per vedere:
 * Ruolo
 * Foto profilo (se disponibile)
 
-![Schermata profilo utente](../images/profile-student.png)
+![Schermata profilo utente](/tutorials/images/profile-student.png)
 
 ---
 

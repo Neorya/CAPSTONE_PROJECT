@@ -21,7 +21,7 @@ After logging in, you will see your dashboard with three main options:
 * **Lobby**
 * **Hall of Fame**
 
-![Home page dashboard with main student options](../images/student-home.png)
+![Home page dashboard with main student options](/tutorials/images/student-home.png)
 
 ---
 
@@ -31,7 +31,7 @@ After logging in, you will see your dashboard with three main options:
 2. If a session is available, you will see its name and start time.
 3. Click **Join**.
 
-![Available session card with Join button](../images/join-game-session-student.png)
+![Available session card with Join button](/tutorials/images/join-game-session-student.png)
 
 If you already joined, the button will show **Enter Lobby** instead.
 
@@ -43,7 +43,7 @@ If no session is available, you will see a message telling you to check back lat
 
 After joining, you enter the **Lobby**.
 
-![Lobby screen with waiting message and loading indicator](../images/lobby-student.png)
+![Lobby screen with waiting message and loading indicator](/tutorials/images/lobby-student.png)
 
 Here you:
 
@@ -56,11 +56,11 @@ When the session starts, you will automatically move to the coding phase.
 
 While waiting in the lobby, you can play a mini-game to pass the time!
 
-![Mini-game available in the lobby](../images/mini-game-student.png)
+![Mini-game available in the lobby](/tutorials/images/mini-game-student.png)
 
 If your game ends, you will see the game over screen:
 
-![Mini-game game over screen](../images/mini-game-gameover-student.png)
+![Mini-game game over screen](/tutorials/images/mini-game-gameover-student.png)
 
 Do not close the page while waiting.
 
@@ -75,7 +75,7 @@ When the game begins, you will see:
 * Code editor
 * Timer at the top
 
-![Coding challenge interface with problem description and editor](../images/phase1-student.png)
+![Coding challenge interface with problem description and editor](/tutorials/images/phase1-student.png)
 
 ### What to Do
 
@@ -89,7 +89,7 @@ When the game begins, you will see:
 
 You can add your own test cases to verify edge cases:
 
-![Adding a custom test case](../images/add-test-case-phase1-student.png)
+![Adding a custom test case](/tutorials/images/add-test-case-phase1-student.png)
 
 ### Test Results
 
@@ -97,17 +97,17 @@ After running tests, you will see the results:
 
 * If your tests **pass**, you will see a success message:
 
-![Tests passed successfully](../images/phase1-passed-student.png)
+![Tests passed successfully](/tutorials/images/phase1-passed-student.png)
 
 * If your tests **fail**, you will see the errors:
 
-![Tests failed with error details](../images/phase1-failed-student.png)
+![Tests failed with error details](/tutorials/images/phase1-failed-student.png)
 
 ### Correct Solution
 
 When your code passes all tests correctly:
 
-![Correct code solution](../images/correct-code-phase1-student.png)
+![Correct code solution](/tutorials/images/correct-code-phase1-student.png)
 
 Your code saves automatically.
 
@@ -119,7 +119,7 @@ When the timer ends, your latest version will be submitted automatically.
 
 After Phase 1 ends, you will review other students' solutions.
 
-![Peer review interface with solution list](../images/solution-review-student.png)
+![Peer review interface with solution list](/tutorials/images/solution-review-student.png)
 
 ### How to Review
 
@@ -129,15 +129,15 @@ After Phase 1 ends, you will review other students' solutions.
 
 * **Correct** – if the solution works:
 
-![Voting a solution as correct](../images/phase2-correct-vote-student.png)
+![Voting a solution as correct](/tutorials/images/phase2-correct-vote-student.png)
 
 * **Incorrect** – if you find a mistake (you must provide a failing test case):
 
-![Voting a solution as incorrect](../images/phase2-incorrect-vote-student.png)
+![Voting a solution as incorrect](/tutorials/images/phase2-incorrect-vote-student.png)
 
 * **Skip** – if you cannot evaluate it:
 
-![Skipping a solution review](../images/phase2-skip-vote-student.png)
+![Skipping a solution review](/tutorials/images/phase2-skip-vote-student.png)
 
 4. Submit your vote.
 5. Continue reviewing until time runs out.
@@ -150,7 +150,7 @@ When the timer ends, voting stops automatically.
 
 To see rankings, click **Hall of Fame**.
 
-![Global leaderboard screen](../images/hall-of-fame-student.png)
+![Global leaderboard screen](/tutorials/images/hall-of-fame-student.png)
 
 You can:
 
@@ -169,7 +169,7 @@ Click your profile icon (top right) to view:
 * Role
 * Profile picture (if available)
 
-![Profile page screen](../images/profile-student.png)
+![Profile page screen](/tutorials/images/profile-student.png)
 
 ---
 

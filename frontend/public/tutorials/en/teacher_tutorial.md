@@ -6,7 +6,7 @@
 
 After logging in as a teacher, you will see your main control panel.
 
-![Teacher home dashboard](../images/teacher-home.png)
+![Teacher home dashboard](/tutorials/images/teacher-home.png)
 
 From here, you can:
 
@@ -25,11 +25,11 @@ Before creating a match, you need to define match settings.
 1. Click **Create Match Setting**.
 2. Fill in the required fields:
 
-![Create match setting form - step 1](../images/create-match-setting-1-teacher.png)
+![Create match setting form - step 1](/tutorials/images/create-match-setting-1-teacher.png)
 
 3. Complete the additional settings:
 
-![Create match setting form - step 2](../images/create-match-setting-2-teacher.png)
+![Create match setting form - step 2](/tutorials/images/create-match-setting-2-teacher.png)
 
 4. Save the match setting.
 
@@ -37,7 +37,7 @@ Before creating a match, you need to define match settings.
 
 You can view all your saved match settings:
 
-![List of match settings](../images/list-match-setting-teacher.png)
+![List of match settings](/tutorials/images/list-match-setting-teacher.png)
 
 ---
 
@@ -48,7 +48,7 @@ Once you have match settings ready:
 1. Click **Create Match**.
 2. Fill in the match details and select the match setting.
 
-![Create new match form](../images/create-new-match-teacher.png)
+![Create new match form](/tutorials/images/create-new-match-teacher.png)
 
 3. Save the match.
 
@@ -65,7 +65,7 @@ Once you have match settings ready:
    * Select the match
 3. Save the session.
 
-![Create game session form](../images/create-game-session-teacher.png)
+![Create game session form](/tutorials/images/create-game-session-teacher.png)
 
 Once created, students can see and join the session.
 
@@ -73,7 +73,7 @@ Once created, students can see and join the session.
 
 You can view all your game sessions:
 
-![List of game sessions](../images/list-game-session-teacher.png)
+![List of game sessions](/tutorials/images/list-game-session-teacher.png)
 
 ---
 
@@ -84,7 +84,7 @@ When students are in the Lobby:
 1. Open your session.
 2. Click **Start Session**.
 
-![Session control panel with Start button](../images/start-game-session-teacher.png)
+![Session control panel with Start button](/tutorials/images/start-game-session-teacher.png)
 
 Students will automatically move into Phase 1.
 
@@ -98,7 +98,7 @@ During the coding phase, you can:
 * See submissions
 * Track time remaining
 
-![Teacher monitoring view during coding phase](../images/phase1-teacher.png)
+![Teacher monitoring view during coding phase](/tutorials/images/phase1-teacher.png)
 
 ---
 
@@ -109,7 +109,7 @@ After all phases are complete:
 * Scores are calculated automatically.
 * Rankings are updated.
 
-![End of game results overview](../images/end-of-game-teacher.png)
+![End of game results overview](/tutorials/images/end-of-game-teacher.png)
 
 You can:
 
@@ -123,7 +123,7 @@ You can:
 
 Click your profile icon (top right) to view your teacher profile:
 
-![Teacher profile page](../images/profile-teacher.png)
+![Teacher profile page](/tutorials/images/profile-teacher.png)
 
 ---
 

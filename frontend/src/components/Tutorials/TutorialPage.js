@@ -86,7 +86,19 @@ const TutorialPage = () => {
                     </div>
                 ) : (
                     <div className="markdown-body">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                                img: ({ src, alt, ...props }) => {
+                                    // Resolve relative image paths to the correct public path
+                                    let resolvedSrc = src;
+                                    if (src && !src.startsWith('http') && !src.startsWith('/')) {
+                                        resolvedSrc = `/tutorials/images/${src.replace(/^(\.\.\/)*images\//, '')}`;
+                                    }
+                                    return <img src={resolvedSrc} alt={alt} {...props} />;
+                                }
+                            }}
+                        >
                             {markdown}
                         </ReactMarkdown>
                     </div>

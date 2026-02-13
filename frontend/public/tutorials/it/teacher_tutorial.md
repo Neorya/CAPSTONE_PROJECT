@@ -6,7 +6,7 @@
 
 Dopo il login come docente vedrai il pannello di controllo principale.
 
-![Dashboard principale docente](../images/teacher-home.png)
+![Dashboard principale docente](/tutorials/images/teacher-home.png)
 
 Da qui puoi:
 
@@ -25,11 +25,11 @@ Prima di creare una partita, devi definire le impostazioni.
 1. Clicca su **Crea Impostazione Partita**.
 2. Compila i campi richiesti:
 
-![Modulo creazione impostazione partita - passaggio 1](../images/create-match-setting-1-teacher.png)
+![Modulo creazione impostazione partita - passaggio 1](/tutorials/images/create-match-setting-1-teacher.png)
 
 3. Completa le impostazioni aggiuntive:
 
-![Modulo creazione impostazione partita - passaggio 2](../images/create-match-setting-2-teacher.png)
+![Modulo creazione impostazione partita - passaggio 2](/tutorials/images/create-match-setting-2-teacher.png)
 
 4. Salva l'impostazione.
 
@@ -37,7 +37,7 @@ Prima di creare una partita, devi definire le impostazioni.
 
 Puoi visualizzare tutte le impostazioni salvate:
 
-![Elenco delle impostazioni partita](../images/list-match-setting-teacher.png)
+![Elenco delle impostazioni partita](/tutorials/images/list-match-setting-teacher.png)
 
 ---
 
@@ -48,7 +48,7 @@ Una volta definite le impostazioni:
 1. Clicca su **Crea Partita**.
 2. Inserisci i dettagli e seleziona l'impostazione.
 
-![Modulo creazione nuova partita](../images/create-new-match-teacher.png)
+![Modulo creazione nuova partita](/tutorials/images/create-new-match-teacher.png)
 
 3. Salva la partita.
 
@@ -65,7 +65,7 @@ Una volta definite le impostazioni:
    * Seleziona la partita
 3. Salva la sessione.
 
-![Modulo creazione sessione di gioco](../images/create-game-session-teacher.png)
+![Modulo creazione sessione di gioco](/tutorials/images/create-game-session-teacher.png)
 
 Una volta creata, gli studenti potranno visualizzarla e partecipare.
 
@@ -73,7 +73,7 @@ Una volta creata, gli studenti potranno visualizzarla e partecipare.
 
 Puoi visualizzare tutte le sessioni di gioco:
 
-![Elenco delle sessioni di gioco](../images/list-game-session-teacher.png)
+![Elenco delle sessioni di gioco](/tutorials/images/list-game-session-teacher.png)
 
 ---
 
@@ -84,7 +84,7 @@ Quando gli studenti sono in Lobby:
 1. Apri la sessione.
 2. Clicca su **Avvia Sessione**.
 
-![Pannello sessione con pulsante Avvia](../images/start-game-session-teacher.png)
+![Pannello sessione con pulsante Avvia](/tutorials/images/start-game-session-teacher.png)
 
 Gli studenti passeranno automaticamente alla Fase 1.
 
@@ -98,7 +98,7 @@ Durante la fase di programmazione puoi:
 * Visualizzare le soluzioni
 * Controllare il tempo rimanente
 
-![Schermata monitoraggio fase di programmazione](../images/phase1-teacher.png)
+![Schermata monitoraggio fase di programmazione](/tutorials/images/phase1-teacher.png)
 
 ---
 
@@ -109,7 +109,7 @@ Al termine di tutte le fasi:
 * I punteggi vengono calcolati automaticamente
 * La classifica viene aggiornata
 
-![Schermata risultati di fine gioco](../images/end-of-game-teacher.png)
+![Schermata risultati di fine gioco](/tutorials/images/end-of-game-teacher.png)
 
 Puoi:
 
@@ -123,7 +123,7 @@ Puoi:
 
 Clicca sull'icona profilo in alto a destra per visualizzare il tuo profilo docente:
 
-![Schermata profilo docente](../images/profile-teacher.png)
+![Schermata profilo docente](/tutorials/images/profile-teacher.png)
 
 ---
 
