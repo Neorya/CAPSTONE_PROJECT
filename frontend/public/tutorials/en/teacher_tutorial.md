@@ -6,7 +6,7 @@
 
 After logging in as a teacher, you will see your main control panel.
 
-(Teacher home dashboard)[../images/teacher-home-dashboard.png]
+![Teacher home dashboard](../images/teacher-home.png)
 
 From here, you can:
 
@@ -18,6 +18,42 @@ From here, you can:
 
 ---
 
+## Creating Match Settings
+
+Before creating a match, you need to define match settings.
+
+1. Click **Create Match Setting**.
+2. Fill in the required fields:
+
+![Create match setting form - step 1](../images/create-match-setting-1-teacher.png)
+
+3. Complete the additional settings:
+
+![Create match setting form - step 2](../images/create-match-setting-2-teacher.png)
+
+4. Save the match setting.
+
+### Viewing Match Settings
+
+You can view all your saved match settings:
+
+![List of match settings](../images/list-match-setting-teacher.png)
+
+---
+
+## Creating a Match
+
+Once you have match settings ready:
+
+1. Click **Create Match**.
+2. Fill in the match details and select the match setting.
+
+![Create new match form](../images/create-new-match-teacher.png)
+
+3. Save the match.
+
+---
+
 ## Creating a Game Session
 
 1. Click **Create Game Session**.
@@ -26,12 +62,18 @@ From here, you can:
    * Session name
    * Start time
    * Duration
-   * Problem details
+   * Select the match
 3. Save the session.
 
-(Create session form screen)[images/teacher-create-session.png]
+![Create game session form](../images/create-game-session-teacher.png)
 
 Once created, students can see and join the session.
+
+### Viewing Game Sessions
+
+You can view all your game sessions:
+
+![List of game sessions](../images/list-game-session-teacher.png)
 
 ---
 
@@ -42,7 +84,7 @@ When students are in the Lobby:
 1. Open your session.
 2. Click **Start Session**.
 
-(Session control panel with Start button)[images/teacher-start-session.png]
+![Session control panel with Start button](../images/start-game-session-teacher.png)
 
 Students will automatically move into Phase 1.
 
@@ -56,38 +98,32 @@ During the coding phase, you can:
 * See submissions
 * Track time remaining
 
-(Teacher monitoring view during coding phase)[images/teacher-phase1-monitor.png]
+![Teacher monitoring view during coding phase](../images/phase1-teacher.png)
 
 ---
 
-## Managing Phase 2 (Peer Review)
+## End of Game
 
-Once coding ends, Phase 2 starts automatically.
-
-You can:
-
-* Monitor review progress
-* Ensure fairness
-* Track voting completion
-
-(Teacher review monitoring screen)[images/teacher-phase2-monitor.png]
-
----
-
-## Viewing Results
-
-After Phase 2 ends:
+After all phases are complete:
 
 * Scores are calculated automatically.
 * Rankings are updated.
 
-(Session results overview screen)[images/teacher-results.png]
+![End of game results overview](../images/end-of-game-teacher.png)
 
 You can:
 
 * View final rankings
 * Analyze performance
 * Discuss results with students
+
+---
+
+## Your Profile
+
+Click your profile icon (top right) to view your teacher profile:
+
+![Teacher profile page](../images/profile-teacher.png)
 
 ---
 

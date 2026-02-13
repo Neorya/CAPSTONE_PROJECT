@@ -6,17 +6,55 @@
 
 Dopo il login come docente vedrai il pannello di controllo principale.
 
-(Dashboard principale docente con gestione sessioni)[images/teacher-home-dashboard.png]
+![Dashboard principale docente](../images/teacher-home.png)
 
 Da qui puoi:
 
-* Creare sessioni
+* Creare impostazioni partita
+* Creare partite
+* Creare sessioni di gioco
 * Gestire sessioni attive
-* Visualizzare risultati
+* Visualizzare risultati (la classifica)
 
 ---
 
-## Creare una Sessione
+## Creare Impostazioni Partita
+
+Prima di creare una partita, devi definire le impostazioni.
+
+1. Clicca su **Crea Impostazione Partita**.
+2. Compila i campi richiesti:
+
+![Modulo creazione impostazione partita - passaggio 1](../images/create-match-setting-1-teacher.png)
+
+3. Completa le impostazioni aggiuntive:
+
+![Modulo creazione impostazione partita - passaggio 2](../images/create-match-setting-2-teacher.png)
+
+4. Salva l'impostazione.
+
+### Visualizzare le Impostazioni
+
+Puoi visualizzare tutte le impostazioni salvate:
+
+![Elenco delle impostazioni partita](../images/list-match-setting-teacher.png)
+
+---
+
+## Creare una Partita
+
+Una volta definite le impostazioni:
+
+1. Clicca su **Crea Partita**.
+2. Inserisci i dettagli e seleziona l'impostazione.
+
+![Modulo creazione nuova partita](../images/create-new-match-teacher.png)
+
+3. Salva la partita.
+
+---
+
+## Creare una Sessione di Gioco
 
 1. Clicca su **Crea Sessione**.
 2. Inserisci:
@@ -24,12 +62,18 @@ Da qui puoi:
    * Nome sessione
    * Orario di inizio
    * Durata
-   * Descrizione del problema
+   * Seleziona la partita
 3. Salva la sessione.
 
-(Modulo creazione sessione)[images/teacher-create-session.png]
+![Modulo creazione sessione di gioco](../images/create-game-session-teacher.png)
 
 Una volta creata, gli studenti potranno visualizzarla e partecipare.
+
+### Visualizzare le Sessioni
+
+Puoi visualizzare tutte le sessioni di gioco:
+
+![Elenco delle sessioni di gioco](../images/list-game-session-teacher.png)
 
 ---
 
@@ -40,7 +84,7 @@ Quando gli studenti sono in Lobby:
 1. Apri la sessione.
 2. Clicca su **Avvia Sessione**.
 
-(Pannello sessione con pulsante Avvia)[images/teacher-start-session.png]
+![Pannello sessione con pulsante Avvia](../images/start-game-session-teacher.png)
 
 Gli studenti passeranno automaticamente alla Fase 1.
 
@@ -50,36 +94,22 @@ Gli studenti passeranno automaticamente alla Fase 1.
 
 Durante la fase di programmazione puoi:
 
-* Monitorare l’avanzamento
+* Monitorare l'avanzamento
 * Visualizzare le soluzioni
 * Controllare il tempo rimanente
 
-(Schermata monitoraggio fase di programmazione)[images/teacher-phase1-monitor.png]
+![Schermata monitoraggio fase di programmazione](../images/phase1-teacher.png)
 
 ---
 
-## Gestire la Fase 2
+## Fine del Gioco
 
-Quando termina la Fase 1, parte automaticamente la revisione.
-
-Puoi:
-
-* Monitorare il numero di valutazioni
-* Controllare l’avanzamento
-* Garantire correttezza nel processo
-
-(Schermata monitoraggio revisione)[images/teacher-phase2-monitor.png]
-
----
-
-## Visualizzare i Risultati
-
-Alla fine della Fase 2:
+Al termine di tutte le fasi:
 
 * I punteggi vengono calcolati automaticamente
 * La classifica viene aggiornata
 
-(Schermata risultati finali della sessione)[images/teacher-results.png]
+![Schermata risultati di fine gioco](../images/end-of-game-teacher.png)
 
 Puoi:
 
@@ -89,9 +119,17 @@ Puoi:
 
 ---
 
+## Il Tuo Profilo
+
+Clicca sull'icona profilo in alto a destra per visualizzare il tuo profilo docente:
+
+![Schermata profilo docente](../images/profile-teacher.png)
+
+---
+
 ## Buone Pratiche per i Docenti
 
 * Spiega chiaramente le regole prima di iniziare.
-* Incoraggia l’uso di test ben strutturati.
+* Incoraggia l'uso di test ben strutturati.
 * Promuovi revisioni corrette e costruttive.
 * Usa la classifica come strumento di apprendimento.
